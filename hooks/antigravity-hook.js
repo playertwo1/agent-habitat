@@ -19,6 +19,8 @@ const DEBUG_TOOL_INPUT_STRING_MAX = 240;
 const DEBUG_OBJECT_KEYS_MAX = 32;
 const DEBUG_ARRAY_MAX = 16;
 const DEBUG_DEPTH_MAX = 4;
+const TRANSCRIPT_TAIL_BYTES = 256 * 1024;
+const ASSISTANT_OUTPUT_TAIL_CHARS = 2000;
 
 const HOOK_MAP = {
   PreInvocation: { state: "thinking", event: "UserPromptSubmit" },
@@ -281,6 +283,45 @@ function resolveHookMapping(hookName, payload) {
   return mapped;
 }
 
+// The final answer of a turn is the last PLANNER_RESPONSE with text in the
+// conversation's transcript.jsonl. Only the tail is read and sent: the server
+// looks for a closing question there (src/claude-turn-ask.js).
+function resolveTranscriptPath(payload, homeDir = os.homedir()) {
+  if (payload && typeof payload.transcriptPath === "string" && payload.transcriptPath) {
+    return payload.transcriptPath;
+  }
+  const id = payload && payload.conversationId != null ? String(payload.conversationId) : "";
+  if (!/^[\w-]+$/.test(id)) return "";
+  return path.join(homeDir, ".gemini", "antigravity", "brain", id, ".system_generated", "logs", "transcript.jsonl");
+}
+
+function readLastAssistantText(transcriptPath) {
+  if (!transcriptPath) return "";
+  let fd;
+  try {
+    fd = fs.openSync(transcriptPath, "r");
+    const size = fs.fstatSync(fd).size;
+    const length = Math.min(size, TRANSCRIPT_TAIL_BYTES);
+    const buf = Buffer.alloc(length);
+    fs.readSync(fd, buf, 0, length, size - length);
+    const lines = buf.toString("utf8").split("\n");
+    for (let i = lines.length - 1; i >= 0; i--) {
+      if (!lines[i].includes("PLANNER_RESPONSE")) continue;
+      try {
+        const entry = JSON.parse(lines[i]);
+        if (entry && entry.type === "PLANNER_RESPONSE" && typeof entry.content === "string" && entry.content.trim()) {
+          return entry.content.trim().slice(-ASSISTANT_OUTPUT_TAIL_CHARS);
+        }
+      } catch {}
+    }
+  } catch {
+    return "";
+  } finally {
+    if (fd !== undefined) try { fs.closeSync(fd); } catch {}
+  }
+  return "";
+}
+
 function buildStateBody(hookName, payload, options = {}) {
   const mapped = resolveHookMapping(hookName, payload);
   if (!mapped) return null;
@@ -296,6 +337,10 @@ function buildStateBody(hookName, payload, options = {}) {
   };
 
   if (cwd) body.cwd = cwd;
+  if (event === "Stop" && !options.remote) {
+    const text = readLastAssistantText(resolveTranscriptPath(payload, options.homeDir));
+    if (text) body.assistant_last_output = text;
+  }
 
   if (options.remote) {
     body.host = options.host || readHostPrefix();
@@ -548,6 +593,8 @@ if (require.main === module) {
 module.exports = {
   __test: {
     buildStateBody,
+    readLastAssistantText,
+    resolveTranscriptPath,
     buildPermissionBody,
     sanitizeAntigravityPermissionOutput,
     isAntigravityHookDebugEnabled,

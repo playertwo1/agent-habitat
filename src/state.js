@@ -4199,7 +4199,7 @@ function hasPendingClaudeInteractionForSession(sessionId) {
 function getHudPendingAttentionIds() {
   const ids = getPendingAttentionIds();
   for (const entry of ctx.pendingPermissions || []) {
-    if (!entry || entry.agentId !== "claude-code" || entry.isClaudeTurnAskNotify !== true) continue;
+    if (!entry || entry.isClaudeTurnAskNotify !== true) continue;
     if (!entry.sessionId || entry.headless || entry.host || entry.wslDistro
       || entry.platform === "wsl" || (entry.profileId && entry.profileId !== "local")
       || !isClaudeInteractionConnectionLive(entry)) continue;

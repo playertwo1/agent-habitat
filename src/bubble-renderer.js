@@ -122,6 +122,11 @@ const BUBBLE_STRINGS = {
     goToClaude: "Go to Claude",
     answerInClaude: "Choose your answer in Claude Desktop.",
     optionsInClaude: "Options in Claude: {options}",
+    taskDone: "Task Done",
+    taskInterrupted: "Task Interrupted",
+    antigravityNeedsInput: "Antigravity Needs Input",
+    goToAntigravity: "Go to Antigravity",
+    answerInAntigravity: "Answer in Antigravity.",
     returnToRemoteCodex: "Return to the remote Codex terminal to answer.",
     otherInCodex: "Other (type in Codex)",
     planReview: "Plan Review",
@@ -186,6 +191,11 @@ const BUBBLE_STRINGS = {
     goToClaude: "\u524D\u5F80 Claude",
     answerInClaude: "\u8BF7\u5728 Claude Desktop \u4E2D\u9009\u62E9\u56DE\u7B54\u3002",
     optionsInClaude: "\u5728 Claude \u4E2D\u53EF\u9009\uFF1A{options}",
+    taskDone: "任务完成",
+    taskInterrupted: "任务中断",
+    antigravityNeedsInput: "Antigravity 需要你的回答",
+    goToAntigravity: "前往 Antigravity",
+    answerInAntigravity: "请在 Antigravity 中回答。",
     returnToRemoteCodex: "\u8BF7\u8FD4\u56DE\u8FDC\u7AEF Codex \u7EC8\u7AEF\u56DE\u7B54\u3002",
     otherInCodex: "\u5176\u4ED6\uFF08\u5728 Codex \u4E2D\u8F93\u5165\uFF09",
     planReview: "\u8BA1\u5212\u5BA1\u6279",
@@ -250,6 +260,11 @@ const BUBBLE_STRINGS = {
     goToClaude: "前往 Claude",
     answerInClaude: "請在 Claude Desktop 中選擇回答。",
     optionsInClaude: "在 Claude 中可選：{options}",
+    taskDone: "任務完成",
+    taskInterrupted: "任務中斷",
+    antigravityNeedsInput: "Antigravity 需要你的回答",
+    goToAntigravity: "前往 Antigravity",
+    answerInAntigravity: "請在 Antigravity 中回答。",
     returnToRemoteCodex: "請返回遠端 Codex 終端機回答。",
     otherInCodex: "其他（在 Codex 中輸入）",
     planReview: "計畫審查",
@@ -314,6 +329,11 @@ const BUBBLE_STRINGS = {
     goToClaude: "Claude\uB85C \uC774\uB3D9",
     answerInClaude: "Claude Desktop\uC5D0\uC11C \uB2F5\uBCC0\uC744 \uC120\uD0DD\uD558\uC138\uC694.",
     optionsInClaude: "Claude\uC5D0\uC11C \uC120\uD0DD \uAC00\uB2A5: {options}",
+    taskDone: "작업 완료",
+    taskInterrupted: "작업 중단",
+    antigravityNeedsInput: "Antigravity에 입력이 필요합니다",
+    goToAntigravity: "Antigravity로 이동",
+    answerInAntigravity: "Antigravity에서 답변하세요.",
     returnToRemoteCodex: "\uC6D0\uACA9 Codex \uD130\uBBF8\uB110\uB85C \uB3CC\uC544\uAC00 \uB2F5\uBCC0\uD558\uC138\uC694.",
     otherInCodex: "\uAE30\uD0C0 (Codex\uC5D0\uC11C \uC785\uB825)",
     planReview: "\uACC4\uD68D \uAC80\uD1A0",
@@ -378,6 +398,11 @@ const BUBBLE_STRINGS = {
     goToClaude: "Claude へ移動",
     answerInClaude: "Claude Desktop で回答を選択してください。",
     optionsInClaude: "Claude での選択肢：{options}",
+    taskDone: "タスク完了",
+    taskInterrupted: "タスク中断",
+    antigravityNeedsInput: "Antigravity に入力が必要",
+    goToAntigravity: "Antigravity へ移動",
+    answerInAntigravity: "Antigravity で回答してください。",
     returnToRemoteCodex: "リモートの Codex ターミナルに戻って回答してください。",
     otherInCodex: "その他（Codex で入力）",
     planReview: "計画レビュー",
@@ -442,6 +467,11 @@ const BUBBLE_STRINGS = {
     goToClaude: "Ir para o Claude",
     answerInClaude: "Escolha sua resposta no Claude Desktop.",
     optionsInClaude: "Opções no Claude: {options}",
+    taskDone: "Tarefa concluída",
+    taskInterrupted: "Tarefa interrompida",
+    antigravityNeedsInput: "O Antigravity precisa de resposta",
+    goToAntigravity: "Ir para o Antigravity",
+    answerInAntigravity: "Responda no Antigravity.",
     returnToRemoteCodex: "Volte ao terminal remoto do Codex para responder.",
     otherInCodex: "Outra (digite no Codex)",
     planReview: "Revisão do plano",
@@ -506,6 +536,11 @@ const BUBBLE_STRINGS = {
     goToClaude: "Ir a Claude",
     answerInClaude: "Elige tu respuesta en Claude Desktop.",
     optionsInClaude: "Opciones en Claude: {options}",
+    taskDone: "Tarea completada",
+    taskInterrupted: "Tarea interrumpida",
+    antigravityNeedsInput: "Antigravity necesita una respuesta",
+    goToAntigravity: "Ir a Antigravity",
+    answerInAntigravity: "Responde en Antigravity.",
     returnToRemoteCodex: "Vuelve a la terminal remota de Codex para responder.",
     otherInCodex: "Otra (escríbela en Codex)",
     planReview: "Revisión del plan",
@@ -927,10 +962,26 @@ function isNativeQuestionData(data) {
   return !!(data && (data.isCodexUserInputNotify || data.isClaudeTurnAskNotify));
 }
 
+// Turn-ask cards also come from Codex and Antigravity (a Stop that ends with a
+// question); turnAskAgentId picks their copy.
 function nativeQuestionCopy(data) {
-  return data && data.isClaudeTurnAskNotify
-    ? { header: "claudeNeedsInput", pill: "CLAUDE", tool: "ClaudeTurnAsk", go: "goToClaude", hint: "answerInClaude" }
-    : { header: "codexNeedsInput", pill: "CODEX", tool: "CodexUserInput", go: "goToCodex", hint: "answerInCodex" };
+  if (data && data.turnAskKind) {
+    return {
+      header: data.turnAskKind === "interrupted" ? "taskInterrupted" : "taskDone",
+      pill: String(data.turnAskAgentName || "").toUpperCase() + (data.turnAskInOrca ? " \u00b7 ORCA" : ""),
+      tool: "ClaudeTurnAsk",
+      go: "goToTerminal",
+      hint: null,
+    };
+  }
+  const agent = data && data.isClaudeTurnAskNotify ? (data.turnAskAgentId || "claude-code") : "codex";
+  if (agent === "claude-code") {
+    return { header: "claudeNeedsInput", pill: "CLAUDE", tool: "ClaudeTurnAsk", go: "goToClaude", hint: "answerInClaude" };
+  }
+  if (agent === "antigravity-cli") {
+    return { header: "antigravityNeedsInput", pill: "ANTIGRAVITY", tool: "ClaudeTurnAsk", go: "goToAntigravity", hint: "answerInAntigravity" };
+  }
+  return { header: "codexNeedsInput", pill: "CODEX", tool: "CodexUserInput", go: "goToCodex", hint: "answerInCodex" };
 }
 
 function getQuestionLabel(question, questionIndex) {
@@ -1297,10 +1348,12 @@ function createCodexUserInputQuestionCard(question, questionIndex, hintKey = "an
   text.className = "question-text";
   text.textContent = question.question || "";
   questionCard.appendChild(text);
-  const hint = document.createElement("div");
-  hint.className = "question-hint";
-  hint.textContent = bubbleText(currentLang, hintKey);
-  questionCard.appendChild(hint);
+  if (hintKey) {
+    const hint = document.createElement("div");
+    hint.className = "question-hint";
+    hint.textContent = bubbleText(currentLang, hintKey);
+    questionCard.appendChild(hint);
+  }
   const optionList = document.createElement("div");
   optionList.className = "option-list";
   const options = Array.isArray(question.options) ? question.options : [];

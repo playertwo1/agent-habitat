@@ -206,7 +206,7 @@ describe("main wiring", () => {
     );
     assert.match(
       source,
-      /canRemind: \(payload\) => _runtimeAgentGate\.isAgentEnabled\("claude-code"\)\s*&& sessions\.has\(payload\.sessionId\)/
+      /canRemind: \(payload\) => _runtimeAgentGate\.isAgentEnabled\(payload\.agentId \|\| "claude-code"\)\s*&& sessions\.has\(payload\.sessionId\)/
     );
   });
 

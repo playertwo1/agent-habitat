@@ -94,8 +94,45 @@ function decideClaudeTurnAskAction({
   }
 }
 
+// Codex and Antigravity draw no wrap_up box, so the same card is raised from
+// their Stop event when the turn's last message ends with a question. Only the
+// last non-empty line counts: a question earlier in the message was already
+// followed by more work. Markdown emphasis and closing quotes are ignored.
+const TURN_END_QUESTION_AGENTS = new Set(["codex", "antigravity-cli"]);
+
+function extractTurnEndQuestion(text) {
+  if (typeof text !== "string") return null;
+  const lines = text.split("\n").map((line) => line.trim()).filter(Boolean);
+  const last = lines.length ? lines[lines.length - 1] : "";
+  if (last.startsWith("```")) return null;
+  const plain = last
+    .replace(/^(?:[-*+>]|\d+[.)])\s+/u, "")
+    .replace(/[*_`]+/gu, "")
+    .replace(/["'”’»)\]\s]+$/u, "");
+  if (!/[?？]$/u.test(plain)) return null;
+  return clampText(plain, MAX_ASK_CHARS) || null;
+}
+
+// Clear rules for those agents: the card lives until the next prompt, the next
+// tool call (the turn resumed) or the session ends.
+function decideTurnEndQuestionAction({ event, assistantLastOutput } = {}) {
+  switch (event) {
+    case "Stop":
+      return extractTurnEndQuestion(assistantLastOutput) ? "show" : "clear";
+    case "UserPromptSubmit":
+    case "PreToolUse":
+    case "SessionEnd":
+      return "clear";
+    default:
+      return "ignore";
+  }
+}
+
 module.exports = {
   CLAUDE_WRAP_UP_TOOL_NAME,
+  TURN_END_QUESTION_AGENTS,
+  extractTurnEndQuestion,
+  decideTurnEndQuestionAction,
   normalizeClaudeTurnAsk,
   decideClaudeTurnAskAction,
   MAX_ASK_CHARS,

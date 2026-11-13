@@ -15,6 +15,7 @@
     "notificationBubbleAutoCloseSeconds",
     "claudeTurnAskReminder",
     "claudeTurnAskReminderMinutes",
+    "completionBubbleEnabled",
     "updateBubbleAutoCloseSeconds",
     "bubbleFollowPet",
     "bubbleFollowPreference",
@@ -729,6 +730,11 @@
         labelKey: "bubbleNotificationLabel",
         descKey: "bubbleNotificationDesc",
         secondsKey: "notificationBubbleAutoCloseSeconds",
+      }),
+      helpers.buildSwitchRow({
+        key: "completionBubbleEnabled",
+        labelKey: "rowCompletionBubble",
+        descKey: "rowCompletionBubbleDesc",
       }),
       // #1326 follow-up: opt-in reminder for an unanswered Claude Desktop
       // end-of-turn question.

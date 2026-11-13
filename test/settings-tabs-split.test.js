@@ -74,6 +74,7 @@ const FROZEN_KEYS = [
   "bubbleFixedCorner",
   "permissionBubblesEnabled",
   "notificationBubbleAutoCloseSeconds",
+  "completionBubbleEnabled",
   "claudeTurnAskReminder",
   "claudeTurnAskReminderMinutes",
   "updateBubbleAutoCloseSeconds",
@@ -119,6 +120,7 @@ const EXPECTED_KEYS = {
     "notificationBubbleAutoCloseSeconds",
     "claudeTurnAskReminder",
     "claudeTurnAskReminderMinutes",
+    "completionBubbleEnabled",
     "updateBubbleAutoCloseSeconds",
     "bubbleFollowPet",
     "bubbleFollowPreference",
@@ -773,7 +775,7 @@ describe("settings tab split", () => {
     assert.deepStrictEqual(sectionRowLabels(notifications), [
       ["启用音效", "音量"],
       ["任务完成时闪烁系统托盘图标", "闪烁间隔", "闪烁时长"],
-      ["隐藏气泡", "权限 / 交互气泡", "通知气泡", "提醒未回复的 Claude 提问", "提醒等待时间", "更新气泡", "气泡位置", "优先方向", "固定角落"],
+      ["隐藏气泡", "权限 / 交互气泡", "通知气泡", "任务完成时弹出卡片", "提醒未回复的 Claude 提问", "提醒等待时间", "更新气泡", "气泡位置", "优先方向", "固定角落"],
     ]);
 
     const sessions = createHarness({ tab: "sessions", snapshot: makeSnapshot({ lang: "zh" }) });
