@@ -29,6 +29,9 @@ const {
   CLAUDE_WRAP_UP_TOOL_NAME,
   normalizeClaudeTurnAsk,
   decideClaudeTurnAskAction,
+  TURN_END_QUESTION_AGENTS,
+  extractTurnEndQuestion,
+  decideTurnEndQuestionAction,
 } = require("./claude-turn-ask");
 const {
   normalizeHookToolUseId,
@@ -1212,6 +1215,35 @@ function handleStatePost(req, res, options) {
           } else if (turnAskAction === "clear") {
             if (typeof ctx.clearClaudeTurnAskBubbles === "function") {
               ctx.clearClaudeTurnAskBubbles(sid, `claude-turn-ask:${event}`);
+            }
+            if (typeof ctx.resolveClaudeTurnAskReminder === "function") ctx.resolveClaudeTurnAskReminder(sid);
+          }
+        }
+        // Same card for Codex / Antigravity: a main-thread Stop whose last
+        // message ends with a question (claude-turn-ask.js). Headless Codex
+        // threads (subagents, internal workers) never ask the user anything.
+        if (hasExplicitPermissionLifecycleSession
+          && TURN_END_QUESTION_AGENTS.has(agentId)
+          && !subagentId
+          && codexHookState.headless !== true) {
+          const turnEndAction = decideTurnEndQuestionAction({ event, assistantLastOutput });
+          if (turnEndAction === "show") {
+            const turnAskPayload = {
+              agentId,
+              sessionId: sid,
+              toolUseId: null,
+              ask: extractTurnEndQuestion(assistantLastOutput),
+              actions: [],
+              sourcePid: effectiveProcessMetadata.sourcePid,
+              agentPid: effectiveProcessMetadata.agentPid,
+              cwd,
+              host,
+            };
+            if (typeof ctx.showClaudeTurnAskBubble === "function") ctx.showClaudeTurnAskBubble(turnAskPayload);
+            if (typeof ctx.trackClaudeTurnAskReminder === "function") ctx.trackClaudeTurnAskReminder(turnAskPayload);
+          } else if (turnEndAction === "clear") {
+            if (typeof ctx.clearClaudeTurnAskBubbles === "function") {
+              ctx.clearClaudeTurnAskBubbles(sid, `turn-end-question:${event}`);
             }
             if (typeof ctx.resolveClaudeTurnAskReminder === "function") ctx.resolveClaudeTurnAskReminder(sid);
           }

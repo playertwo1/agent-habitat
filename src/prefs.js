@@ -344,6 +344,8 @@ const SCHEMA = {
   // #1326 follow-up: opt-in reminder for a Claude Desktop end-of-turn question
   // (mcp__ccd_turn__wrap_up) still unanswered after the configured minutes.
   claudeTurnAskReminder: { type: "boolean", default: false },
+  // Desktop card when any agent finishes a task: agent, Orca tag, final message.
+  completionBubbleEnabled: { type: "boolean", default: true },
   claudeTurnAskReminderMinutes: {
     type: "number",
     default: 5,

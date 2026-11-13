@@ -131,6 +131,7 @@ const { launchClaudeSession, openTerminalAt } = require("./launch-claude");
 const { dialog: electronDialog } = require("electron");
 const initPermission = require("./permission");
 const { createClaudeTurnAskReminder, reminderDelayMsFromMinutes } = require("./claude-turn-ask-reminder");
+const { createCompletionBubbleNotifier } = require("./completion-bubble");
 const { isPassiveNotifyEntry } = require("./passive-notify-entry");
 const { registerPermissionIpc } = initPermission;
 const telegramApprovalSettings = require("./telegram-approval-settings");
@@ -2306,7 +2307,7 @@ const _permCtx = {
 };
 const _perm = initPermission(_permCtx);
 permissionPresentationRuntime = _perm;
-const { showPermissionBubble, resolvePermissionEntry, sendPermissionResponse, repositionBubbles, permLog, PASSTHROUGH_TOOLS, addPendingPermission, removePendingPermission, isPermissionEntryLive, canAutoResolvePendingPermission, wouldAutoAllowPermission, beginSessionTrustConfirmation, endSessionTrustConfirmation, syncPermissionBubbleContent, maybeStartRemoteApproval, clearCodexNotifyBubbles, showCodexUserInputBubble, clearCodexUserInputBubbles, showClaudeTurnAskBubble, clearClaudeTurnAskBubbles, showKimiNotifyBubble, clearKimiNotifyBubbles, syncPermissionShortcuts, replyOpencodeFamilyPermission, dismissOpencodeFamilyPermissionResolvedExternally } = _perm;
+const { showPermissionBubble, resolvePermissionEntry, sendPermissionResponse, repositionBubbles, permLog, PASSTHROUGH_TOOLS, addPendingPermission, removePendingPermission, isPermissionEntryLive, canAutoResolvePendingPermission, wouldAutoAllowPermission, beginSessionTrustConfirmation, endSessionTrustConfirmation, syncPermissionBubbleContent, maybeStartRemoteApproval, clearCodexNotifyBubbles, showCodexUserInputBubble, clearCodexUserInputBubbles, showClaudeTurnAskBubble, clearClaudeTurnAskBubbles, showTaskDoneBubble, showKimiNotifyBubble, clearKimiNotifyBubbles, syncPermissionShortcuts, replyOpencodeFamilyPermission, dismissOpencodeFamilyPermissionResolvedExternally } = _perm;
 
 _codexRemoteFallbackNotice = createCodexRemoteFallbackNotice({
   setTimeout: (fn, ms) => setTimeout(fn, ms),
@@ -2331,7 +2332,7 @@ let recordWindowsProcessChainShadow = () => false;
 // live-session check are read again when the timer fires.
 const claudeTurnAskReminder = createClaudeTurnAskReminder({
   isEnabled: () => _settingsController.get("claudeTurnAskReminder") === true,
-  canRemind: (payload) => _runtimeAgentGate.isAgentEnabled("claude-code")
+  canRemind: (payload) => _runtimeAgentGate.isAgentEnabled(payload.agentId || "claude-code")
     && sessions.has(payload.sessionId),
   getDelayMs: () => reminderDelayMsFromMinutes(_settingsController.get("claudeTurnAskReminderMinutes")),
   onRemind: (payload) => {
@@ -2339,6 +2340,13 @@ const claudeTurnAskReminder = createClaudeTurnAskReminder({
   },
 });
 app.on("will-quit", () => claudeTurnAskReminder.dispose());
+
+// Desktop "task finished" card (agent name, Orca tag, final message), fed by
+// broadcastSessionSnapshot.
+const completionBubbleNotifier = createCompletionBubbleNotifier({
+  isEnabled: () => _settingsController.get("completionBubbleEnabled") === true,
+  show: (card) => showTaskDoneBubble({ ...card, agentName: _resolveAgentDisplayName(card.agentId) }),
+});
 
 function getPendingPermissionFocusEntry(sessionId) {
   const id = String(sessionId || "");
@@ -2586,6 +2594,7 @@ const _stateCtx = {
     // Slack completion pings ride the same fanout; the client dedupes internally
     // and fires sends async, so this never throws or blocks the broadcast.
     try { getSlackNotifyClient().onSnapshot(snapshot); } catch {}
+    try { completionBubbleNotifier.onSnapshot(snapshot); } catch {}
     if (discordPresenceBridge) {
       try { discordPresenceBridge.onSnapshot(snapshot); } catch {}
     }
