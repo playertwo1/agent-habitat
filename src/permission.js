@@ -5874,13 +5874,15 @@ function showClaudeTurnAskBubble({
 }
 
 // Task-finished card (src/completion-bubble.js). Same read-only card as the
-// turn-ask question, but a transient notification: it auto-closes per the
-// notification policy and yields to a pending question card for the session.
+// turn-ask question: it stays until clicked or the session starts new work
+// (6 s auto-close was too short to read), and yields to a pending question card.
+// A newer completion in the same session replaces the old card.
 function showTaskDoneBubble({ agentId, agentName, sessionId, text, interrupted, inOrca, cwd, host }) {
   if (!sessionId || !agentId) return false;
   if (shouldSuppressClaudeTurnAskBubble(ctx, agentId)) return false;
-  if (pendingPermissions.some((entry) => entry && entry.sessionId === sessionId && entry.isClaudeTurnAskNotify)) return false;
-  const policy = getPolicy(ctx, "notification");
+  const existing = pendingPermissions.find((entry) => entry && entry.sessionId === sessionId && entry.isClaudeTurnAskNotify);
+  if (existing && !existing.turnAskKind) return false;
+  if (existing) dismissPassiveNotify(existing, "task-done-replaced");
   const session = ctx.sessions?.get(sessionId);
   const label = agentName || agentId;
   const permEntry = {
@@ -5911,7 +5913,6 @@ function showTaskDoneBubble({ agentId, agentName, sessionId, text, interrupted, 
   addPendingPermission(permEntry, "passive-added");
   showPermissionBubble(permEntry);
   permLog(`passive task-done show: agent=${agentId} session=${sessionId} orca=${!!inOrca}`);
-  schedulePassiveNotifyAutoExpire(permEntry, policy.autoCloseMs);
   return true;
 }
 
@@ -6096,7 +6097,7 @@ function schedulePassiveNotifyAutoExpire(permEntry, autoCloseMs, now = Date.now(
   // is the same kind of blocking question; it is cleared by the session's next
   // prompt / tool call / SessionEnd (see claude-turn-ask.js). Kiro reminders are
   // cleared by the interaction ledger, not by a timer.
-  if ((isNativeQuestionNotify(permEntry) && !permEntry.turnAskKind) || permEntry.isKiroDesktopNotify) return false;
+  if (isNativeQuestionNotify(permEntry) || permEntry.isKiroDesktopNotify) return false;
   const remainingMs = computePassiveNotifyRemainingMs(permEntry.createdAt, autoCloseMs, now);
   permLog(
     `passive notify schedule: agent=${getPassiveNotifyAgentId(permEntry)} session=${permEntry.sessionId || "(none)"} autoCloseMs=${autoCloseMs} remainingMs=${remainingMs}`

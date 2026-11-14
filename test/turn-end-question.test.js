@@ -72,7 +72,7 @@ describe("/state route raises the card for Codex and Antigravity", () => {
   const { handleStatePost } = require("../src/server-route-state");
 
   function harness() {
-    const calls = { shown: [], cleared: [], tracked: [] };
+    const calls = { shown: [], cleared: [], tracked: [], done: [] };
     const ctx = {
       STATE_SVGS: { idle: "x.svg", thinking: "x.svg", working: "x.svg", attention: "x.svg", error: "x.svg", notification: "x.svg", sleeping: "x.svg" },
       pendingPermissions: [], sessions: new Map(),
@@ -82,6 +82,7 @@ describe("/state route raises the card for Codex and Antigravity", () => {
       clearClaudeTurnAskBubbles: (...a) => calls.cleared.push(a),
       trackClaudeTurnAskReminder: (p) => calls.tracked.push(p),
       resolveClaudeTurnAskReminder() {},
+      showTaskDoneBubble: (c) => { calls.done.push(c); return true; },
     };
     const recorder = { acceptedUnlessDnd() {}, droppedByDisabled() {}, droppedByDnd() {}, droppedInvalidAgent() {}, droppedUnsupported() {} };
     const post = (body) => new Promise((resolve) => {
@@ -106,11 +107,23 @@ describe("/state route raises the card for Codex and Antigravity", () => {
     assert.equal(calls.cleared.length, before + 1);
   });
 
-  it("codex: a plain final answer shows nothing", async () => {
+  it("codex: a plain final answer raises the task-done card, not the question card", async () => {
     const { calls, post } = harness();
     await post({ state: "attention", event: "Stop", session_id: "codex:t1", agent_id: "codex", hook_source: "codex-official",
       assistant_last_output: "Tudo pronto." });
     assert.equal(calls.shown.length, 0);
+    assert.equal(calls.done.length, 1);
+    assert.equal(calls.done[0].agentId, "codex");
+    assert.equal(calls.done[0].text, "Tudo pronto.");
+  });
+
+  it("antigravity: a Stop without a question raises the task-done card; a question does not", async () => {
+    const { calls, post } = harness();
+    await post({ state: "attention", event: "Stop", session_id: "antigravity:c2", agent_id: "antigravity-cli",
+      assistant_last_output: "Corrigi o bug." });
+    await post({ state: "attention", event: "Stop", session_id: "antigravity:c3", agent_id: "antigravity-cli",
+      assistant_last_output: "Posso seguir?" });
+    assert.deepEqual(calls.done.map((c) => c.text), ["Corrigi o bug."]);
   });
 
   it("codex: Stop ending in a question shows the card", async () => {

@@ -5,7 +5,7 @@ const assert = require("node:assert/strict");
 const { createCompletionBubbleNotifier, buildCompletionCard } = require("../src/completion-bubble");
 
 const done = (over = {}) => ({
-  id: "s1", agentId: "codex", badge: "done", cwd: "C:\\work\\proj",
+  id: "s1", agentId: "claude-code", badge: "done", cwd: "C:\\work\\proj",
   lastEvent: { rawEvent: "Stop", at: 100 }, assistantLastOutput: "Refatorei o parser.", ...over,
 });
 
@@ -23,16 +23,17 @@ describe("completion bubble notifier", () => {
     snap(done({ lastEvent: { rawEvent: "Stop", at: 200 } }));
     snap(done({ lastEvent: { rawEvent: "Stop", at: 200 } }));
     assert.equal(shown.length, 1);
-    assert.equal(shown[0].agentId, "codex");
+    assert.equal(shown[0].agentId, "claude-code");
     assert.equal(shown[0].text, "Refatorei o parser.");
   });
 
-  it("tags Orca sessions and keeps the agent id for claude and antigravity", () => {
+  it("tags Orca sessions; leaves codex and antigravity to the Stop route", () => {
     const { shown, snap } = setup();
     snap();
     snap(done({ id: "a", agentId: "claude-code", orcaPaneKey: "pane1", lastEvent: { rawEvent: "Stop", at: 1 } }));
     snap(done({ id: "b", agentId: "antigravity-cli", lastEvent: { rawEvent: "Stop", at: 1 } }));
-    assert.deepEqual(shown.map((c) => [c.agentId, c.inOrca]), [["claude-code", true], ["antigravity-cli", false]]);
+    snap(done({ id: "c", agentId: "codex", lastEvent: { rawEvent: "Stop", at: 1 } }));
+    assert.deepEqual(shown.map((c) => [c.agentId, c.inOrca]), [["claude-code", true]]);
   });
 
   it("marks interrupted, skips headless, working sessions and the disabled switch", () => {
@@ -49,7 +50,7 @@ describe("completion bubble notifier", () => {
   });
 
   it("leaves a closing question to the question card, but not for claude", () => {
-    assert.equal(buildCompletionCard(done({ assistantLastOutput: "Posso seguir?" })), null);
+    assert.equal(buildCompletionCard(done({ agentId: "codex", assistantLastOutput: "Posso seguir?" })), null);
     assert.ok(buildCompletionCard(done({ agentId: "claude-code", assistantLastOutput: "Posso seguir?" })));
   });
 

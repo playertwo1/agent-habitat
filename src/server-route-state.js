@@ -33,6 +33,7 @@ const {
   extractTurnEndQuestion,
   decideTurnEndQuestionAction,
 } = require("./claude-turn-ask");
+const { buildCompletionCard } = require("./completion-bubble");
 const {
   normalizeHookToolUseId,
   findPendingPermissionForStateEvent,
@@ -1246,6 +1247,15 @@ function handleStatePost(req, res, options) {
               ctx.clearClaudeTurnAskBubbles(sid, `turn-end-question:${event}`);
             }
             if (typeof ctx.resolveClaudeTurnAskReminder === "function") ctx.resolveClaudeTurnAskReminder(sid);
+            // Their Stop is the completion: the snapshot "done" badge is not
+            // reliable for Codex Desktop threads, so the task-done card is
+            // raised here instead (src/completion-bubble.js skips them).
+            if (event === "Stop" && typeof ctx.showTaskDoneBubble === "function") {
+              const card = buildCompletionCard({
+                id: sid, agentId, assistantLastOutput, badge: "done", orcaPaneKey, cwd, host,
+              });
+              if (card) ctx.showTaskDoneBubble(card);
+            }
           }
         }
         recordRequestHookEvent.acceptedUnlessDnd(shouldDropForDnd());

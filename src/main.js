@@ -3279,6 +3279,10 @@ const _serverCtx = {
   showClaudeTurnAskBubble,
   clearClaudeTurnAskBubbles,
   trackClaudeTurnAskReminder: (payload) => claudeTurnAskReminder.track(payload),
+  showTaskDoneBubble: (card) => (
+    _settingsController.get("completionBubbleEnabled") === true
+      && showTaskDoneBubble({ ...card, agentName: _resolveAgentDisplayName(card.agentId) })
+  ),
   resolveClaudeTurnAskReminder: (sessionId) => claudeTurnAskReminder.resolve(sessionId),
   handleTestResult: (result, context) => handleTestResult(result, context),
   maybeStartRemoteApproval,
