@@ -970,7 +970,7 @@ function nativeQuestionCopy(data) {
       header: data.turnAskKind === "interrupted" ? "taskInterrupted" : "taskDone",
       pill: String(data.turnAskAgentName || "").toUpperCase() + (data.turnAskInOrca ? " \u00b7 ORCA" : ""),
       tool: "ClaudeTurnAsk",
-      go: "goToTerminal",
+      go: ({ "claude-code": "goToClaude", codex: "goToCodex", "antigravity-cli": "goToAntigravity" })[data.turnAskAgentId] || "goToTerminal",
       hint: null,
     };
   }

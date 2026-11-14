@@ -61,3 +61,18 @@ describe("completion bubble notifier", () => {
     assert.equal(buildCompletionCard(done({ assistantLastOutput: "" })).text, "proj");
   });
 });
+
+describe("focus start pid", () => {
+  const { resolveLiveFocusStartPid } = require("../src/focus").__test;
+  const alive = (set) => (pid) => set.has(pid);
+  it("keeps a live sourcePid", () => {
+    assert.equal(resolveLiveFocusStartPid(10, [10, 20, 30], alive(new Set([10, 20]))), 10);
+  });
+  it("skips a dead hook process to the first live pid in the chain (Claude Desktop)", () => {
+    assert.equal(resolveLiveFocusStartPid(25692, [25692, 7968, 32760], alive(new Set([7968, 32760]))), 7968);
+  });
+  it("falls back to sourcePid when nothing in the chain lives", () => {
+    assert.equal(resolveLiveFocusStartPid(5, [5, 6], alive(new Set())), 5);
+    assert.equal(resolveLiveFocusStartPid(5, undefined, alive(new Set())), 5);
+  });
+});
