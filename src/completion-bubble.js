@@ -44,7 +44,8 @@ function createCompletionBubbleNotifier({ isEnabled = () => true, show = () => {
     for (const entry of entries) {
       if (!entry || !entry.id) continue;
       seen.add(entry.id);
-      if (!isCompletion(entry)) continue;
+      // Codex / Antigravity get their card straight from Stop (server-route-state.js).
+      if (!isCompletion(entry) || TURN_END_QUESTION_AGENTS.has(entry.agentId)) continue;
       const key = dedupeKey(entry);
       if (lastNotified.get(entry.id) === key) continue;
       // Record even when priming/disabled so toggling on later does not backfill.
