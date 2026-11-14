@@ -74,6 +74,27 @@ function querySupersetWorkspaceId(dbPath, cwd, callback) {
   tryNext(0);
 }
 
+function isPidAlive(pid) {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (err) {
+    return !!(err && err.code === "EPERM");
+  }
+}
+
+// The window walk starts at sourcePid, but some hosts (Claude Desktop) run the
+// hook in a short-lived process that is gone by the time the user clicks. Start
+// at the first pid of the recorded chain that is still alive instead, so the
+// walk can still climb to the app window (claude.exe -> Claude.exe).
+function resolveLiveFocusStartPid(sourcePid, pidChain, isAlive = isPidAlive) {
+  if (!sourcePid || isAlive(sourcePid)) return sourcePid;
+  for (const pid of Array.isArray(pidChain) ? pidChain : []) {
+    if (Number.isFinite(pid) && pid > 0 && pid !== sourcePid && isAlive(pid)) return pid;
+  }
+  return sourcePid;
+}
+
 module.exports = function initFocus(ctx) {
 
 const FOCUS_RESULT_PREFIX = "__CLAWD_FOCUS_RESULT__ ";
@@ -2409,7 +2430,8 @@ function focusTerminalWindowLegacy(request, onDone) {
 
   // Windows: send command to persistent PowerShell process (near-instant)
   const titleCandidates = buildWindowsTitleCandidates(request, cwdCandidates);
-  const cmd = makeFocusCmd(sourcePid || 0, titleCandidates, buildFocusCacheKey(request), request.wtHwnd, request.focusToken, cwdCandidates, !!request.orcaPaneKey);
+  const startPid = resolveLiveFocusStartPid(sourcePid, pidChain);
+  const cmd = makeFocusCmd(startPid || 0, titleCandidates, buildFocusCacheKey(request), request.wtHwnd, request.focusToken, cwdCandidates, !!request.orcaPaneKey);
   if (psProc && psProc.stdin.writable) {
     psProc.stdin.write(cmd + "\n");
     return true;
@@ -2501,6 +2523,7 @@ return {
 // closure-only helpers like makeFocusCmd; this attaches the module-scoped
 // helpers separately.
 module.exports.__test = {
+  resolveLiveFocusStartPid,
   findSupersetDataDirs,
   supersetSchemeForDir,
   querySupersetWorkspaceId,
