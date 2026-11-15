@@ -75,4 +75,11 @@ describe("focus start pid", () => {
     assert.equal(resolveLiveFocusStartPid(5, [5, 6], alive(new Set())), 5);
     assert.equal(resolveLiveFocusStartPid(5, undefined, alive(new Set())), 5);
   });
+  it("starts Claude Desktop focus at the agent, not a launcher terminal above the app", () => {
+    const { getTerminalFocusSourcePid } = require("../src/session-focus");
+    // second instance opened by a script: sourcePid is that script's conhost
+    assert.equal(getTerminalFocusSourcePid({ claudeEntrypoint: "claude-desktop", sourcePid: 28660, agentPid: 12836 }), 12836);
+    assert.equal(getTerminalFocusSourcePid({ claudeEntrypoint: "cli", sourcePid: 28660, agentPid: 12836 }), 28660);
+    assert.equal(getTerminalFocusSourcePid({ claudeEntrypoint: "claude-desktop", sourcePid: 7 }), 7);
+  });
 });

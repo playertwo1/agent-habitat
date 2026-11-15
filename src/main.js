@@ -206,6 +206,7 @@ const createMacHideController = require("./mac-hide");
 const {
   getFocusableLocalHudSessionIds: selectFocusableLocalHudSessionIds,
   getSessionFocusTarget,
+  getTerminalFocusSourcePid,
   mergeSessionFocusEntry,
 } = require("./session-focus");
 const { focusCodexThreadTarget, focusDshDesktopTarget } = require("./session-focus-handoff");
@@ -2872,7 +2873,7 @@ function getFocusableLocalHudSessionIds() {
 function focusTerminalSession(session, sessionId, requestSource) {
   if (!session || (!session.sourcePid && !session.orcaPaneKey)) return false;
   return focusTerminalWindow({
-    sourcePid: session.sourcePid,
+    sourcePid: getTerminalFocusSourcePid(session),
     wtHwnd: session.wtHwnd,
     cwd: session.cwd,
     editor: session.editor,
