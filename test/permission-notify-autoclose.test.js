@@ -695,6 +695,25 @@ describe("Kimi passive cue rebuild after dismissal (gate-ledger joint lifecycle)
     assert.ok(second.bubble && !second.bubble.destroyed, "re-armed cue should own a live bubble window");
   });
 
+  it("task-done cards follow the notification auto-close; question cards stay", () => {
+    mock.timers.enable({ apis: ["setTimeout", "Date"] });
+    mock.timers.setTime(100_000);
+    const harness = createPermissionHarness();
+    const { api } = harness;
+    harness.setNotificationAutoCloseMs(5_000);
+
+    assert.strictEqual(api.showTaskDoneBubble({
+      agentId: "codex", agentName: "Codex", sessionId: "codex-done", text: "Pronto.",
+    }), true);
+    assert.strictEqual(api.showClaudeTurnAskBubble({
+      sessionId: "claude-q", ask: "Posso seguir?", actions: [],
+    }), true);
+    assert.strictEqual(api.pendingPermissions.length, 2);
+
+    mock.timers.tick(5_000);
+    assert.deepStrictEqual(api.pendingPermissions.map((entry) => entry.sessionId), ["claude-q"]);
+  });
+
   it("rebuilds a fresh card after the previous cue auto-expired", () => {
     mock.timers.enable({ apis: ["setTimeout", "Date"] });
     mock.timers.setTime(100_000);
