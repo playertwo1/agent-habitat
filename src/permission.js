@@ -5874,8 +5874,9 @@ function showClaudeTurnAskBubble({
 }
 
 // Task-finished card (src/completion-bubble.js). Same read-only card as the
-// turn-ask question: it stays until clicked or the session starts new work
-// (6 s auto-close was too short to read), and yields to a pending question card.
+// turn-ask question, but it auto-closes per Settings > Notifications (0 = stays
+// until clicked or the session starts new work), and yields to a pending
+// question card.
 // A newer completion in the same session replaces the old card.
 function showTaskDoneBubble({ agentId, agentName, sessionId, text, interrupted, inOrca, cwd, host }) {
   if (!sessionId || !agentId) return false;
@@ -5913,6 +5914,7 @@ function showTaskDoneBubble({ agentId, agentName, sessionId, text, interrupted, 
   addPendingPermission(permEntry, "passive-added");
   showPermissionBubble(permEntry);
   permLog(`passive task-done show: agent=${agentId} session=${sessionId} orca=${!!inOrca}`);
+  schedulePassiveNotifyAutoExpire(permEntry, getPolicy(ctx, "notification").autoCloseMs);
   return true;
 }
 
@@ -6097,7 +6099,9 @@ function schedulePassiveNotifyAutoExpire(permEntry, autoCloseMs, now = Date.now(
   // is the same kind of blocking question; it is cleared by the session's next
   // prompt / tool call / SessionEnd (see claude-turn-ask.js). Kiro reminders are
   // cleared by the interaction ledger, not by a timer.
-  if (isNativeQuestionNotify(permEntry) || permEntry.isKiroDesktopNotify) return false;
+  // Task-done cards reuse the question card but are notifications: they follow
+  // the notification auto-close setting like any other passive cue.
+  if ((isNativeQuestionNotify(permEntry) && !permEntry.turnAskKind) || permEntry.isKiroDesktopNotify) return false;
   const remainingMs = computePassiveNotifyRemainingMs(permEntry.createdAt, autoCloseMs, now);
   permLog(
     `passive notify schedule: agent=${getPassiveNotifyAgentId(permEntry)} session=${permEntry.sessionId || "(none)"} autoCloseMs=${autoCloseMs} remainingMs=${remainingMs}`
