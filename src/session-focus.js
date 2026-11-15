@@ -174,7 +174,17 @@ function mergeSessionFocusEntry(session, fallback, id) {
   return entry;
 }
 
+// Claude Desktop runs claude-code as a child of the app window, so the agent pid
+// climbs straight to it. The hook's sourcePid can instead be a terminal ABOVE the
+// app (e.g. the conhost of a launcher script that opened a second instance),
+// which owns no window and makes "go to Claude" do nothing.
+function getTerminalFocusSourcePid(entry) {
+  if (entry && entry.claudeEntrypoint === "claude-desktop" && entry.agentPid) return entry.agentPid;
+  return entry ? entry.sourcePid : null;
+}
+
 module.exports = {
+  getTerminalFocusSourcePid,
   mergeSessionFocusEntry,
   getCodexThreadId,
   getCodexThreadUrl,
