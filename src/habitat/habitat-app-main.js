@@ -7,7 +7,8 @@ const { createHabitatRuntime } = require("./habitat-runtime");
 const { createHabitatSceneMachine } = require("./scene-machine");
 const { loadHabitatPrefs, saveHabitatPrefs } = require("./habitat-prefs");
 const { computeHabitatHitRects, classifyHabitatHitPoint } = require("./habitat-hit-geometry");
-const { createHitWindowActivationController } = require("../win-hit-window-activation");
+const { createHitWindowActivationRuntime } = require("../win-hit-window-activation");
+const { resolveTargetDisplayWorkArea, computeSafeStageBounds, computeSafePanelBounds } = require("./habitat-display-layout");
 const initServer = require("../server");
 const {
   HABITAT_SERVER_PORTS,
@@ -55,6 +56,102 @@ function buildHabitatServerContext({ runtimeConfigPath, habitatRuntime, syncInte
 function extractSceneSnapshot(snapshot) {
   if (!snapshot || typeof snapshot !== "object") return { residents: {} };
   return snapshot.scene && typeof snapshot.scene === "object" ? snapshot.scene : snapshot;
+}
+
+function createAdaptiveStageLoop({
+  isIdle000,
+  onTick,
+  setIntervalFn = setInterval,
+  clearIntervalFn = clearInterval,
+  intervalMs = 33,
+  reconcileMs = 5000,
+  hasTrackedSessions,
+  onReconcile
+} = {}) {
+  let tickTimer = null;
+  let reconcileTimer = null;
+  let running = false;
+
+  function syncReconcileTimer() {
+    const hasSess = typeof hasTrackedSessions === "function" ? hasTrackedSessions() : false;
+    if (hasSess) {
+      if (!reconcileTimer) {
+        reconcileTimer = setIntervalFn(() => {
+          try {
+            if (typeof onReconcile === "function") {
+              onReconcile();
+            }
+          } catch {}
+        }, reconcileMs);
+      }
+    } else {
+      if (reconcileTimer) {
+        clearIntervalFn(reconcileTimer);
+        reconcileTimer = null;
+      }
+    }
+  }
+
+  function tickCheck() {
+    try {
+      const idle = typeof isIdle000 === "function" ? isIdle000() : false;
+      if (idle) {
+        // Stop tick when stable 000 inside cottage with door closed (T23)
+        if (tickTimer) {
+          clearIntervalFn(tickTimer);
+          tickTimer = null;
+        }
+      } else {
+        if (typeof onTick === "function") {
+          onTick();
+        }
+      }
+      syncReconcileTimer();
+    } catch {}
+  }
+
+  function start() {
+    running = true;
+    wake();
+  }
+
+  function wake() {
+    if (!running) return;
+    const idle = typeof isIdle000 === "function" ? isIdle000() : false;
+    if (!idle) {
+      if (!tickTimer) {
+        tickTimer = setIntervalFn(tickCheck, intervalMs);
+      }
+    }
+    syncReconcileTimer();
+  }
+
+  function getState() {
+    return {
+      tickRunning: Boolean(tickTimer),
+      reconcileRunning: Boolean(reconcileTimer)
+    };
+  }
+
+  function dispose() {
+    running = false;
+    if (tickTimer) {
+      clearIntervalFn(tickTimer);
+      tickTimer = null;
+    }
+    if (reconcileTimer) {
+      clearIntervalFn(reconcileTimer);
+      reconcileTimer = null;
+    }
+  }
+
+  return {
+    start,
+    wake,
+    syncReconcileTimer,
+    getState,
+    dispose
+  };
 }
 
 function isSceneIdle000(sceneSnap, isDemoMode = false) {
@@ -290,32 +387,33 @@ function runHabitatAppMode(electron) {
     repoRoot,
     manifestPath,
     reducedMotion: !!prefs.reducedMotion,
+    onActivity: () => { if (stageLoop) stageLoop.wake(); },
     onPermissionRequest: async (payload) => {
       if (!prefs.cardsEnabled || demoMode) return "ask";
       if (!renderWin || renderWin.isDestroyed()) return "ask";
       const stageBounds = renderWin.getBounds();
-      const primaryDisplay = screen.getPrimaryDisplay();
+      const workArea = resolveTargetDisplayWorkArea({ bounds: stageBounds, ...getDisplaysSnapshot() });
       const decisionResult = await cardManager.requestPermission({
         id: payload.id || `perm-${Date.now()}`,
         provider: payload.provider,
         cwdName: payload.cwdName || "projeto",
         summary: payload.summary || payload.tool || "Aprovação de ferramenta",
         stageBounds,
-        workArea: primaryDisplay.workArea
+        workArea
       });
       return decisionResult.decision || "ask";
     },
     onStateTransition: ({ provider, state, resident }) => {
       if (demoMode || !prefs.cardsEnabled || !renderWin || renderWin.isDestroyed()) return;
       const stageBounds = renderWin.getBounds();
-      const primaryDisplay = screen.getPrimaryDisplay();
+      const workArea = resolveTargetDisplayWorkArea({ bounds: stageBounds, ...getDisplaysSnapshot() });
       const cardOpts = {
         id: `${provider}-${Date.now()}`,
         provider,
         cwdName: (resident && resident.cwdName) || "projeto",
         summary: (resident && resident.summary) || `Estado: ${state}`,
         stageBounds,
-        workArea: primaryDisplay.workArea
+        workArea
       };
       if (state === "done") {
         cardManager.showCompletionCard(cardOpts);
@@ -448,17 +546,25 @@ function runHabitatAppMode(electron) {
     const scale = prefs.scale || 1.5;
     const canvasWidth = manifestData.canvas.width;
     const canvasHeight = manifestData.canvas.height;
-    const winWidth = Math.round(canvasWidth * scale);
-    const winHeight = Math.round(canvasHeight * scale);
 
-    const primaryDisplay = screen.getPrimaryDisplay();
-    const workArea = primaryDisplay.workArea;
+    function getDisplaysSnapshot() {
+      return {
+        displays: screen.getAllDisplays(),
+        primaryDisplay: screen.getPrimaryDisplay(),
+        getDisplayMatching: (b) => screen.getDisplayMatching(b)
+      };
+    }
 
-    let initialPos = prefs.windowPosition || {
-      x: workArea.x + workArea.width - winWidth - 30,
-      y: workArea.y + workArea.height - winHeight - 30
-    };
-    initialPos = clampStageBoundsToWorkArea({ ...initialPos, width: winWidth, height: winHeight }, workArea);
+    const initialBounds = computeSafeStageBounds({
+      manifest: manifestData,
+      scale,
+      savedPosition: prefs.windowPosition,
+      ...getDisplaysSnapshot()
+    });
+
+    const winWidth = initialBounds.width;
+    const winHeight = initialBounds.height;
+    const initialPos = { x: initialBounds.x, y: initialBounds.y };
 
     renderWin = new BrowserWindow({
       width: winWidth,
@@ -482,6 +588,8 @@ function runHabitatAppMode(electron) {
     renderWin.setIgnoreMouseEvents(true, { forward: false });
     renderWin.loadFile(appPaths.stageHtml);
 
+    hitActivationRuntime = createHitWindowActivationRuntime({ isWin: process.platform === "win32", getHitWindow: () => hitWin, onError: () => {} });
+
     hitWin = new BrowserWindow({
       width: winWidth,
       height: winHeight,
@@ -490,7 +598,7 @@ function runHabitatAppMode(electron) {
       transparent: true,
       frame: false,
       skipTaskbar: true,
-      focusable: true,
+      focusable: hitActivationRuntime.windowsHitWindowFocusable,
       resizable: false,
       alwaysOnTop: !!prefs.alwaysOnTop,
       webPreferences: {
@@ -501,11 +609,15 @@ function runHabitatAppMode(electron) {
       }
     });
 
-    hitActivationCtrl = createHitWindowActivationController({ isWin: process.platform === "win32" });
-    if (hitActivationCtrl && typeof hitActivationCtrl.prepare === "function") {
-      hitActivationCtrl.prepare(hitWin);
+    if (hitActivationRuntime && hitActivationRuntime.controller && typeof hitActivationRuntime.controller.prepare === "function") {
+      hitActivationRuntime.controller.prepare(hitWin);
     }
     hitWin.loadFile(appPaths.hitHtml);
+    hitWin.webContents.once("did-finish-load", () => {
+      if (hitActivationRuntime && typeof hitActivationRuntime.setHitWinFocusable === "function") {
+        hitActivationRuntime.setHitWinFocusable(false);
+      }
+    });
 
     updateHitShapes(getActiveSceneSnapshot(Date.now()), scale);
 
@@ -526,13 +638,48 @@ function runHabitatAppMode(electron) {
       togglePanel();
     });
 
+    function relayoutWindows() {
+      if (!renderWin || renderWin.isDestroyed()) return;
+      const scale = prefs.scale || 1.5;
+      const savedPos = renderWin.getBounds();
+      const safeBounds = computeSafeStageBounds({
+        manifest: manifestData,
+        scale,
+        savedPosition: savedPos,
+        ...getDisplaysSnapshot()
+      });
+      renderWin.setBounds(safeBounds);
+      if (hitWin && !hitWin.isDestroyed()) {
+        hitWin.setBounds(safeBounds);
+      }
+      prefs = saveHabitatPrefs({ filePath: prefsPath, patch: { windowPosition: { x: safeBounds.x, y: safeBounds.y } } });
+      if (panelWin && !panelWin.isDestroyed()) {
+        const workArea = resolveTargetDisplayWorkArea({ bounds: safeBounds, ...getDisplaysSnapshot() });
+        const panelBounds = computeSafePanelBounds({ stageBounds: safeBounds, panelWidth: 480, panelHeight: 640, workArea });
+        panelWin.setBounds(panelBounds);
+      }
+    }
+
+    screen.on("display-added", relayoutWindows);
+    screen.on("display-removed", relayoutWindows);
+    screen.on("display-metrics-changed", relayoutWindows);
+
     ipcMain.on("habitat-stage:ready", () => {
       pushStageFrame({ force: true });
     });
 
-    tickInterval = setInterval(() => {
-      pushStageFrame();
-    }, 100);
+    stageLoop = createAdaptiveStageLoop({
+      isIdle000: () => isSceneIdle000(getActiveSceneSnapshot(Date.now()), demoMode),
+      onTick: () => pushStageFrame(),
+      intervalMs: 33,
+      reconcileMs: 5000,
+      hasTrackedSessions: () => runtime.hasTrackedSessions(Date.now()),
+      onReconcile: () => {
+        runtime.reconcile(Date.now());
+        pushStageFrame();
+      }
+    });
+    stageLoop.wake();
 
     ipcMain.on("habitat-hit:click", async (event, pt) => {
       if (!pt || typeof pt.x !== "number" || typeof pt.y !== "number") return;
@@ -563,7 +710,9 @@ function runHabitatAppMode(electron) {
       prefs = saveHabitatPrefs({ filePath: prefsPath, patch: { windowPosition: { x: newX, y: newY } } });
     });
 
-    ipcMain.on("habitat-hit:drag-end", () => {});
+    ipcMain.on("habitat-hit:drag-end", () => {
+      relayoutWindows();
+    });
     ipcMain.on("habitat-hit:context-menu", () => {
       if (tray && typeof tray.popUpContextMenu === "function") {
         tray.popUpContextMenu();
@@ -591,6 +740,7 @@ function runHabitatAppMode(electron) {
       const now = Date.now();
       demoSceneMachine.setAllProviders(stateObj && typeof stateObj === "object" ? stateObj : {}, now);
       demoSceneMachine.tick(now);
+      if (stageLoop) stageLoop.wake();
       pushStageFrame({ force: true, now });
       updateTrayMenu();
       const state = getPanelState();
@@ -603,6 +753,7 @@ function runHabitatAppMode(electron) {
       const now = Date.now();
       demoSceneMachine.setAllProviders(resolveDemoPresetStates(presetName), now);
       demoSceneMachine.tick(now);
+      if (stageLoop) stageLoop.wake();
       pushStageFrame({ force: true, now });
       updateTrayMenu();
       const state = getPanelState();
@@ -612,6 +763,7 @@ function runHabitatAppMode(electron) {
 
     ipcMain.handle("habitat:stop-demo", () => {
       demoMode = false;
+      if (stageLoop) stageLoop.wake();
       pushStageFrame({ force: true });
       updateTrayMenu();
       const state = getPanelState();
@@ -672,11 +824,18 @@ function runHabitatAppMode(electron) {
   });
 
   app.on("before-quit", () => {
-    if (tickInterval) clearInterval(tickInterval);
-    if (fullscreenCheckInterval) clearInterval(fullscreenCheckInterval);
-    if (hitActivationCtrl && typeof hitActivationCtrl.dispose === "function") {
-      try { hitActivationCtrl.dispose(); } catch {}
+    if (stageLoop) {
+      try { stageLoop.dispose(); } catch {}
     }
+    if (hitActivationRuntime && hitActivationRuntime.controller && typeof hitActivationRuntime.controller.dispose === "function") {
+      try { hitActivationRuntime.controller.dispose(); } catch {}
+    }
+    try {
+      screen.removeListener("display-added", relayoutWindows);
+      screen.removeListener("display-removed", relayoutWindows);
+      screen.removeListener("display-metrics-changed", relayoutWindows);
+    } catch {}
+    if (fullscreenCheckInterval) clearInterval(fullscreenCheckInterval);
     try { cardManager.dispose(); } catch {}
     if (serverCtl && typeof serverCtl.cleanup === "function") {
       try { serverCtl.cleanup(); } catch {}
@@ -688,6 +847,9 @@ function runHabitatAppMode(electron) {
 
   function applyPrefsChanges() {
     demoSceneMachine.setReducedMotion(!!prefs.reducedMotion, Date.now());
+    if (runtime && typeof runtime.setReducedMotion === "function") {
+      runtime.setReducedMotion(!!prefs.reducedMotion, Date.now());
+    }
     cardManager.setCardsEnabled(!!prefs.cardsEnabled);
     syncFullscreenWatcher();
 
@@ -697,13 +859,7 @@ function runHabitatAppMode(electron) {
     hitWin.setAlwaysOnTop(alwaysOnTop);
 
     const scale = prefs.scale || 1.5;
-    const canvasWidth = manifestData.canvas.width;
-    const canvasHeight = manifestData.canvas.height;
-    const winWidth = Math.round(canvasWidth * scale);
-    const winHeight = Math.round(canvasHeight * scale);
-
-    renderWin.setSize(winWidth, winHeight);
-    hitWin.setSize(winWidth, winHeight);
+    relayoutWindows();
 
     if (prefs.clickThrough) {
       hitWin.setIgnoreMouseEvents(true);
@@ -713,6 +869,7 @@ function runHabitatAppMode(electron) {
       if (!isFullscreenHidden) hitWin.showInactive();
     }
 
+    if (stageLoop) stageLoop.wake();
     pushStageFrame({ force: true });
   }
 
@@ -799,9 +956,15 @@ function runHabitatAppMode(electron) {
       panelWin.focus();
       return;
     }
+    const stageBounds = renderWin && !renderWin.isDestroyed() ? renderWin.getBounds() : { x: 100, y: 100, width: 320, height: 180 };
+    const workArea = resolveTargetDisplayWorkArea({ bounds: stageBounds, ...getDisplaysSnapshot() });
+    const panelBounds = computeSafePanelBounds({ stageBounds, panelWidth: 480, panelHeight: 640, workArea });
+
     panelWin = new BrowserWindow({
-      width: 480,
-      height: 640,
+      width: panelBounds.width,
+      height: panelBounds.height,
+      x: panelBounds.x,
+      y: panelBounds.y,
       backgroundColor: "#24232A",
       webPreferences: {
         preload: appPaths.panelPreload,
@@ -826,5 +989,6 @@ module.exports = {
   clampStageBoundsToWorkArea,
   resolveDemoPresetStates,
   computeHabitatDiagnostics,
-  buildHabitatPanelState
+  buildHabitatPanelState,
+  createAdaptiveStageLoop
 };

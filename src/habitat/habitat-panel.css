@@ -1,4 +1,14 @@
-:root {
+@media (prefers-reduced-motion: reduce) {
+  body[data-reduced-motion="true"] *, * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+:focus-visible, input:focus-visible, label input:focus-visible, .demo-btn:focus-visible, .action-btn:focus-visible {
+  outline: 2px solid #FFC45C;
+  outline-offset: 2px;
+}
   --bg-color: #24232A;
   --surface-color: #2E2C36;
   --border-color: #3E3B49;

@@ -16,6 +16,7 @@ function createHabitatRuntime(options = {}) {
   const manifestPath = options.manifestPath || path.join(repoRoot, "assets/habitat/cozy-cottage/habitat-manifest.json");
   const onPermissionRequest = typeof options.onPermissionRequest === "function" ? options.onPermissionRequest : null;
   const onStateTransition = typeof options.onStateTransition === "function" ? options.onStateTransition : null;
+  const onActivity = typeof options.onActivity === "function" ? options.onActivity : null;
 
   let lastStatesMap = new Map();
 
@@ -47,14 +48,22 @@ function createHabitatRuntime(options = {}) {
 
   function handleHttpEvent(rawPayload, nowMs = Date.now()) {
     if (!rawPayload || typeof rawPayload !== "object") {
-      return { accepted: false, snapshot: getSnapshot(nowMs) };
+      function dispose() {
+    // Idempotent teardown
+  }
+
+  return { accepted: false, snapshot: getSnapshot(nowMs) };
     }
 
     const normalized = normalizeHookPayloadToAggregatorEvent(rawPayload, nowMs);
     const agentOrProvider = normalized.provider || normalized.agentId || rawPayload.provider || rawPayload.agentId;
     const provider = mapAgentIdToProvider(agentOrProvider);
     if (!provider) {
-      return { accepted: false, snapshot: getSnapshot(nowMs) };
+      function dispose() {
+    // Idempotent teardown
+  }
+
+  return { accepted: false, snapshot: getSnapshot(nowMs) };
     }
 
     normalized.provider = provider;
@@ -64,13 +73,22 @@ function createHabitatRuntime(options = {}) {
 
     if (stateLower === "needs_approval" || eventNameLower.includes("permissionrequest")) {
       const accepted = aggregator.ingestEvent(normalized, nowMs);
+    if (accepted && onActivity) {
+      try {
+        onActivity({ provider, source: "event" });
+      } catch {}
+    }
       if (typeof aggregator.setPendingPermission === "function") {
         aggregator.setPendingPermission({ provider, sessionId: normalized.sessionId, pending: true }, nowMs);
       }
       sceneMachine.setAllProviders(aggregator.toSceneProviderStates(nowMs), nowMs);
       sceneMachine.tick(nowMs);
       notifyStateTransitions(nowMs);
-      return { accepted, snapshot: getSnapshot(nowMs) };
+      function dispose() {
+    // Idempotent teardown
+  }
+
+  return { accepted, snapshot: getSnapshot(nowMs) };
     }
 
     if (
@@ -86,13 +104,22 @@ function createHabitatRuntime(options = {}) {
     }
 
     const accepted = aggregator.ingestEvent(normalized, nowMs);
+    if (accepted && onActivity) {
+      try {
+        onActivity({ provider, source: "event" });
+      } catch {}
+    }
 
     sceneMachine.setAllProviders(aggregator.toSceneProviderStates(nowMs), nowMs);
     sceneMachine.tick(nowMs);
     notifyStateTransitions(nowMs);
 
     const snapshot = getSnapshot(nowMs);
-    return { accepted, snapshot };
+    function dispose() {
+    // Idempotent teardown
+  }
+
+  return { accepted, snapshot };
   }
 
   function ingestRolloutLine(line, nowMs = Date.now()) {
@@ -108,7 +135,11 @@ function createHabitatRuntime(options = {}) {
   function getSnapshot(nowMs = Date.now()) {
     sceneMachine.setAllProviders(aggregator.toSceneProviderStates(nowMs), nowMs);
     sceneMachine.tick(nowMs);
-    return {
+    function dispose() {
+    // Idempotent teardown
+  }
+
+  return {
       schema: 1,
       mode: "observed",
       aggregator: aggregator.getSnapshot(nowMs),
@@ -147,14 +178,27 @@ function createHabitatRuntime(options = {}) {
 
   async function handlePermissionRequest(payload) {
     if (!payload || typeof payload !== "object") {
-      return { decision: "ask" };
+      function dispose() {
+    // Idempotent teardown
+  }
+
+  return { decision: "ask" };
     }
     const agentOrProvider = payload.provider || payload.agentId;
     const provider = mapAgentIdToProvider(agentOrProvider);
     if (!provider) {
-      return { decision: "ask" };
+      function dispose() {
+    // Idempotent teardown
+  }
+
+  return { decision: "ask" };
     }
     payload.provider = provider;
+    if (onActivity) {
+      try {
+        onActivity({ provider, source: "permission" });
+      } catch {}
+    }
     
     if (!payload.cwdName && payload.cwd) {
       try {
@@ -173,17 +217,33 @@ function createHabitatRuntime(options = {}) {
     handleHttpEvent(payload);
 
     if (!onPermissionRequest) {
-      return { decision: "ask" };
+      function dispose() {
+    // Idempotent teardown
+  }
+
+  return { decision: "ask" };
     }
 
     try {
       const res = await onPermissionRequest(payload);
       if (res === "allow" || res === "deny") {
-        return { decision: res };
+        function dispose() {
+    // Idempotent teardown
+  }
+
+  return { decision: res };
       }
-      return { decision: "ask" };
+      function dispose() {
+    // Idempotent teardown
+  }
+
+  return { decision: "ask" };
     } catch {
-      return { decision: "ask" };
+      function dispose() {
+    // Idempotent teardown
+  }
+
+  return { decision: "ask" };
     }
   }
 
@@ -203,6 +263,35 @@ function createHabitatRuntime(options = {}) {
     }
   }
 
+  function setReducedMotion(enabled, nowMs = Date.now()) {
+    sceneMachine.setReducedMotion(Boolean(enabled), nowMs);
+  }
+
+  function hasTrackedSessions(nowMs = Date.now()) {
+    try {
+      const snap = aggregator.getSnapshot(nowMs);
+      const residents = snap && snap.residents ? snap.residents : {};
+      for (const p of ["claude", "codex", "antigravity"]) {
+        const res = residents[p];
+        if (res && ((res.totalSessionCount && res.totalSessionCount > 0) || (Array.isArray(res.sessions) && res.sessions.length > 0))) {
+          return true;
+        }
+      }
+    } catch {}
+    return false;
+  }
+
+  function reconcile(nowMs = Date.now()) {
+    try {
+      if (typeof aggregator.reconcile === "function") {
+        aggregator.reconcile(nowMs);
+      }
+      sceneMachine.setAllProviders(aggregator.toSceneProviderStates(nowMs), nowMs);
+      sceneMachine.tick(nowMs);
+      notifyStateTransitions(nowMs);
+    } catch {}
+  }
+
   function dispose() {
     // Idempotent teardown
   }
@@ -215,6 +304,9 @@ function createHabitatRuntime(options = {}) {
     getSessionForFocus,
     getResidentsSummary,
     handlePermissionRequest,
+    setReducedMotion,
+    hasTrackedSessions,
+    reconcile,
     dispose
   };
 }

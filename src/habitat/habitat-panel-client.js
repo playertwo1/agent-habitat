@@ -117,6 +117,7 @@
     if (e.key === "Escape") {
       if (!modalOverlay.hidden) {
         modalOverlay.hidden = true;
+        if (btnRequestSync) btnRequestSync.focus();
         return;
       }
       bridge.close();
@@ -150,7 +151,11 @@
     });
 
     // Prefs
-    const prefs = state.prefs || {};
+    // Set reduced motion preference
+  const prefs = state.prefs || {};
+  if (bodyEl) {
+    bodyEl.setAttribute("data-reduced-motion", String(Boolean(prefs.reducedMotion)));
+  }
     if (prefAlwaysOnTop) prefAlwaysOnTop.checked = Boolean(prefs.alwaysOnTop);
     if (prefFullscreenAutoHide) prefFullscreenAutoHide.checked = Boolean(prefs.fullscreenAutoHide);
     if (prefReducedMotion) prefReducedMotion.checked = Boolean(prefs.reducedMotion);
@@ -299,12 +304,15 @@
   if (btnRequestSync) {
     btnRequestSync.addEventListener("click", () => {
       modalOverlay.hidden = false;
+      const yesBtn = document.getElementById("modal-confirm-yes") || modalYes;
+      if (yesBtn) yesBtn.focus();
     });
   }
 
   if (modalCancel) {
     modalCancel.addEventListener("click", () => {
       modalOverlay.hidden = true;
+      if (btnRequestSync) btnRequestSync.focus();
     });
   }
 

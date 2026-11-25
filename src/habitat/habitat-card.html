@@ -4,6 +4,16 @@
   <meta charset="UTF-8">
   <title>Agent Habitat — Card</title>
   <style>
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+    :focus-visible, button:focus-visible {
+      outline: 2px solid #FFC45C;
+      outline-offset: 2px;
+    }
     body {
       margin: 0;
       padding: 12px;
@@ -140,10 +150,16 @@
       focusBtn.onclick = () => window.habitatCard.focus(provider);
     }
 
-    const dismissBtn = document.getElementById("btn-dismiss") || document.getElementById("btn-deny");
-    if (dismissBtn && type !== "permission") {
+    const dismissBtn = document.getElementById("btn-dismiss");
+    if (dismissBtn) {
       dismissBtn.onclick = () => window.habitatCard.dismiss(id);
     }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        window.habitatCard.dismiss(id);
+      }
+    });
   </script>
 </body>
 </html>

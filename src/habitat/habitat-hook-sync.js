@@ -92,10 +92,16 @@ function planHabitatHookSync(options = {}) {
   function planForFile(filePath, events, providerName) {
     let existingData = {};
     let fileExists = false;
+    let invalidJson = false;
     try {
       if (fs.existsSync(filePath)) {
         fileExists = true;
-        existingData = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+        const content = fs.readFileSync(filePath, "utf-8");
+        try {
+          existingData = JSON.parse(content);
+        } catch {
+          invalidJson = true;
+        }
       }
     } catch {}
 
@@ -103,50 +109,57 @@ function planHabitatHookSync(options = {}) {
     let hasMarkerAnywhere = false;
     let foreignHooksPreserved = 0;
 
-    if (providerName === "antigravity") {
-      const agyObj = existingData[ANTIGRAVITY_GROUP_ID] && typeof existingData[ANTIGRAVITY_GROUP_ID] === "object" ? existingData[ANTIGRAVITY_GROUP_ID] : {};
-      if (hasAgentHabitatMarker(agyObj)) {
-        hasMarkerAnywhere = true;
-      }
-      for (const ev of events) {
-        if (!agyObj[ev] || !hasAgentHabitatMarker(agyObj[ev])) {
-          missingEvents.push(ev);
-        }
-      }
-      for (const [k, v] of Object.entries(existingData)) {
-        if (k !== ANTIGRAVITY_GROUP_ID) {
-          foreignHooksPreserved++;
-        }
-      }
-      if (existingData[ANTIGRAVITY_GROUP_ID]) {
-        for (const [k, v] of Object.entries(existingData[ANTIGRAVITY_GROUP_ID])) {
-          if (!hasAgentHabitatMarker(v)) foreignHooksPreserved++;
-        }
-      }
-    } else {
-      const hooksObj = existingData.hooks && typeof existingData.hooks === "object" ? existingData.hooks : {};
-      for (const ev of events) {
-        const currentEntry = hooksObj[ev];
-        if (hasAgentHabitatMarker(currentEntry)) {
+    if (!invalidJson) {
+      if (providerName === "antigravity") {
+        const agyObj = existingData[ANTIGRAVITY_GROUP_ID] && typeof existingData[ANTIGRAVITY_GROUP_ID] === "object" ? existingData[ANTIGRAVITY_GROUP_ID] : {};
+        if (hasAgentHabitatMarker(agyObj)) {
           hasMarkerAnywhere = true;
-        } else {
-          missingEvents.push(ev);
         }
-        if (currentEntry) {
-          if (Array.isArray(currentEntry)) {
-            if (currentEntry.some((item) => !hasAgentHabitatMarker(item))) foreignHooksPreserved++;
-          } else if (typeof currentEntry === "object") {
-            if (!hasAgentHabitatMarker(currentEntry)) foreignHooksPreserved++;
-          } else if (typeof currentEntry === "string" && !currentEntry.includes(AGENT_HABITAT_HOOK_MARKER)) {
+        for (const ev of events) {
+          if (!agyObj[ev] || !hasAgentHabitatMarker(agyObj[ev])) {
+            missingEvents.push(ev);
+          }
+        }
+        for (const [k, v] of Object.entries(existingData)) {
+          if (k !== ANTIGRAVITY_GROUP_ID) {
             foreignHooksPreserved++;
           }
         }
+        if (existingData[ANTIGRAVITY_GROUP_ID]) {
+          for (const [k, v] of Object.entries(existingData[ANTIGRAVITY_GROUP_ID])) {
+            if (!hasAgentHabitatMarker(v)) foreignHooksPreserved++;
+          }
+        }
+      } else {
+        const hooksObj = existingData.hooks && typeof existingData.hooks === "object" ? existingData.hooks : {};
+        for (const ev of events) {
+          const currentEntry = hooksObj[ev];
+          if (hasAgentHabitatMarker(currentEntry)) {
+            hasMarkerAnywhere = true;
+          } else {
+            missingEvents.push(ev);
+          }
+          if (currentEntry) {
+            if (Array.isArray(currentEntry)) {
+              if (currentEntry.some((item) => !hasAgentHabitatMarker(item))) foreignHooksPreserved++;
+            } else if (typeof currentEntry === "object") {
+              if (!hasAgentHabitatMarker(currentEntry)) foreignHooksPreserved++;
+            } else if (typeof currentEntry === "string" && !currentEntry.includes(AGENT_HABITAT_HOOK_MARKER)) {
+              foreignHooksPreserved++;
+            }
+          }
+        }
+      }
+    } else {
+      for (const ev of events) {
+        missingEvents.push(ev);
       }
     }
 
     return {
       path: filePath,
       exists: fileExists,
+      invalidJson,
       missingEvents,
       hasMarker: hasMarkerAnywhere,
       foreignHooksPreserved,
@@ -158,9 +171,9 @@ function planHabitatHookSync(options = {}) {
   const antigravityPlan = planForFile(antigravityPath, ANTIGRAVITY_EVENTS, "antigravity");
 
   const totalAdditions =
-    (claudePlan.missingEvents.length > 0 && !claudePlan.hasMarker ? claudePlan.missingEvents.length : 0) +
-    (codexPlan.missingEvents.length > 0 && !codexPlan.hasMarker ? codexPlan.missingEvents.length : 0) +
-    (antigravityPlan.missingEvents.length > 0 && !antigravityPlan.hasMarker ? antigravityPlan.missingEvents.length : 0);
+    (claudePlan.invalidJson ? claudePlan.missingEvents.length : (claudePlan.missingEvents.length > 0 ? claudePlan.missingEvents.length : 0)) +
+    (codexPlan.invalidJson ? codexPlan.missingEvents.length : (codexPlan.missingEvents.length > 0 ? codexPlan.missingEvents.length : 0)) +
+    (antigravityPlan.invalidJson ? antigravityPlan.missingEvents.length : (antigravityPlan.missingEvents.length > 0 ? antigravityPlan.missingEvents.length : 0));
 
   return {
     targets: {
@@ -185,9 +198,14 @@ function mutateHooksData(existingData, events, provider, options) {
       const command = buildHabitatHookCommand({ nodeBin, hookScriptPath, provider, eventName: ev });
       const hookEntry = { type: "command", command, timeout: 10 };
       if (ev === "PostToolUse") {
-        group[ev] = [{ matcher: "*", hooks: [hookEntry] }];
+        // preserve foreign hooks inside PostToolUse array if any
+        const currentList = Array.isArray(group[ev]) ? group[ev].filter(item => !hasAgentHabitatMarker(item)) : [];
+        currentList.push({ matcher: "*", hooks: [hookEntry] });
+        group[ev] = currentList;
       } else {
-        group[ev] = [hookEntry];
+        const currentList = Array.isArray(group[ev]) ? group[ev].filter(item => !hasAgentHabitatMarker(item)) : (group[ev] && !hasAgentHabitatMarker(group[ev]) ? [group[ev]] : []);
+        currentList.push(hookEntry);
+        group[ev] = currentList;
       }
     }
     return existingData;
@@ -217,7 +235,6 @@ function mutateHooksData(existingData, events, provider, options) {
       filtered.push(ourGroup);
       existingData.hooks[ev] = filtered;
     } else {
-      // If current is object or string, convert/preserve
       const filtered = !hasAgentHabitatMarker(current) ? [current] : [];
       filtered.push(ourGroup);
       existingData.hooks[ev] = filtered;
@@ -229,7 +246,7 @@ function mutateHooksData(existingData, events, provider, options) {
 
 function installHabitatHooks(options = {}) {
   if (options.confirm !== true) {
-    return { ok: false, reason: "confirmation-required" };
+    return { ok: false, reason: "confirmation-required", installedCount: 0, skippedInvalid: 0, backupsCreated: 0, errors: [] };
   }
 
   const nodeBin = options.nodeBin || "node";
@@ -242,6 +259,9 @@ function installHabitatHooks(options = {}) {
   ];
 
   let installedCount = 0;
+  let skippedInvalid = 0;
+  let backupsCreated = 0;
+  const errors = [];
 
   for (const target of paths) {
     const dir = path.dirname(target.filePath);
@@ -252,23 +272,45 @@ function installHabitatHooks(options = {}) {
     }
 
     let existingData = {};
+    let rawContent = "";
     if (fileExists) {
       try {
-        existingData = JSON.parse(fs.readFileSync(target.filePath, "utf-8"));
+        rawContent = fs.readFileSync(target.filePath, "utf-8");
+        existingData = JSON.parse(rawContent);
+      } catch (err) {
+        skippedInvalid++;
+        errors.push({ provider: target.provider, error: "invalid-json", message: err.message });
+        continue;
+      }
+    }
+
+    const mutated = mutateHooksData(JSON.parse(JSON.stringify(existingData)), target.events, target.provider, { nodeBin, hookScriptPath });
+    const currentSerialized = JSON.stringify(existingData, null, 2);
+    const newSerialized = JSON.stringify(mutated, null, 2);
+
+    if (fileExists && currentSerialized === newSerialized) {
+      // Idempotent: no real change, do not rewrite or create .bak
+      continue;
+    }
+
+    if (fileExists) {
+      try {
         const now = new Date();
         const stamp = now.toISOString().replace(/[-:TZ.]/g, "").slice(0, 17);
         const backupPath = `${target.filePath}.agent-habitat-${stamp}.bak`;
-        fs.writeFileSync(backupPath, fs.readFileSync(target.filePath));
+        fs.writeFileSync(backupPath, rawContent);
+        backupsCreated++;
       } catch {}
     }
 
-    const mutated = mutateHooksData(existingData, target.events, target.provider, { nodeBin, hookScriptPath });
     writeJsonAtomic(target.filePath, mutated);
     installedCount++;
   }
 
-  return { ok: true, installedCount };
+  return { ok: errors.length === 0, installedCount, skippedInvalid, backupsCreated, errors };
 }
+
+const repairHabitatHooks = installHabitatHooks;
 
 function uninstallHabitatHooks(options = {}) {
   const paths = [
@@ -278,63 +320,95 @@ function uninstallHabitatHooks(options = {}) {
   ];
 
   let uninstalledCount = 0;
+  let skippedInvalid = 0;
+  let backupsCreated = 0;
+  const errors = [];
 
   for (const target of paths) {
     if (!fs.existsSync(target.filePath)) continue;
 
+    let content = "";
+    let data = {};
     try {
-      const content = fs.readFileSync(target.filePath, "utf-8");
-      const data = JSON.parse(content);
-      let changed = false;
-      const now = new Date();
-      const stamp = now.toISOString().replace(/[-:TZ.]/g, "").slice(0, 17);
-      let backedUp = false;
+      content = fs.readFileSync(target.filePath, "utf-8");
+      data = JSON.parse(content);
+    } catch (err) {
+      skippedInvalid++;
+      errors.push({ provider: target.provider, error: "invalid-json", message: err.message });
+      continue;
+    }
 
-      if (target.provider === "antigravity") {
-        if (data[ANTIGRAVITY_GROUP_ID]) {
-          if (!backedUp) {
-            fs.writeFileSync(`${target.filePath}.agent-habitat-${stamp}.bak`, content);
-            backedUp = true;
-          }
-          delete data[ANTIGRAVITY_GROUP_ID];
-          changed = true;
-        }
-      } else {
-        if (data.hooks && typeof data.hooks === "object") {
-          for (const ev of Object.keys(data.hooks)) {
-            const current = data.hooks[ev];
-            if (hasAgentHabitatMarker(current)) {
-              if (!backedUp) {
-                fs.writeFileSync(`${target.filePath}.agent-habitat-${stamp}.bak`, content);
-                backedUp = true;
+    let changed = false;
+    let backedUp = false;
+    const now = new Date();
+    const stamp = now.toISOString().replace(/[-:TZ.]/g, "").slice(0, 17);
+
+    function createBackupOnce() {
+      if (!backedUp) {
+        try {
+          fs.writeFileSync(`${target.filePath}.agent-habitat-${stamp}.bak`, content);
+          backupsCreated++;
+          backedUp = true;
+        } catch {}
+      }
+    }
+
+    if (target.provider === "antigravity") {
+      if (data[ANTIGRAVITY_GROUP_ID] && typeof data[ANTIGRAVITY_GROUP_ID] === "object") {
+        const agyObj = data[ANTIGRAVITY_GROUP_ID];
+        for (const ev of Object.keys(agyObj)) {
+          const entry = agyObj[ev];
+          if (hasAgentHabitatMarker(entry)) {
+            createBackupOnce();
+            if (Array.isArray(entry)) {
+              const filtered = entry.filter(item => !hasAgentHabitatMarker(item));
+              if (filtered.length > 0) {
+                agyObj[ev] = filtered;
+              } else {
+                delete agyObj[ev];
               }
-              if (Array.isArray(current)) {
-                const filtered = current.filter((item) => !hasAgentHabitatMarker(item));
-                if (filtered.length > 0) {
-                  data.hooks[ev] = filtered;
-                } else {
-                  delete data.hooks[ev];
-                }
+            } else {
+              delete agyObj[ev];
+            }
+            changed = true;
+          }
+        }
+        if (Object.keys(agyObj).length === 0) {
+          delete data[ANTIGRAVITY_GROUP_ID];
+        }
+      }
+    } else {
+      if (data.hooks && typeof data.hooks === "object") {
+        for (const ev of Object.keys(data.hooks)) {
+          const current = data.hooks[ev];
+          if (hasAgentHabitatMarker(current)) {
+            createBackupOnce();
+            if (Array.isArray(current)) {
+              const filtered = current.filter((item) => !hasAgentHabitatMarker(item));
+              if (filtered.length > 0) {
+                data.hooks[ev] = filtered;
               } else {
                 delete data.hooks[ev];
               }
-              changed = true;
+            } else {
+              delete data.hooks[ev];
             }
-          }
-          if (Object.keys(data.hooks).length === 0) {
-            delete data.hooks;
+            changed = true;
           }
         }
+        if (Object.keys(data.hooks).length === 0) {
+          delete data.hooks;
+        }
       }
+    }
 
-      if (changed) {
-        writeJsonAtomic(target.filePath, data);
-        uninstalledCount++;
-      }
-    } catch {}
+    if (changed) {
+      writeJsonAtomic(target.filePath, data);
+      uninstalledCount++;
+    }
   }
 
-  return { ok: true, uninstalledCount };
+  return { ok: errors.length === 0, uninstalledCount, skippedInvalid, backupsCreated, errors };
 }
 
 module.exports = {
@@ -350,5 +424,6 @@ module.exports = {
   hasAgentHabitatMarker,
   planHabitatHookSync,
   installHabitatHooks,
+  repairHabitatHooks,
   uninstallHabitatHooks,
 };
