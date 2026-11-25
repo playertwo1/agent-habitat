@@ -1350,6 +1350,53 @@ function routeHttpRequest(req, res, remoteProfile = null) {
           res.end(JSON.stringify({ ok: false, error: "stream_error" }));
         }
       });
+    } else if (req.method === "POST" && req.url === "/habitat/permission") {
+      if (!remoteProfile && rejectUnsafeLocalHookRequest(req, res, "/habitat/permission")) return;
+      if (!ctx.habitatRuntime || typeof ctx.habitatRuntime.handlePermissionRequest !== "function") {
+        res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+        res.end(JSON.stringify({ ok: false, decision: "ask" }));
+        req.resume();
+        return;
+      }
+      const MAX_HABITAT_PERM_BYTES = 16 * 1024;
+      const chunks = [];
+      let size = 0;
+      req.on("data", chunk => {
+        size += chunk.length;
+        if (size > MAX_HABITAT_PERM_BYTES) {
+          chunks.length = 0;
+          res.writeHead(413, { "Content-Type": "application/json; charset=utf-8" });
+          res.end(JSON.stringify({ ok: false, decision: "ask" }));
+          req.destroy();
+        } else {
+          chunks.push(chunk);
+        }
+      });
+      req.on("end", async () => {
+        if (res.destroyed || res.writableEnded) return;
+        let parsed;
+        try {
+          parsed = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+        } catch {
+          res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+          res.end(JSON.stringify({ ok: false, decision: "ask" }));
+          return;
+        }
+        let decisionResult = { decision: "ask" };
+        try {
+          decisionResult = await ctx.habitatRuntime.handlePermissionRequest(parsed);
+        } catch {
+          decisionResult = { decision: "ask" };
+        }
+        res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+        res.end(JSON.stringify({ ok: true, decision: decisionResult && decisionResult.decision ? decisionResult.decision : "ask" }));
+      });
+      req.on("error", () => {
+        if (!res.destroyed && !res.writableEnded) {
+          res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+          res.end(JSON.stringify({ ok: false, decision: "ask" }));
+        }
+      });
     } else if (req.method === "GET" && req.url === "/state") {
       sendStateHealthResponse(res, { getHookServerPort });
     } else if (req.method === "POST" && req.url === "/state") {

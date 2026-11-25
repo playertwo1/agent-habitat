@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Agent Habitat — Stage</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' file:; img-src 'self' file: data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self';">
+  <style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: transparent;
+      image-rendering: pixelated;
+    }
+    #stage-root {
+      position: absolute;
+      left: 0;
+      top: 0;
+      image-rendering: pixelated;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="stage-root"></div>
+  <script src="habitat-renderer.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const container = document.getElementById('stage-root');
+      let renderer = null;
+
+      window.habitatStage.onRenderData((payload) => {
+        if (!payload || !payload.manifest) return;
+        const { manifest, manifestDirUrl, atomMetaMap, scale, reducedMotion, snapshot } = payload;
+
+        if (!renderer) {
+          renderer = window.createHabitatRenderer({
+            container,
+            manifest,
+            manifestDirUrl,
+            atomMetaMap: atomMetaMap || {},
+            scale: scale || 2,
+            reducedMotion: !!reducedMotion,
+            disableTransitions: false
+          });
+        } else {
+          if (scale !== undefined) {
+            renderer.setScale(scale);
+          }
+        }
+
+        if (snapshot) {
+          renderer.render(snapshot);
+        }
+      });
+
+      window.habitatStage.notifyReady();
+    });
+  </script>
+</body>
+</html>

@@ -13,6 +13,11 @@ const { maybeRunPackageKoffiSmoke } = require("./package-koffi-smoke");
 if (maybeRunPackageKoffiSmoke({ app, BrowserWindow })) {
   return;
 }
+
+if (process.env.CLAWD_LEGACY_SINGLE_PET !== "1") {
+  require("./habitat/habitat-app-main").runHabitatAppMode(require("electron"));
+  return;
+}
 // ── Linux/Wayland: relaunch under XWayland so the pet is draggable (issue #441) ──
 // Native Wayland ignores client-side window positioning and blocks global cursor
 // queries, so the pet spawns centered, can't be dragged, and has no tracking;

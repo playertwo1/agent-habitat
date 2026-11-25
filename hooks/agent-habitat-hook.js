@@ -64,7 +64,6 @@ function readStdinWithTimeout(timeoutMs = 1500) {
       }
     });
 
-    // If stdin is already ended or closed (e.g. TTY without input)
     if (process.stdin.destroyed) {
       if (!resolved) {
         resolved = true;
@@ -121,26 +120,88 @@ function postEventToHabitat(port, payload, timeoutMs = 150) {
   });
 }
 
+function requestPermissionFromHabitat(port, payload, timeoutMs = 45000) {
+  return new Promise((resolve) => {
+    const data = JSON.stringify(payload);
+    let resolved = false;
+
+    const req = http.request(
+      {
+        hostname: "127.0.0.1",
+        port,
+        path: "/habitat/permission",
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Content-Length": Buffer.byteLength(data),
+        },
+      },
+      (res) => {
+        let raw = "";
+        res.on("data", (chunk) => (raw += chunk));
+        res.on("end", () => {
+          if (resolved) return;
+          resolved = true;
+          try {
+            const json = JSON.parse(raw);
+            if (json && (json.decision === "allow" || json.decision === "deny")) {
+              resolve(json.decision);
+            } else {
+              resolve("ask");
+            }
+          } catch {
+            resolve("ask");
+          }
+        });
+      }
+    );
+
+    req.on("error", () => {
+      if (!resolved) {
+        resolved = true;
+        resolve("ask");
+      }
+    });
+
+    req.setTimeout(timeoutMs, () => {
+      if (!resolved) {
+        resolved = true;
+        req.destroy();
+        resolve("ask");
+      }
+    });
+
+    req.write(data);
+    req.end();
+  });
+}
+
 async function main() {
   const args = process.argv.slice(2);
-  const provider = (args[0] || "").toLowerCase();
-  const eventName = args[1] || "UnknownEvent";
+  const blockingPermission = args.includes("--blocking-permission");
+  const filteredArgs = args.filter((a) => a !== "--blocking-permission");
+
+  const provider = (filteredArgs[0] || "").toLowerCase();
+  const eventName = filteredArgs[1] || "UnknownEvent";
 
   const stdinData = await readStdinWithTimeout(1500);
 
   const sessionId =
-    stdinData.session_id ||
     stdinData.sessionId ||
+    stdinData.session_id ||
     stdinData.conversation_id ||
     stdinData.conversationId ||
     stdinData.thread_id ||
     stdinData.threadId ||
+    stdinData.session?.id ||
     `${provider || "generic"}:default`;
 
   let cwdName = "";
   if (stdinData.cwd && typeof stdinData.cwd === "string") {
     cwdName = path.basename(stdinData.cwd);
   }
+
+  const ppid = Number.isInteger(process.ppid) && process.ppid > 0 ? process.ppid : null;
 
   const payload = {
     schema: 1,
@@ -149,21 +210,31 @@ async function main() {
     event: eventName,
     sessionId,
     pid: process.pid,
+    ...(ppid !== null ? { ppid } : {}),
     cwdName,
     entrypoint: stdinData.entrypoint || process.env.CLAUDE_CODE_ENTRYPOINT || "",
     originator: stdinData.originator || process.env.AGENT_HABITAT_ORIGINATOR || "",
     timestampMs: Date.now(),
+    ...(blockingPermission ? { toolCall: { toolName: typeof (stdinData.tool_name || stdinData.toolName) === "string" ? String(stdinData.tool_name || stdinData.toolName).slice(0, 80) : "" } } : {}),
   };
 
   const port = resolveHabitatPort();
-  await postEventToHabitat(port, payload, 150);
+  const permissionTimeoutMs = parseInt(process.env.AGENT_HABITAT_PERMISSION_TIMEOUT_MS, 10) || 45000;
 
-  if (provider === "antigravity") {
-    const out = stdoutForAntigravityEvent(eventName);
-    process.stdout.write(out + "\n");
+  if (blockingPermission) {
+    const decision = await requestPermissionFromHabitat(port, payload, permissionTimeoutMs);
+    console.log(JSON.stringify({ decision }));
+    process.exit(0);
+  } else {
+    await postEventToHabitat(port, payload, 150);
+
+    if (provider === "antigravity") {
+      const out = stdoutForAntigravityEvent(eventName);
+      process.stdout.write(out + "\n");
+    }
+
+    process.exit(0);
   }
-
-  process.exit(0);
 }
 
 if (require.main === module) {
@@ -175,4 +246,5 @@ module.exports = {
   resolveHabitatPort,
   readStdinWithTimeout,
   postEventToHabitat,
+  requestPermissionFromHabitat,
 };

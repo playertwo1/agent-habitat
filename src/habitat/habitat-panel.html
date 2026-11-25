@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Agent Habitat</title>
+  <link rel="stylesheet" href="habitat-panel.css">
+</head>
+<body data-scale="1">
+  <div id="habitat-root">
+    <header class="habitat-header">
+      <div class="habitat-title-area">
+        <h1>Agent Habitat</h1>
+        <span id="habitat-status-pill" class="pill ocioso">Ocioso</span>
+      </div>
+      <div class="habitat-tabs" role="tablist" aria-label="Abas do Habitat">
+        <button role="tab" id="tab-residents" aria-selected="true" aria-controls="panel-residents" tabindex="0" class="tab-btn active">Moradores</button>
+        <button role="tab" id="tab-settings" aria-selected="false" aria-controls="panel-settings" tabindex="-1" class="tab-btn">Ajustes</button>
+      </div>
+    </header>
+
+    <main class="habitat-main">
+      <!-- Aba Moradores -->
+      <section id="panel-residents" role="tabpanel" aria-labelledby="tab-residents" class="tab-panel active">
+        <div class="demo-banner">
+          <div class="demo-info">
+            <h2>Modo Demonstração</h2>
+            <p>Simule os estados operacionais dos 3 moradores do habitat.</p>
+          </div>
+          <div class="demo-buttons">
+            <button class="demo-btn" data-preset="000">000: Todos Ociosos</button>
+            <button class="demo-btn" data-preset="100">100: Claude</button>
+            <button class="demo-btn" data-preset="010">010: Codex</button>
+            <button class="demo-btn" data-preset="001">001: Antigravity</button>
+            <button class="demo-btn" data-preset="111">111: Todos</button>
+            <button class="demo-btn secondary" id="btn-stop-demo">Voltar ao modo real</button>
+          </div>
+        </div>
+
+        <div class="residents-grid" id="residents-grid">
+          <!-- Inserido dinamicamente via client.js -->
+        </div>
+      </section>
+
+      <!-- Aba Ajustes -->
+      <section id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" class="tab-panel" hidden>
+        <div class="settings-card">
+          <h3>Escala da Interface</h3>
+          <div class="scale-options">
+            <label><input type="radio" name="ui-scale" value="1" checked> Padrão (1x)</label>
+            <label><input type="radio" name="ui-scale" value="1.5"> Ampliado (1.5x)</label>
+            <label><input type="radio" name="ui-scale" value="2"> Grande (2x)</label>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3>Preferências do Painel</h3>
+          <div class="toggles-list">
+            <label class="toggle-row"><input type="checkbox" id="pref-alwaysOnTop"> Manter sempre no topo</label>
+            <label class="toggle-row"><input type="checkbox" id="pref-fullscreenAutoHide"> Ocultar automaticamente em tela cheia</label>
+            <label class="toggle-row"><input type="checkbox" id="pref-reducedMotion"> Reduzir animações e movimento</label>
+            <label class="toggle-row"><input type="checkbox" id="pref-clickThrough"> Permitir clique através da cabana</label>
+            <label class="toggle-row"><input type="checkbox" id="pref-cardsEnabled" checked> Exibir mini-cards de atividade detalhada</label>
+            <label class="toggle-row"><input type="checkbox" id="pref-openAtLogin"> Iniciar com o Windows</label>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <div class="section-header-inline">
+            <h3>Diagnóstico das 6 Superfícies Windows</h3>
+            <button class="action-btn" id="btn-refresh-diag">Verificar superfícies</button>
+          </div>
+          <div class="diagnostics-grid" id="diagnostics-grid">
+            <!-- Preenchido via client.js -->
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3>Integração opcional por conectores</h3>
+          <p class="warning-text">Aviso: Esta operação grava ganchos de integração locais e cria um backup <code>.agent-habitat-*.bak</code> antes de alterar qualquer configuração. Requer confirmação explícita.</p>
+          <div class="hooks-actions">
+            <button class="action-btn primary" id="btn-request-sync">Sincronizar Conectores (Requer Confirmação)</button>
+            <button class="action-btn danger" id="btn-uninstall-hooks">Remover Conectores e Restaurar Backup</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal de Confirmação de Conectores -->
+  <div id="hook-confirm-modal" class="modal-overlay" hidden>
+    <div class="modal-dialog">
+      <h3>Confirmar Sincronização de Conectores</h3>
+      <p>Deseja realmente aplicar os ganchos de integração local e criar arquivos de backup?</p>
+      <div class="modal-actions">
+        <button class="action-btn primary" id="modal-confirm-yes">Sim, sincronizar conectores</button>
+        <button class="action-btn secondary" id="modal-confirm-cancel">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="habitat-panel-client.js"></script>
+</body>
+</html>

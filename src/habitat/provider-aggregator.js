@@ -106,6 +106,8 @@ function createHabitatProviderAggregator({
 
     let session = existingSession;
     if (!session) {
+      const ppidVal = Number.isInteger(rawEvent.ppid) && rawEvent.ppid > 0 ? rawEvent.ppid : null;
+      const cwdInput = typeof rawEvent.cwdName === "string" ? rawEvent.cwdName.trim() : (rawEvent.cwd && typeof rawEvent.cwd === "string" ? path.basename(rawEvent.cwd) : "");
       session = {
         sessionId,
         state: "idle",
@@ -118,9 +120,24 @@ function createHabitatProviderAggregator({
         lastEventName: eventName,
         lastRawState: rawState,
         pid: Number.isFinite(rawEvent.pid) ? rawEvent.pid : null,
+        ppid: ppidVal,
+        cwdName: cwdInput,
+        surface: rawEvent.entrypoint || rawEvent.originator || rawEvent.surface || provider,
         stateBeforePermission: "busy"
       };
       providerSessions.set(sessionId, session);
+    } else {
+      if (Number.isInteger(rawEvent.ppid) && rawEvent.ppid > 0) {
+        session.ppid = rawEvent.ppid;
+      }
+      if (typeof rawEvent.cwdName === "string" && rawEvent.cwdName.trim()) {
+        session.cwdName = rawEvent.cwdName.trim();
+      } else if (rawEvent.cwd && typeof rawEvent.cwd === "string") {
+        session.cwdName = path.basename(rawEvent.cwd);
+      }
+      if (rawEvent.entrypoint || rawEvent.originator || rawEvent.surface) {
+        session.surface = rawEvent.entrypoint || rawEvent.originator || rawEvent.surface;
+      }
     }
 
     let nextState = session.state;

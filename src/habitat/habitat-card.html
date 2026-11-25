@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Agent Habitat — Card</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 12px;
+      background-color: #24232A;
+      color: #F6EADB;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      user-select: none;
+    }
+    .card-container {
+      background-color: #2E2C36;
+      border: 1px solid #3E3B49;
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .title {
+      font-weight: 600;
+      color: #FFC45C;
+      font-size: 14px;
+    }
+    .provider {
+      font-size: 11px;
+      background: #3E3B49;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #F6EADB;
+    }
+    .content {
+      margin-bottom: 12px;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+    .meta {
+      font-size: 11px;
+      color: #A09FA6;
+      margin-bottom: 12px;
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    button {
+      background: #3E3B49;
+      color: #F6EADB;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 12px;
+      transition: background 0.15s;
+    }
+    button:hover {
+      background: #4E4B5B;
+    }
+    button.primary {
+      background: #FFC45C;
+      color: #24232A;
+      font-weight: 600;
+    }
+    button.primary:hover {
+      background: #FFD47C;
+    }
+    button.danger {
+      background: #D9534F;
+      color: #FFF;
+    }
+    button.danger:hover {
+      background: #C9302C;
+    }
+  </style>
+</head>
+<body>
+  <div class="card-container">
+    <div class="header">
+      <span class="title" id="card-title">Solicitação de Ação</span>
+      <span class="provider" id="card-provider">provedor</span>
+    </div>
+    <div class="meta" id="card-meta">Projeto: --</div>
+    <div class="content" id="card-content">Carregando detalhes da atividade...</div>
+    <div class="actions" id="card-actions">
+      <!-- Inserido dinamicamente -->
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id") || "";
+    const provider = params.get("provider") || "geral";
+    const cwdName = params.get("cwdName") || "Geral";
+    const summary = params.get("summary") || "Ação pendente";
+    const type = params.get("type") || "permission";
+
+    document.getElementById("card-provider").textContent = provider;
+    document.getElementById("card-meta").textContent = `Projeto: ${cwdName}`;
+    document.getElementById("card-content").textContent = summary;
+
+    const titleEl = document.getElementById("card-title");
+    const actionsEl = document.getElementById("card-actions");
+
+    if (type === "permission") {
+      titleEl.textContent = "Aprovação de Ferramenta";
+      actionsEl.innerHTML = `
+        <button class="primary" id="btn-allow">Permitir</button>
+        <button class="danger" id="btn-deny">Negar</button>
+        <button id="btn-focus">Focar janela</button>
+        <button id="btn-dismiss">Fechar</button>
+      `;
+      document.getElementById("btn-allow").onclick = () => window.habitatCard.decide(id, "allow");
+      document.getElementById("btn-deny").onclick = () => window.habitatCard.decide(id, "deny");
+    } else if (type === "question") {
+      titleEl.textContent = "Pergunta do Morador";
+      actionsEl.innerHTML = `
+        <button id="btn-focus">Focar janela</button>
+        <button class="primary" id="btn-dismiss">Fechar</button>
+      `;
+    } else {
+      titleEl.textContent = "Atividade Concluída";
+      actionsEl.innerHTML = `
+        <button class="primary" id="btn-dismiss">Fechar</button>
+      `;
+    }
+
+    const focusBtn = document.getElementById("btn-focus");
+    if (focusBtn) {
+      focusBtn.onclick = () => window.habitatCard.focus(provider);
+    }
+
+    const dismissBtn = document.getElementById("btn-dismiss") || document.getElementById("btn-deny");
+    if (dismissBtn && type !== "permission") {
+      dismissBtn.onclick = () => window.habitatCard.dismiss(id);
+    }
+  </script>
+</body>
+</html>
