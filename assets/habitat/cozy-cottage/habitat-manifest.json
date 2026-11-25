@@ -32,6 +32,7 @@
       "frames": ["smoke-0.png", "smoke-1.png", "smoke-2.png", "smoke-3.png"]
     }
   },
+  "helpers": { "file": "helpers.png", "frame": { "width": 16, "height": 16 }, "frameMs": 400, "max": 3, "offset": { "x": 26, "y": 6 }, "spacing": 18, "rows": { "claude": 0, "codex": 1, "antigravity": 2 } },
   "stations": {
     "claude": {
       "character": "clawd",

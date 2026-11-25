@@ -207,6 +207,17 @@ function validateHabitatManifest({ manifest, manifestDir, repoRoot, checkFiles =
     }
   }
 
+  // P1.3: ajudantes de subagente (opcional); se existir, precisa estar íntegro.
+  const helpers = manifest.helpers;
+  if (helpers !== undefined) {
+    const f = helpers && helpers.frame;
+    const ok = helpers && typeof helpers.file === 'string' && f && f.width > 0 && f.height > 0
+      && helpers.frameMs > 0 && Number.isInteger(helpers.max) && helpers.max > 0 && helpers.rows
+      && expectedProviders.every((p) => Number.isInteger(helpers.rows[p]) && helpers.rows[p] >= 0);
+    if (!ok) errors.push('helpers must have file, frame, frameMs, max and rows for every provider');
+    else if (resolvedManifestDir && resolvedRepoRoot) validateClipPathOrObject(helpers.file);
+  }
+
   if (stations && resolvedManifestDir && resolvedRepoRoot) {
     for (const p of expectedProviders) {
       if (stations[p] && stations[p].props) {

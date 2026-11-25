@@ -108,6 +108,36 @@ function createHabitatRenderer({ container, manifest, manifestDirUrl, atomMetaMa
   styleLayer(fgEl);
   stage.appendChild(fgEl);
 
+  // P1.3: ajudantes de subagente (cogumelinhos), desenhados só com o morador fora da cabana.
+  const helperCfg = manifest.helpers || null;
+  const helperEls = {};
+  if (helperCfg) {
+    const helpersContainer = document.createElement('div');
+    helpersContainer.style.position = 'absolute';
+    helpersContainer.style.left = '0';
+    helpersContainer.style.top = '0';
+    helpersContainer.style.width = `${canvasWidth}px`;
+    helpersContainer.style.height = `${canvasHeight}px`;
+    helpersContainer.style.pointerEvents = 'none';
+    stage.appendChild(helpersContainer);
+    const sheetUrl = new URL(helperCfg.file, manifestDirUrl).href;
+    for (const provider of Object.keys(manifest.stations)) {
+      helperEls[provider] = [];
+      for (let k = 0; k < helperCfg.max; k++) {
+        const el = document.createElement('div');
+        el.style.position = 'absolute';
+        el.style.display = 'none';
+        el.style.width = `${helperCfg.frame.width}px`;
+        el.style.height = `${helperCfg.frame.height}px`;
+        el.style.backgroundImage = `url("${sheetUrl}")`;
+        el.style.imageRendering = 'pixelated';
+        el.dataset.helper = provider;
+        helpersContainer.appendChild(el);
+        helperEls[provider].push(el);
+      }
+    }
+  }
+
   const actorElements = {};
 
   for (const [provider, station] of Object.entries(manifest.stations)) {
@@ -180,6 +210,22 @@ function createHabitatRenderer({ container, manifest, manifestDirUrl, atomMetaMa
       smokeEl.src = smokeFrameUrls[idx];
     } else {
       smokeEl.style.display = 'none';
+    }
+
+    if (helperCfg) {
+      const t = snapshot.nowMs || Date.now();
+      const col = snapshot.reducedMotion ? 0 : Math.floor(t / helperCfg.frameMs) % 2;
+      for (const provider of Object.keys(helperEls)) {
+        const res = snapshot.residents[provider];
+        const n = res && res.presence === 'outside' && snapshot.helpers ? (snapshot.helpers[provider] || 0) : 0;
+        helperEls[provider].forEach((el, k) => {
+          if (k >= n) { el.style.display = 'none'; return; }
+          el.style.display = 'block';
+          el.style.left = `${res.x + helperCfg.offset.x + k * helperCfg.spacing - helperCfg.frame.width / 2}px`;
+          el.style.top = `${res.y + helperCfg.offset.y - helperCfg.frame.height}px`;
+          el.style.backgroundPosition = `-${col * helperCfg.frame.width}px -${helperCfg.rows[provider] * helperCfg.frame.height}px`;
+        });
+      }
     }
 
     const residentsArr = Object.values(snapshot.residents);

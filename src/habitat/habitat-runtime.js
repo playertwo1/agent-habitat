@@ -4,6 +4,7 @@ const path = require("path");
 const fs = require("fs");
 const { createHabitatProviderAggregator } = require("./provider-aggregator");
 const { createHabitatSceneMachine } = require("./scene-machine");
+const { createSubagentTracker } = require("./habitat-subagents");
 const { mapAgentIdToProvider } = require("./mvp-scope");
 const {
   detectWindowsMvpSurfaces,
@@ -17,6 +18,7 @@ function createHabitatRuntime(options = {}) {
   const onPermissionRequest = typeof options.onPermissionRequest === "function" ? options.onPermissionRequest : null;
   const onStateTransition = typeof options.onStateTransition === "function" ? options.onStateTransition : null;
   const onActivity = typeof options.onActivity === "function" ? options.onActivity : null;
+  const subagents = createSubagentTracker();
   const onAcceptedEvent = typeof options.onAcceptedEvent === "function" ? options.onAcceptedEvent : null;
 
   let lastStatesMap = new Map();
@@ -110,6 +112,9 @@ function createHabitatRuntime(options = {}) {
         onActivity({ provider, source: "event" });
       } catch {}
     }
+    if (accepted) {
+      subagents.record({ provider, sessionId: normalized.sessionId, event: normalized.event, subagentId: rawPayload.agentId }, nowMs);
+    }
     if (accepted && onAcceptedEvent) {
       try {
         onAcceptedEvent({ provider, sessionId: normalized.sessionId, event: normalized.event, cwd: rawPayload.cwd }, nowMs);
@@ -149,7 +154,7 @@ function createHabitatRuntime(options = {}) {
       schema: 1,
       mode: "observed",
       aggregator: aggregator.getSnapshot(nowMs),
-      scene: sceneMachine.getSnapshot(nowMs)
+      scene: { ...sceneMachine.getSnapshot(nowMs), helpers: subagents.counts(nowMs) }
     };
   }
 
