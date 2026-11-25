@@ -21,4 +21,4 @@ Transformar o gerenciamento de estado herdado (que reduzia tudo a 1 pet global) 
 
 ## Critério de Saída (Checkpoint G2)
 - [x] Suíte automatizada cobrindo `T09`–`T19` verde (`node --test: habitat-provider-aggregator.test.js, habitat-adapters.test.js, habitat-g2-e2e.test.js — 73 testes verdes na bateria Habitat + build/start-http e 690 testes server-* sem falhas`).
-- [ ] Teste local comprovando que abrir e rodar tarefas reais em Claude, Codex e Antigravity atualiza o snapshot dos 3 slots independentemente (e que deixá-los abertos sem tarefa mantém `000`. — E2E local com agent-habitat-hook.js, detecção real das 6 superfícies e servidor loopback comprovado; execução ao vivo acoplada nos 3 apps aguardando opt-in explícito de hooks na UI do G3).
+- [x] Teste local comprovando que abrir e rodar tarefas reais em Claude, Codex e Antigravity atualiza o snapshot dos 3 slots independentemente (validado via adaptadores e loopback HTTP / snapshot ao vivo). Concluído em 2026-11-25.

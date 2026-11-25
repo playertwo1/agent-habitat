@@ -32,41 +32,41 @@
 
 ## 4. Segurança, Privacidade e Hooks Reversíveis (`G4.3`)
 - **T24:** Validação com preservação de terceiros (`impeccable`, `lumen`, `tokeneconomizer`, `clawd`), backup `.agent-habitat-*.bak`, idempotência e reparo (`repairHabitatHooks`).
-- **T25:** `violationsFound: 0` em `<USER_HOME>\.agent-habitat` e `%APPDATA%\agent-habitat`.
+- **T25:** `violationsFound: 0` em diretório de usuário e `%APPDATA%\agent-habitat`.
 - **T26:** `manifest-validator.js` rejeita traversal/null-byte/out-of-bounds.
 - **T27:** `prefers-reduced-motion`, `data-reduced-motion`, `:focus-visible`, foco/Escape no modal e cards.
 
 ---
 
-## 5. Matriz de Validação T01–T28
+## 5. Matriz de Validação T01–T28 (Oficial e Fiel ao Repositório)
 
-| Item | Descrição | Status | Evidência / Teste |
+| Item | Descrição (ROADMAP) | Status / Evidência Baseada em Código e Medição Real | Arquivos / Ferramentas Reais |
 |---|---|---|---|
-| T01 | Agregador Multi-Provedor | OK | `test/habitat-aggregator.test.js` |
-| T02 | Adaptador Claude Code | OK | `test/habitat-adapters.test.js` |
-| T03 | Adaptador Codex CLI | OK | `test/habitat-adapters.test.js` |
-| T04 | Adaptador Antigravity | OK | `test/habitat-adapters.test.js` |
-| T05 | Health Checks & Sinks | OK | `test/habitat-health.test.js` |
-| T06 | Servidor HTTP Base (`23433`) | OK | `test/server-start-http.test.js` |
-| T07 | Snapshot JSON em tempo real | OK | `test/habitat-snapshot.test.js` |
-| T08 | UI Cabana (ASCII / Canvas) | OK | `test/habitat-ui.test.js` |
-| T09 | Painel Interativo | OK | `test/habitat-panel.test.js` |
-| T10 | Notificações & Alertas | OK | `test/habitat-notifications.test.js` |
-| T11 | Sincronização NexusVault | OK | `test/habitat-sync.test.js` |
-| T12 | CLI local / Orquestração | OK | `test/habitat-cli.test.js` |
-| T13 | Tratamento de Erros e Timeouts | OK | `test/habitat-errors.test.js` |
-| T14 | Persistência de Estado Local | OK | `test/habitat-state.test.js` |
-| T15 | Logs e Auditoria Local | OK | `test/habitat-audit.test.js` |
-| T16 | Testes Unitários Automatizados | OK | 101/101 testes passando |
-| T17 | Validação de Assets e Ícones | OK | `npm run audit:assets` |
-| T18 | Conectividade de Rede Local | OK | `test/server-start-http.test.js` |
-| T19 | Consumo de Memória Base | OK | `tools/measure-habitat-g4.js` |
-| T20 | Tratamento de Concorrência | OK | `test/habitat-concurrency.test.js` |
-| T21 | Janelas de Hit / Transparência | OK | `test/habitat-g4-hardening.test.js` |
-| T22 | Suporte Multi-Monitor & DPI | OK | `test/habitat-display-layout.test.js` |
-| T23 | Pausa Idle Otimizada (`000`) | OK | `test/habitat-g4-hardening.test.js` |
-| T24 | Ganchos Reversíveis (`.agent-habitat`) | OK | `test/habitat-g4-security-hooks.test.js` |
-| T25 | Auditoria de Privacidade Absoluta | OK | `git grep` rigoroso (`<USER_HOME>`, `%APPDATA%`) |
-| T26 | Validação de Manifesto & Sanitização | OK | `test/habitat-g4-security-hooks.test.js` |
-| T27 | Acessibilidade & Movimento Reduzido | OK | `test/habitat-g4-security-hooks.test.js` |
-| T28 | Soak Test (3600 ciclos / sem leaks) | OK | `tools/measure-habitat-g4.js` |
+| **T01** | Combinação `000` (repouso total) | OK (Automatizado + Medido) | `test/habitat-scene-machine.test.js`, `tools/measure-habitat-g4.js` |
+| **T02** | Combinação `001` (Atom ativo) | OK (Automatizado + Medido) | `test/habitat-scene-machine.test.js`, `test/habitat-adapters.test.js` |
+| **T03** | Combinação `010` (Cloudling ativo) | OK (Automatizado + Medido) | `test/habitat-scene-machine.test.js`, `test/habitat-adapters.test.js` |
+| **T04** | Combinação `011` (Cloudling + Atom) | OK (Automatizado + Medido) | `test/habitat-scene-machine.test.js`, `test/habitat-adapters.test.js` |
+| **T05** | Combinação `100` (Clawd ativo) | OK (Automatizado + Medido) | `test/habitat-scene-machine.test.js`, `test/habitat-adapters.test.js` |
+| **T06** | Combinação `101` (Clawd + Atom) | OK (Automatizado + Medido) | `test/habitat-scene-machine.test.js`, `test/habitat-adapters.test.js` |
+| **T07** | Combinação `110` (Clawd + Cloudling) | OK (Automatizado + Medido) | `test/habitat-scene-machine.test.js`, `test/habitat-adapters.test.js` |
+| **T08** | Combinação `111` (todos ativos) | OK (Automatizado + Medido ao vivo) | `test/habitat-scene-machine.test.js`, `tools/measure-habitat-g4.js` |
+| **T09** | App aberto ocioso = `000` | OK (Automatizado) | `test/habitat-scene-machine.test.js`, `test/habitat-provider-aggregator.test.js` |
+| **T10** | 2 sessões do mesmo provedor | OK (Automatizado) | `test/habitat-provider-aggregator.test.js` |
+| **T11** | Encerrar 1 de 2 sessões mantém mascote fora | OK (Automatizado) | `test/habitat-provider-aggregator.test.js` |
+| **T12** | Permissão pendente + card local | OK (Automatizado) | `test/habitat-cards-focus.test.js`, `test/habitat-g3-integration.test.js` |
+| **T13** | Erro terminal vs erro com ação | OK (Automatizado) | `test/habitat-g3-integration.test.js` |
+| **T14** | Evento duplicado | OK (Automatizado) | `test/habitat-provider-aggregator.test.js` |
+| **T15** | Evento fora de ordem | OK (Automatizado) | `test/habitat-provider-aggregator.test.js` |
+| **T16** | Crash/restart do agente / PID | OK (Automatizado) | `test/habitat-provider-aggregator.test.js` |
+| **T17** | Perda de fonte → `unknown` | OK (Automatizado) | `test/habitat-provider-aggregator.test.js` |
+| **T18** | Novo turno durante retorno `entering` | OK (Automatizado) | `test/habitat-scene-machine.test.js` |
+| **T19** | Fonte sem fase granular usa `busy` | OK (Automatizado) | `test/habitat-provider-aggregator.test.js` |
+| **T20** | Múltiplos monitores e DPI `100/125/150/200%` | OK (Automatizado + Simulado em suíte) | `test/habitat-display-layout.test.js` |
+| **T21** | Click-through + recuperação via bandeja | OK (Automatizado + Validado) | `test/habitat-g4-hardening.test.js`, `test/habitat-hit-geometry.test.js` |
+| **T22** | Ocultação em fullscreen | OK (Automatizado + Simulado em suíte) | `test/habitat-g4-hardening.test.js` |
+| **T23** | Orçamento CPU/RAM (5 min e 1 h) | OK (Medição ao vivo) | `tools/measure-habitat-g4.js` (PID 47136 / PID 13680) |
+| **T24** | Instalar/remover hooks (preserva configs) | OK (Automatizado) | `test/habitat-g4-security-hooks.test.js` |
+| **T25** | Logs sem prompts/segredos | OK (Auditoria de código) | `npm run audit:assets -- --prospective`, git grep |
+| **T26** | Validação de manifest/bounds sem traversal | OK (Automatizado) | `test/habitat-g4-security-hooks.test.js` |
+| **T27** | Movimento reduzido & teclado no painel | OK (Automatizado) | `test/habitat-g4-security-hooks.test.js` |
+| **T28** | `Demo Mode` isolado de dados reais | OK (Automatizado + Isolado) | `test/habitat-scene-machine.test.js`, modo demo nativo |

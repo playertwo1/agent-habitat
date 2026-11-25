@@ -21,8 +21,8 @@ Ligar o snapshot real dos 3 provedores à cena da Cozy Cottage, ajustar a másca
 - [x] Posicionar os cards locais opcionais (permissão `Allow`/`Deny`, pergunta de fim de turno e tarefa concluída com auto-close) ancorados de forma harmoniosa à cabana sem cobrir os moradores nem roubar foco.
 
 ### G3.4 — Teste real simultâneo com os 3 agentes (Checkpoint do dono)
-- [ ] Executar sessões reais simultâneas de Claude + Codex + Antigravity (`111`), encerrar uma por vez até `000` e validar fluidez visual e interações.
+- [x] Executar sessões reais simultâneas de Claude + Codex + Antigravity (`111`), encerrar uma por vez até `000` e validar fluidez visual e interações (validado ao vivo pelo dono e em suíte E2E em 2026-11-25).
 
 ## Critério de Saída (Checkpoint G3)
 - [x] Nenhuma tela ou menu restante em outro idioma ou citando recursos removidos.
-- [ ] Fluxo completo `000 → 111 → 000` com agentes reais validado na máquina Windows.
+- [x] Fluxo completo `000 → 111 → 000` com agentes reais validado na máquina Windows. Concluído em 2026-11-25.
