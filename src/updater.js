@@ -6,7 +6,7 @@ const electron = require("electron");
 const { redactSecrets } = require("./secret-redact");
 const { getUpdateInstallFormat } = require("./update-install-format");
 
-const RELEASES_LATEST_URL = "https://github.com/playertwo1/clawd-on-desk/releases/latest";
+const RELEASES_LATEST_URL = "https://github.com/playertwo1/agent-habitat/releases/latest";
 const APT_GUIDE_URL = "https://apt.clawdondesk.com/";
 const DEPENDENCY_INSTALL_TIMEOUT_MS = 10 * 60 * 1000;
 const UPDATE_ERROR_DETAIL_MAX_LENGTH = 8 * 1024;
@@ -775,9 +775,9 @@ function initUpdater(ctx, deps = {}) {
     return new Promise((resolve, reject) => {
       const req = httpsGet({
         hostname: "github.com",
-        path: "/playertwo1/clawd-on-desk/releases/latest",
+        path: "/playertwo1/agent-habitat/releases/latest",
         headers: {
-          "User-Agent": "Clawd-on-Desk",
+          "User-Agent": "Agent-Habitat",
           Accept: "text/html,*/*",
         },
       }, (res) => {
@@ -810,11 +810,11 @@ function initUpdater(ctx, deps = {}) {
 
   function fetchLatestReleaseFromApi() {
     return new Promise((resolve, reject) => {
-      const headers = { "User-Agent": "Clawd-on-Desk" };
+      const headers = { "User-Agent": "Agent-Habitat" };
       if (lastReleaseEtag) headers["If-None-Match"] = lastReleaseEtag;
       const req = httpsGet({
         hostname: "api.github.com",
-        path: "/repos/playertwo1/clawd-on-desk/releases/latest",
+        path: "/repos/playertwo1/agent-habitat/releases/latest",
         headers,
       }, (res) => {
         // 304 Not Modified — drain and serve the cached release.

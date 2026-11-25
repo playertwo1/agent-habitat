@@ -22,40 +22,7 @@ const {
 const RELEASE_BASE =
   "https://github.com/rullerzhou-afk/clawd-on-desk/releases/download/v0.14.0";
 
-const WORKFLOW_PATH = path.join(__dirname, "..", ".github", "workflows", "winget.yml");
-const WORKFLOW_RAW = fs.readFileSync(WORKFLOW_PATH, "utf8");
-
-// Assertions below run against the workflow with comments removed. Grepping the
-// raw text lets any assertion be satisfied by a comment that merely mentions the
-// right token while the executable YAML says something else.
-function stripComments(yaml) {
-  return yaml
-    .split("\n")
-    .map((line) => line.replace(/\s+#.*$/, ""))
-    .filter((line) => !/^\s*#/.test(line))
-    .join("\n");
-}
-
-const WORKFLOW = stripComments(WORKFLOW_RAW);
-const WORKFLOW_DOCUMENT = yaml.load(WORKFLOW_RAW, { schema: yaml.JSON_SCHEMA });
-
-// Returns the body of a named step, up to the next step at the same indent.
-function stepBody(yaml, name) {
-  const start = yaml.indexOf(`- name: ${name}`);
-  if (start === -1) return null;
-  const rest = yaml.slice(start + 1);
-  const next = rest.indexOf("\n      - ");
-  return next === -1 ? rest : rest.slice(0, next);
-}
-
-// Asserts a CLI flag carries an exact value. Checking only that a flag appears
-// lets `--require-architectures ""` or `--version "9.9.9"` pass unnoticed, which
-// is how six semantic breaks survived an earlier revision of these tests.
-function assertFlag(body, flag, expected, message) {
-  const match = body.match(new RegExp(`${flag}\\s+(\\S+)`));
-  assert.ok(match, `${flag} must be passed${message ? ` (${message})` : ""}`);
-  assert.equal(match[1], expected, `${flag} must be ${expected}, got ${match[1]}`);
-}
+const LOCAL_INSTALLERS_REGEX = "^Agent-Habitat-Setup-.*-(x64|arm64)\\.exe$";
 
 function configWith() {
   return {
@@ -464,19 +431,13 @@ describe("winget contract release-asset cross-check", () => {
 });
 
 describe("winget contract installers-regex cross-check", () => {
-  const workflowRegex = (() => {
-    const match = WORKFLOW.match(/^\s*INSTALLERS_REGEX:\s*'(.+)'\s*$/m);
-    assert.ok(match, "workflow must define INSTALLERS_REGEX");
-    return match[1];
-  })();
-
   it("matches every installer the contract expects", () => {
-    const report = verifyWingetArchContract({ installersRegex: workflowRegex });
+    const report = verifyWingetArchContract({ installersRegex: LOCAL_INSTALLERS_REGEX });
     assert.deepEqual(report.errors, [], report.errors.join("\n"));
   });
 
   it("selects both architectures, never a single one", () => {
-    const matcher = new RegExp(workflowRegex);
+    const matcher = new RegExp(LOCAL_INSTALLERS_REGEX);
     const matched = verifyWingetArchContract().installers.filter((installer) =>
       matcher.test(installer.filename),
     );
@@ -521,18 +482,17 @@ describe("winget contract installers-regex cross-check", () => {
     );
   });
 
-  it("declares the same required architectures the workflow does", () => {
-    const match = WORKFLOW.match(/^\s*REQUIRED_ARCHITECTURES:\s*"(.+)"\s*$/m);
-    assert.ok(match, "workflow must define REQUIRED_ARCHITECTURES");
-    assert.deepEqual(match[1].split(",").map((v) => v.trim()).sort(), ["arm64", "x64"]);
+  it("accepts the required x64 and arm64 architecture set", () => {
+    const report = verifyWingetArchContract({ requiredArchitectures: ["x64", "arm64"] });
+    assert.deepEqual(report.errors, [], report.errors.join("\n"));
   });
 });
 
 describe("winget contract helpers", () => {
   it("reads the Windows build config from package.json", () => {
     const build = readWindowsBuildConfig(pkg);
-    assert.equal(build.owner, "rullerzhou-afk");
-    assert.equal(build.repo, "clawd-on-desk");
+    assert.equal(build.owner, "playertwo1");
+    assert.equal(build.repo, "agent-habitat");
     assert.ok(build.entries.length >= 1);
   });
 
@@ -654,7 +614,7 @@ describe("winget contract CLI", () => {
     fs.writeFileSync(
       assetsFile,
       JSON.stringify([
-        { name: `Clawd-on-Desk-Setup-${version}-x64.exe`, digest: "sha256:aa", size: 1 },
+        { name: `Agent-Habitat-Setup-${version}-x64.exe`, digest: "sha256:aa", size: 1 },
         { name: "latest.yml", digest: "sha256:bb", size: 2 },
       ]),
       "utf8",
@@ -690,261 +650,9 @@ describe("winget contract CLI", () => {
   });
 });
 
-describe("winget publish workflow", () => {
-  it("keeps the ambient GitHub token strictly read-only", () => {
-    // Both jobs only need source reads. The submission write goes to the fork
-    // and upstream PR through a dedicated PAT passed to one process step.
-    // Lock both the top-level value and the absence of a job-level override.
-    // Matches the inline form too (`permissions: write-all`): a job-level
-    // override written that way is valid YAML, replaces the workflow-level grant
-    // outright, and would slip past a bare-`permissions:` pattern.
-    const declarations = WORKFLOW.match(/^[ \t]*permissions:/gm) || [];
-    assert.equal(declarations.length, 1, "workflow must declare permissions exactly once");
-
-    const topLevel = WORKFLOW.match(/^permissions:\s*\n((?:[ \t]+.*(?:\n|$))*)/m);
-    assert.ok(topLevel, "workflow must declare top-level permissions");
-    assert.equal(topLevel[1].trim(), "contents: read");
-  });
-
-  it("keeps the long-lived token in the final submit step only", () => {
-    const references = WORKFLOW.match(/secrets\.WINGET_TOKEN/g) || [];
-    assert.equal(references.length, 1, "the submission token must have one live reference");
-    const prepare = WORKFLOW_DOCUMENT.jobs.prepare;
-    assert.doesNotMatch(JSON.stringify(prepare), /WINGET_TOKEN/);
-    const steps = WORKFLOW_DOCUMENT.jobs.submit.steps;
-    const tokenStepIndex = steps.findIndex((step) =>
-      JSON.stringify(step).includes("secrets.WINGET_TOKEN"),
-    );
-    assert.equal(tokenStepIndex, steps.length - 1, "only the final submit step may receive the PAT");
-    assert.equal(steps[tokenStepIndex].env.GH_TOKEN, "${{ secrets.WINGET_TOKEN }}");
-  });
-
-  it("gates submission on an explicit repository variable", () => {
-    assert.equal(
-      WORKFLOW_DOCUMENT.jobs.submit.if,
-      "needs.prepare.result == 'success' && vars.WINGET_AUTO_SUBMIT == 'true'",
-    );
-    assert.deepEqual(WORKFLOW_DOCUMENT.jobs.submit.needs, "prepare");
-    assert.equal(WORKFLOW_DOCUMENT.jobs.submit.environment, "winget-submit");
-  });
-
-  it("pins every third-party action to a full commit SHA", () => {
-    const actionUses = [];
-    for (const job of Object.values(WORKFLOW_DOCUMENT.jobs)) {
-      for (const step of job.steps || []) {
-        if (typeof step.uses === "string") actionUses.push(step.uses);
-      }
-    }
-    assert.ok(actionUses.length > 0);
-    for (const use of actionUses) {
-      assert.match(use, /^[^@]+@[0-9a-f]{40}$/, `${use} must be commit-pinned`);
-    }
-    assert.ok(actionUses.includes("actions/checkout@11d5960a326750d5838078e36cf38b85af677262"));
-    assert.ok(actionUses.includes("actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020"));
-    assert.ok(actionUses.includes("actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02"));
-    assert.ok(actionUses.includes("actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093"));
-  });
-
-  it("runs komac in dry-run as a standalone flag", () => {
-    // `--dry-run=false` still matches a bare /--dry-run/ search but is rejected
-    // by clap, so the run would fail rather than being safely prepared.
-    const body = stepBody(WORKFLOW, "Generate manifest (no submission)");
-    assert.ok(body, "generate step must exist");
-    assert.match(body, /^\s*--dry-run\s*\\?\s*$/m, "--dry-run must take no value");
-  });
-
-  it("bounds the job so a stalled download cannot hold the concurrency group", () => {
-    // komac downloads both installers in full; there is no header-only mode.
-    assert.match(WORKFLOW, /timeout-minutes:\s*\d+/);
-  });
-
-  it("runs the architecture contract before invoking komac", () => {
-    const gate = WORKFLOW.indexOf("verify:winget-arch");
-    const generate = WORKFLOW.indexOf("komac update");
-    assert.ok(gate > -1, "workflow must run the architecture gate");
-    assert.ok(generate > -1, "workflow must generate via komac");
-    assert.ok(gate < generate, "the gate must run before generation");
-  });
-
-  it("normalizes and verifies generated output before it can be uploaded", () => {
-    const generate = WORKFLOW.indexOf("komac update");
-    const gate = WORKFLOW.indexOf("npm run verify:winget-manifest");
-    const upload = WORKFLOW.indexOf("name: winget-generated-manifest");
-    assert.ok(generate > -1 && gate > -1 && upload > -1);
-    assert.ok(generate < gate, "output validation must follow generation");
-    assert.ok(gate < upload, "only validated output may be uploaded");
-    const body = stepBody(WORKFLOW, "Normalize and verify generated manifest");
-    assertFlag(body, "--generated-root", "generated");
-    assertFlag(body, "--architecture-contract", "winget-arch-contract.json");
-    assertFlag(body, "--release-tag", '"$TAG"');
-    assertFlag(body, "--output", "winget-generated-manifest-report.json");
-    assert.doesNotMatch(body, /\bif:/, "output validation must not be conditional");
-    assert.doesNotMatch(body, /continue-on-error/);
-  });
-
-  it("submits the exact downloaded artifact only after re-verification", () => {
-    const steps = WORKFLOW_DOCUMENT.jobs.submit.steps;
-    const download = steps.find((step) => step.name === "Download validated manifest");
-    const reverify = steps.find((step) => step.name === "Reverify downloaded manifest");
-    const submit = steps.find((step) => step.name === "Submit validated manifest PR");
-    assert.deepEqual(download.with, {
-      name: "winget-generated-manifest",
-      path: "validated-artifact",
-    });
-    assert.match(reverify.run, /--generated-root validated-artifact\/generated/);
-    assert.match(reverify.run, /--architecture-contract evidence\/winget-arch-contract\.json/);
-    assert.match(submit.run, /scripts\/submit-winget-manifest\.js/);
-    assert.match(submit.run, /--generated-root validated-artifact\/generated/);
-    assert.match(submit.run, /--expected-digests winget-downloaded-manifest-report\.json/);
-    assert.ok(
-      steps.indexOf(reverify) < steps.indexOf(submit),
-      "downloaded manifest must be reverified before submission",
-    );
-    assert.equal(reverify.if, undefined, "reverification must not be conditional");
-    assert.equal(reverify["continue-on-error"], undefined, "reverification must fail the job");
-    assert.equal(
-      submit.env.WINGET_FORK_OWNER,
-      "${{ vars.WINGET_FORK_OWNER }}",
-      "fork owner must be configured explicitly",
-    );
-    assert.doesNotMatch(WORKFLOW, /komac submit/);
-    assert.doesNotMatch(WORKFLOW, /--submit\b/);
-  });
-
-  it("gives the gate no way to be skipped or ignored", () => {
-    const body = stepBody(WORKFLOW, "Verify WinGet architecture contract");
-    assert.ok(body, "gate step must exist");
-    assert.doesNotMatch(body, /\bif:/, "gate must not be conditional");
-    assert.doesNotMatch(body, /continue-on-error/, "gate failure must fail the job");
-  });
-
-  it("passes the gate live values, not just the right flag names", () => {
-    const body = stepBody(WORKFLOW, "Verify WinGet architecture contract");
-    assertFlag(body, "--release-tag", '"$TAG"', "must track the resolved tag");
-    assertFlag(body, "--require-architectures", '"$REQUIRED_ARCHITECTURES"');
-    assertFlag(body, "--installers-regex", '"$INSTALLERS_REGEX"');
-    assertFlag(body, "--package-json", "tagged-package.json");
-    assertFlag(body, "--output", "winget-arch-contract.json");
-  });
-
-  it("reads the build config from the tag, not the tooling checkout", () => {
-    // Installer filenames come from the package.json that built the assets.
-    const body = stepBody(WORKFLOW, "Fetch the tagged build configuration");
-    assert.ok(body, "config fetch step must exist");
-    assert.match(body, /contents\/package\.json\?ref=\$TAG/);
-    assert.match(body, />\s*tagged-package\.json/);
-  });
-
-  it("checks the tooling out at the default branch explicitly", () => {
-    // Without an explicit ref, actions/checkout takes the triggering ref, which
-    // for a release event is the tag — and older tags lack this tooling.
-    const body = stepBody(WORKFLOW, "Check out release tooling");
-    assert.ok(body, "tooling checkout step must exist");
-    assert.match(body, /ref:\s*\$\{\{\s*github\.event\.repository\.default_branch\s*\}\}/);
-  });
-
-  it("collects whole asset objects, not just names", () => {
-    const body = stepBody(WORKFLOW, "Collect release assets");
-    assert.ok(body, "collect step must exist");
-    assert.match(body, /--json assets/);
-    // A `.assets[].name` filter would drop the digests the contract pins
-    // content with, and every other assertion here would still pass.
-    assert.doesNotMatch(body, /\.assets\[\]\.name/);
-  });
-
-  it("feeds the gate exactly the file the collect step writes", () => {
-    // Binding the two steps by value: asserting each mentions some filename
-    // passes even when they disagree, because a leftover reference elsewhere in
-    // the step satisfies the match.
-    const collect = stepBody(WORKFLOW, "Collect release assets");
-    const gate = stepBody(WORKFLOW, "Verify WinGet architecture contract");
-    const written = collect.match(/>\s*(\S+\.json)/);
-    const consumed = gate.match(/--assets-file\s+(\S+)/);
-    assert.ok(written, "collect step must redirect to a .json file");
-    assert.ok(consumed, "gate must be given an assets file");
-    assert.equal(consumed[1], written[1]);
-  });
-
-  it("feeds komac exactly the URLs the contract emitted", () => {
-    const body = stepBody(WORKFLOW, "Generate manifest (no submission)");
-    assert.ok(body, "generate step must exist");
-    assert.match(body, /\.komacUrls\[\]/, "URLs must come from the verified report");
-    assert.doesNotMatch(body, /releases\/download/, "URLs must not be rebuilt by hand");
-    assert.match(body, /--urls "\$\{urls\[@\]\}"/, "the resolved array must be passed");
-    assertFlag(body, "--version", '"${TAG#v}"', "must derive from the resolved tag");
-  });
-
-  it("writes komac output to the directory it uploads", () => {
-    const generate = stepBody(WORKFLOW, "Generate manifest (no submission)");
-    const output = generate.match(/--output\s+(\S+)/);
-    assert.ok(output, "generate step must pass --output");
-    const upload = WORKFLOW_DOCUMENT.jobs.prepare.steps.find(
-      (step) => step.with?.name === "winget-generated-manifest",
-    );
-    assert.ok(upload, "generated-manifest upload step must exist");
-    assert.deepEqual(
-      upload.with.path.split(/\r?\n/).filter(Boolean),
-      [`${output[1]}/`, "winget-generated-manifest-report.json"],
-      "artifact layout must preserve the generated/ directory on download",
-    );
-  });
-
-  it("summarizes the manifest from komac's nested layout", () => {
-    // komac writes the winget-pkgs directory tree, so a flat generated/*.yaml
-    // glob silently matches nothing and the summary renders empty.
-    const body = stepBody(WORKFLOW, "Summarize generated installers");
-    assert.ok(body, "summary step must exist");
-    assert.doesNotMatch(body, /cat generated\/\*/, "flat glob cannot match the nested layout");
-    assert.match(body, /find generated .*installer\.yaml/);
-  });
-
-  it("installs komac somewhere a non-root runner can write", () => {
-    // GitHub-hosted runners execute as a non-root user; /usr/local/bin needs sudo.
-    const body = stepBody(WORKFLOW, "Install komac");
-    assert.ok(body, "install step must exist");
-    assert.doesNotMatch(body, /\/usr\/local\/bin/);
-    assert.match(body, /\$RUNNER_TEMP\/bin/);
-    assert.match(body, />> "\$GITHUB_PATH"/, "the install dir must be added to PATH");
-  });
-
-  it("pins komac to a version and verifies its checksum", () => {
-    assert.match(WORKFLOW, /KOMAC_VERSION:\s*"2\.16\.0"/);
-    assert.match(
-      WORKFLOW,
-      /KOMAC_SHA256:\s*"7d2707fa6210f2789a3702de49fbd150b736dbf426ee0b9bc8e098736f9fd82d"/,
-    );
-    const body = stepBody(WORKFLOW, "Install komac");
-    assert.ok(body, "install step must exist");
-    assert.match(body, /sha256sum --check --strict/);
-  });
-
-  it("only prepares non-prerelease version tags", () => {
-    assert.match(WORKFLOW, /types:\s*\[released\]/);
-    assert.match(WORKFLOW, /github\.event\.release\.prerelease == false/);
-    const body = stepBody(WORKFLOW, "Resolve release tag");
-    assert.ok(body, "resolve step must exist");
-    // Polarity matters: a guard that publishes only prereleases would satisfy a
-    // naive "mentions isPrerelease" assertion.
-    assert.match(body, /\[ "\$prerelease" != "false" \]/);
-    assert.match(body, /\^v\[0-9\]\+\\\.\[0-9\]\+\\\.\[0-9\]\+\$/, "tag shape must be pinned");
-  });
-
-  it("serializes concurrent runs", () => {
-    assert.match(WORKFLOW, /concurrency:/);
-    assert.match(WORKFLOW, /cancel-in-progress:\s*false/);
-  });
-
-  it("declares the exact package identifier live in winget-pkgs", () => {
-    assert.match(WORKFLOW, /komac update rullerzhou-afk\.clawd-on-desk\s*\\?\s*$/m);
-  });
-
-  it("invokes an npm script that package.json actually defines", () => {
-    const invoked = WORKFLOW.match(/npm run ([\w:-]+)/g) || [];
-    assert.ok(invoked.length > 0, "workflow must invoke an npm script");
-    for (const entry of invoked) {
-      const name = entry.replace("npm run ", "");
-      assert.ok(pkg.scripts[name], `package.json is missing the "${name}" script`);
-    }
+describe("local-only winget contract scripts", () => {
+  it("removes GitHub Actions workflows while retaining local WinGet verification scripts", () => {
+    assert.equal(fs.existsSync(path.join(__dirname, "..", ".github", "workflows")), false);
     assert.equal(pkg.scripts["verify:winget-arch"], "node scripts/verify-winget-arch-contract.js");
     assert.equal(
       pkg.scripts["verify:winget-manifest"],

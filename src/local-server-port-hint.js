@@ -7,8 +7,11 @@ const { CLAWD_SERVER_ID, SERVER_PORTS, normalizeLocalPort } = require("../hooks/
 
 // A restart preference only. Never used by clients or as liveness/ownership
 // evidence. Production opts in through main.js; server tests default to no IO.
-function hintPath(options) {
-  return path.join(options.homeDir || os.homedir(), ".clawd", "local-server-port.json");
+function hintPath(options = {}) {
+  const runtimeDirName = typeof options.runtimeDirName === "string" && options.runtimeDirName
+    ? options.runtimeDirName
+    : ".clawd";
+  return path.join(options.homeDir || os.homedir(), runtimeDirName, "local-server-port.json");
 }
 function normalizeHint(value) {
   const port = normalizeLocalPort(value);

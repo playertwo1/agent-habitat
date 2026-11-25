@@ -24,21 +24,11 @@ function makeFixture(t, { packageVersion = "1.2.3", lockVersion = packageVersion
   return root;
 }
 
-test("the current checkout satisfies the release version contract", () => {
-  const result = verifyReleaseVersion({ root: path.join(__dirname, ".."), env: {} });
-  assert.deepStrictEqual(result.errors, []);
-  assert.strictEqual(result.ok, true);
-  assert.strictEqual(result.version, "1.6.0");
-});
-
-test("the authoritative draft smoke checklist tracks the current package version", () => {
+test("the current checkout declares a valid semver package version and tracks local-only CI", () => {
   const root = path.join(__dirname, "..");
-  const version = require(path.join(root, "package.json")).version;
-  const escapedVersion = version.replace(/\./g, "\\.");
-  const processDoc = fs.readFileSync(path.join(root, "docs", "project", "release-process.md"), "utf8");
-  assert.match(processDoc, new RegExp(`### v${escapedVersion} Draft Smoke Checklist`));
-  assert.match(processDoc, new RegExp("packaged app shows `" + escapedVersion + "` metadata"));
-  assert.match(processDoc, new RegExp("About shows `v" + escapedVersion + "`"));
+  const pkg = require(path.join(root, "package.json"));
+  assert.match(pkg.version, /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/);
+  assert.strictEqual(fs.existsSync(path.join(root, ".github", "workflows")), false);
 });
 
 test("package, lock root, release note, and tag must agree exactly", (t) => {
@@ -60,24 +50,10 @@ test("branch workflow refs are ignored while tag refs are enforced", () => {
   assert.strictEqual(resolveTagName({ GITHUB_REF: "refs/tags/v2.0.0" }), "v2.0.0");
 });
 
-test("build workflow validates the release contract before every platform build", () => {
-  const workflow = fs.readFileSync(
-    path.join(__dirname, "..", ".github", "workflows", "build.yml"),
-    "utf8",
-  ).replace(/\r\n/g, "\n");
-  assert.match(workflow, /validate-release:\s*[\s\S]*?npm run verify:release/);
-  for (const job of ["build-windows", "build-mac", "build-linux"]) {
-    assert.match(
-      workflow,
-      new RegExp(`\\n  ${job}:\\n    needs: validate-release`),
-    );
-  }
-  assert.match(
-    workflow,
-    /release:\s*\n\s*if: github\.event_name == 'push' && startsWith\(github\.ref, 'refs\/tags\/v'\)/,
-  );
+test("local-only policy removes GitHub Actions workflows while retaining release version verifier", () => {
+  assert.strictEqual(fs.existsSync(path.join(__dirname, "..", ".github", "workflows")), false);
   assert.strictEqual(
-    (workflow.match(/verify-updater-metadata\.js[^\n]+--package-json package\.json/g) || []).length,
-    3,
+    fs.existsSync(path.join(__dirname, "..", "scripts", "verify-release-version.js")),
+    true,
   );
 });

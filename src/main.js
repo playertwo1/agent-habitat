@@ -80,6 +80,13 @@ const {
   applyWindowsAppUserModelId,
   shouldOpenSettingsWindowFromArgv,
 } = require("./settings-window-icon");
+const {
+  HABITAT_APP_NAME,
+  HABITAT_RUNTIME_DIR_NAME,
+  HABITAT_SERVER_PORTS,
+  defaultHabitatRuntimeConfigPath,
+  shouldSyncHooksOnStartup,
+} = require("./habitat-identity");
 const createSettingsWindowRuntime = require("./settings-window");
 const createRoamFenceLoader = require("./roam-fence");
 const createRoamFenceSettings = require("./roam-fence-settings");
@@ -364,6 +371,9 @@ const loginItemHelpers = require("./login-item");
 const { writeCodexAutoStartGate } = require("../hooks/server-config");
 const { effectiveClaudeConfigDirs, claudeConfigDirKey } = require("../hooks/claude-config-dirs");
 const { createCodexAutoStartGateEvaluator } = require("./agent-gate");
+if (typeof app.setName === "function" && app.getName() !== HABITAT_APP_NAME) {
+  app.setName(HABITAT_APP_NAME);
+}
 const PREFS_PATH = path.join(app.getPath("userData"), "clawd-prefs.json");
 const _initialPrefsLoad = prefsModule.load(PREFS_PATH);
 // Recovery from readable invalid contents is writable only after the original
@@ -3310,7 +3320,19 @@ const _serverCtx = {
     }
   },
 };
-Object.assign(_serverCtx, require("./local-server-port-hint"));
+const localServerPortHint = require("./local-server-port-hint");
+Object.assign(_serverCtx, {
+  runtimeConfigPath: defaultHabitatRuntimeConfigPath(),
+  getPortCandidates: () => HABITAT_SERVER_PORTS,
+  staticServerPorts: HABITAT_SERVER_PORTS,
+  syncIntegrationsOnStartup: shouldSyncHooksOnStartup(),
+  readLocalServerPortHint: () => localServerPortHint.readLocalServerPortHint({
+    runtimeDirName: HABITAT_RUNTIME_DIR_NAME,
+  }),
+  writeLocalServerPortHint: (port) => localServerPortHint.writeLocalServerPortHint(port, {
+    runtimeDirName: HABITAT_RUNTIME_DIR_NAME,
+  }),
+});
 const _server = require("./server")(_serverCtx);
 const { startHttpServer, getHookServerPort } = _server;
 
@@ -6151,7 +6173,9 @@ if (!gotTheLock) {
     || _initialPrefsLoad.recovered === true
     || _initialPrefsLoad.codexAutoStartAuthoritative === false
   ) ? null : _initialPrefsLoad.snapshot;
-  _syncCodexAutoStartGate(startupGateSnapshot, "startup");
+  if (shouldSyncHooksOnStartup()) {
+    _syncCodexAutoStartGate(startupGateSnapshot, "startup");
+  }
   app.on("second-instance", (_event, commandLine) => {
     if (petWindowRuntime.isPetEffectivelyHidden()) {
       prepManualPetVisibility();
@@ -6433,8 +6457,10 @@ if (!gotTheLock) {
     }
 
     // Auto-install VS Code/Cursor terminal-focus extension
-    try { installTerminalFocusExtension(); } catch (err) {
-      console.warn("Clawd: failed to auto-install terminal-focus extension:", err.message);
+    if (shouldSyncHooksOnStartup()) {
+      try { installTerminalFocusExtension(); } catch (err) {
+        console.warn("Clawd: failed to auto-install terminal-focus extension:", err.message);
+      }
     }
 
     // Auto-updater: setup event handlers (user triggers check via tray menu)

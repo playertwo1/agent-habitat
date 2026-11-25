@@ -88,9 +88,14 @@ module.exports = function initServer(ctx) {
 const createHttpServer = ctx.createHttpServer || http.createServer.bind(http);
 const setImmediateFn = ctx.setImmediate || setImmediate;
 const nowFn = typeof ctx.now === "function" ? ctx.now : Date.now;
-const clearRuntimeConfigFn = ctx.clearRuntimeConfig || clearRuntimeConfig;
+const clearRuntimeConfigFn = ctx.clearRuntimeConfig
+  || (() => clearRuntimeConfig(ctx.runtimeConfigPath));
 const getPortCandidatesFn = ctx.getPortCandidates || getPortCandidates;
-const readRuntimePortFn = ctx.readRuntimePort || readRuntimePort;
+const staticPorts = Array.isArray(ctx.staticServerPorts) && ctx.staticServerPorts.length > 0
+  ? ctx.staticServerPorts
+  : SERVER_PORTS;
+const readRuntimePortFn = ctx.readRuntimePort
+  || (() => readRuntimePort({ runtimeConfigPath: ctx.runtimeConfigPath }));
 const writeRuntimeConfigFn = ctx.writeRuntimeConfig || writeRuntimeConfig;
 // Opt-in production IO: tests never read or overwrite the user's restart hint.
 const readPortHint = ctx.readLocalServerPortHint || (() => null);
@@ -148,7 +153,10 @@ function resolveWindowsProcessMetadata(request) {
   return windowsProcessMetadataResolver(request);
 }
 function writeCurrentRuntimeConfig(port) {
-  return writeRuntimeConfigFn(port, { windowsProcessChain: windowsProcessChainRuntime });
+  return writeRuntimeConfigFn(port, {
+    ...(typeof ctx.runtimeConfigPath === "string" ? { runtimeConfigPath: ctx.runtimeConfigPath } : {}),
+    windowsProcessChain: windowsProcessChainRuntime,
+  });
 }
 // #681: where the runtime file lives is a pure expression — answering it must
 // not read the file, probe a PID, or touch any of the seams above. Callers that
@@ -249,7 +257,7 @@ function getAgentIntegrationOptions(agentId) {
 function getHookServerPort() {
   if (activeServerPort) return activeServerPort;
   const runtime = readRuntimePortFn();
-  return SERVER_PORTS.includes(runtime) ? runtime : DEFAULT_SERVER_PORT;
+  return staticPorts.includes(runtime) ? runtime : staticPorts[0];
 }
 
 function getRuntimeStatus() {
@@ -1349,7 +1357,7 @@ function startHttpServer() {
   startupFailure = null;
   let hint = null;
   try { hint = normalizeLocalPort(readPortHint()); } catch {}
-  if (hint < 1024 || SERVER_PORTS.includes(hint)) hint = null;
+  if (hint < 1024 || staticPorts.includes(hint)) hint = null;
   // Port 0 is a server-only last resort, never a client scan candidate.
   const listenPorts = [...new Set([
     ...getPortCandidatesFn().map(normalizeLocalPort).filter(Boolean).slice(0, 8),
@@ -1403,7 +1411,7 @@ function startHttpServer() {
       try { runtimeWritten = writeCurrentRuntimeConfig(port) === true; }
       catch (err) { console.warn("Failed to write the Clawd runtime file:", (err && err.message) || err); }
       if (!runtimeWritten) {
-        const dynamic = !SERVER_PORTS.includes(port);
+        const dynamic = !staticPorts.includes(port);
         console.warn(`Clawd runtime file was not written (${runtimeConfigFilePath()}) — `
           + (dynamic ? "dynamic listener closed; check Doctor → Local server"
             : "hook process metadata will be omitted until this is repaired (see Doctor → Local server)"));
@@ -1415,13 +1423,15 @@ function startHttpServer() {
         }
       }
       activeServerPort = port;
-      if (runtimeWritten && !SERVER_PORTS.includes(port)) {
+      if (runtimeWritten && !staticPorts.includes(port)) {
         let saved = false;
         try { saved = writePortHint(port) === true; } catch {}
         if (!saved) console.warn("Clawd could not save its local server restart port hint");
       }
       console.log(`Clawd state server listening on 127.0.0.1:${port}`);
-      setImmediateFn(() => { syncEnabledStartupIntegrations(); });
+      if (ctx.syncIntegrationsOnStartup !== false) {
+        setImmediateFn(() => { syncEnabledStartupIntegrations(); });
+      }
       settle(port);
     });
     listen();

@@ -1,6 +1,6 @@
 # STATE — Ponto de Retomada do Agent Habitat
 
-**Atualizado:** 2026-11-24 · **Versão atual:** `0.1.0-kickoff` (pré-G0, herdado de `playertwo1/clawd-on-desk@1.6.4`) · **Etapa da vez:** [G0 — Descoberta, Licenças e Isolamento da Base](roadmap/g0-descoberta-e-base.md)
+**Atualizado:** 2026-11-24 · **Versão atual:** `0.1.0` (Gate G0 concluído) · **Etapa da vez:** [G1 — Cabana e Demo](roadmap/g1-cabana-e-demo.md)
 
 Este arquivo registra **apenas** onde estamos, o que aguarda validação do dono e qual é a próxima ação imediata. Para detalhes das etapas, consulte o [ROADMAP](ROADMAP.md).
 
@@ -8,22 +8,22 @@ Este arquivo registra **apenas** onde estamos, o que aguarda validação do dono
 
 | Etapa | Estado |
 |---|---|
-| **Kickoff (`D1`–`D8`)** | **Concluído em 2026-11-24.** Repositório criado em `C:\Users\notefael\projetos\agent-habitat` sobre `playertwo1/clawd-on-desk` (`e216f924`), workflows de GitHub Actions removidos, referências visuais integradas em `docs/referencias_visuais/` e documentação fundacional completa (`PRODUCT`, `DESIGN`, `ARCHITECTURE`, `ROADMAP`, `README`, `CHANGELOG`, `AGENTS` e `questionario`). |
-| **G0** | **Próxima etapa** (`G0.1` → `G0.3`). |
-| **G1 – G5** | Pendentes na fila do MVP. |
+| **Kickoff (`D1`–`D8`)** | **Concluído em 2026-11-24** (`8495b4a0`). Repositório criado sobre `playertwo1/clawd-on-desk` (`e216f924`), zero GitHub Actions, referências visuais e documentação fundacional prontas. |
+| **G0 (`G0.1`–`G0.3`)** | **Concluído em 2026-11-24.** `Arnav8452/atom` auditado (19 pares `.webp`/`.json` em `assets/originals/atom/` + `NOTICE.md`), 6 superfícies Windows comprovadas em `docs/discovery-g0.md` e identidade isolada (`src/habitat-identity.js`, `com.playertwo1.agent-habitat`, portas `23433–23437`, `~/.agent-habitat/runtime.json`, `AGENT_HABITAT_SYNC_HOOKS=0`). |
+| **G1 (`G1.1`–`G1.4`)** | **Próxima etapa** (camadas PNG RGBA da Cozy Cottage, props, manifesto e `Demo Mode` das 8 combinações). |
+| **G2 – G5** | Pendentes na fila do MVP. |
 | **P1 / P2** | Parqueados até o fechamento do G5. |
 
 ## Próxima Ação Imediata
 
-1. **Executar `G0.1` ([`g0-descoberta-e-base.md`](roadmap/g0-descoberta-e-base.md)):** inspecionar `https://github.com/Arnav8452/atom` (`aae0dfe8603a82a699b210dd8c8ca717ebea31f1`), importar os sprites originais do **Atom** para `assets/originals/atom/`, inventariar os assets de **Clawd** e **Cloudling** e registrar tudo em `docs/discovery-g0.md` + `NOTICE.md`.
-2. **Em seguida (`G0.2` e `G0.3`):** comprovar os eventos das 6 superfícies Windows (Claude CLI/Desktop, Codex CLI/Desktop, Antigravity IDE/CLI) e isolar `appId`, porta loopback e marcadores de hook do `agent-habitat` para não conflitar com o `clawd-on-desk`.
+1. **Executar `G1.1` ([`g1-cabana-e-demo.md`](roadmap/g1-cabana-e-demo.md)):** produzir e validar transparência alfa real (zero checkerboard residual) das camadas modulares da Cozy Cottage e props em `assets/habitat/cozy-cottage/`, além do `habitat-manifest.json` com dimensões, pivôs, `doorAnchor` e coordenadas das 3 estações (`T26`).
+2. **Em seguida (`G1.2`–`G1.4`):** integrar os sprites originais de Clawd, Cloudling e Atom, implementar `src/habitat/scene-machine.js` + `Demo Mode` (`000`–`111`) e validar visualmente no desktop.
 
 ## Pendências do Proprietário
 
-- Revisar se a estrutura inicial de documentos e etapas (`G0`–`G5`) está de acordo para darmos a largada no **G0.1**.
-- Durante o **G0.1**, confirmar notas de atribuição/autorização dos autores de **Clawd**, **Cloudling** e **Atom** para registro formal no repositório privado (necessário antes de eventual abertura pública futura).
+- Aprovação visual da Cozy Cottage quando o **G1.4** estiver pronto para captura no desktop real.
 
 ## Notas Técnicas Atuais
 
-- Os testes herdados que exigiam `.github/workflows/*.yml` ou READMEs multilíngues na raiz foram adaptados no kickoff para refletir a política **100% local sem GitHub Actions** e os arquivos arquivados em `docs/herdado-clawd/`.
-- Enquanto `G0.3` não for executado, `package.json` ainda carrega `appId` e portas originais do `clawd-on-desk`; portanto, **não iniciar `npm start` simultaneamente** com o `clawd-on-desk` aberto antes de concluir `G0.3`.
+- O app sobe de forma isolada em dev na porta `23433` (`~/.agent-habitat/runtime.json`, `%APPDATA%\agent-habitat`) sem colidir com o `clawd-on-desk` em execução (`23333`) e sem modificar `~/.claude`, `~/.codex` ou `~/.gemini` (`AGENT_HABITAT_SYNC_HOOKS=0` por padrão até o **G2**).
+- Validações do fechamento do G0: `npm run audit:assets -- --prospective` com `0 error(s), 0 warning(s)`; smoke test real na porta `23433` aprovado; suíte local executada com Python 3.12 no `PATH` (`15747` aprovados, `151` ignorados, `1` falha pré-existente de ACL do `%TEMP%` do sandbox Windows em `test/recap-private-permissions.test.js:588`).
