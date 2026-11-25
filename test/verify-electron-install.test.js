@@ -390,18 +390,10 @@ test("package lifecycle and launch wiring cover install and development entry po
   );
 });
 
-test("repository and CI use the supported Node contract", () => {
+test("repository enforces supported Node contract and local-only CI policy", () => {
   const rootDir = path.join(__dirname, "..");
   const pkg = require("../package.json");
   assert.equal(pkg.engines.node, ">=22.12.0");
   assert.equal(fs.readFileSync(path.join(rootDir, ".nvmrc"), "utf8").trim(), "24.18.0");
-
-  for (const workflowPath of [
-    ".github/workflows/build.yml",
-    ".github/workflows/wayland-smoke.yml",
-  ]) {
-    const workflow = fs.readFileSync(path.join(rootDir, workflowPath), "utf8");
-    assert.match(workflow, /node-version-file:\s*\.nvmrc/);
-    assert.doesNotMatch(workflow, /node-version:\s*20/);
-  }
+  assert.equal(fs.existsSync(path.join(rootDir, ".github", "workflows")), false);
 });

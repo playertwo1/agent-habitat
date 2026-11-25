@@ -95,19 +95,12 @@ test("package scripts cannot fetch, verify, or stage the retired executable", ()
   assert.equal(scriptText.includes("assert-no-retired-telegram-sidecar"), false);
 });
 
-test("the permanent package assertion is present in all build workflows", () => {
-  const release = read(".github/workflows/build.yml");
-  const retirement = read(".github/workflows/telegram-retirement-package-audit.yml");
-  const wayland = read(".github/workflows/wayland-smoke.yml");
-  for (const [name, workflow] of [
-    ["release", release],
-    ["retirement", retirement],
-    ["wayland", wayland],
-  ]) {
-    assert.match(
-      workflow,
-      /scripts\/assert-no-retired-telegram-sidecar\.js/,
-      `${name} workflow must inspect real package resources`,
-    );
-  }
+test("no GitHub Actions workflows exist and package assertion script stays intact", () => {
+  const workflowsDir = path.join(ROOT, ".github", "workflows");
+  assert.equal(fs.existsSync(workflowsDir), false, ".github/workflows must stay absent (local CLI policy)");
+  assert.equal(
+    fs.existsSync(path.join(ROOT, "scripts", "assert-no-retired-telegram-sidecar.js")),
+    true,
+    "local package audit script must remain available for local release checks",
+  );
 });

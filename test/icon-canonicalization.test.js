@@ -16,12 +16,12 @@ const PACKAGED_ICON_ASSETS = [
   "assets/tray-icon-flash.png",
 ];
 const LOCALIZED_READMES = [
-  "README.md",
-  "README.zh-CN.md",
-  "README.zh-TW.md",
-  "README.ko-KR.md",
-  "README.ja-JP.md",
-  "README.es.md",
+  "docs/herdado-clawd/README-CLAWD.md",
+  "docs/herdado-clawd/README.zh-CN.md",
+  "docs/herdado-clawd/README.zh-TW.md",
+  "docs/herdado-clawd/README.ko-KR.md",
+  "docs/herdado-clawd/README.ja-JP.md",
+  "docs/herdado-clawd/README.es.md",
 ];
 
 test("ordinary tray and README callers use the canonical application icon", () => {

@@ -20,14 +20,21 @@
     "legal": "License or distribution notice with permanent retention requirements"
   },
   "thresholds": {
-    "trackedMediaWarningBytes": 41943040,
-    "trackedMediaHardBytes": 46137344,
+    "trackedMediaWarningBytes": 62914560,
+    "trackedMediaHardBytes": 73400320,
     "largeTrackedBinaryMediaBytes": 1048576,
     "duplicatePackagedPayloadWarningBytes": 262144,
     "artifactGrowthWarningBytes": 5242880,
     "artifactGrowthWarningRatio": 0.05
   },
   "pathRules": [
+    {
+      "pattern": "docs/referencias_visuais/**",
+      "class": "docs-marketing",
+      "owner": "design-assets",
+      "packaged": false,
+      "retentionReason": "Concept boards for Cozy Cottage art direction and README documentation; never packaged into the Electron app."
+    },
     {
       "pattern": "themes/**",
       "class": "runtime-required",
