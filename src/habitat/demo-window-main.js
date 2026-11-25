@@ -132,6 +132,17 @@ function runHabitatDemoMode({ app, BrowserWindow, ipcMain, argv, repoRoot }) {
 
     win.loadFile(path.join(__dirname, 'habitat-demo.html'));
 
+    if (!isCapture) {
+      win.webContents.once('did-finish-load', () => {
+        if (!win.isDestroyed()) {
+          win.center();
+          win.show();
+          win.moveTop();
+          win.focus();
+        }
+      });
+    }
+
     // Ticker loop (only when not capture and when not fully idle/closed)
     const tickerInterval = setInterval(() => {
       if (isCapture || idleSent) return;

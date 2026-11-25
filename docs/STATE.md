@@ -1,6 +1,6 @@
 # STATE — Ponto de Retomada do Agent Habitat
 
-**Atualizado:** 2026-11-25 · **Versão atual:** `0.1.0` (Gate G0 concluído) · **Etapa da vez:** [G1 — Cabana e Demo](roadmap/g1-cabana-e-demo.md)
+**Atualizado:** 2026-11-25 · **Versão atual:** `0.1.0` (Gate G1 concluído) · **Etapa da vez:** [G2 — Agregador e Adaptadores](roadmap/g2-agregador-e-adaptadores.md)
 
 Este arquivo registra **apenas** onde estamos, o que aguarda validação do dono e qual é a próxima ação imediata. Para detalhes das etapas, consulte o [ROADMAP](ROADMAP.md).
 
@@ -16,11 +16,11 @@ Este arquivo registra **apenas** onde estamos, o que aguarda validação do dono
 
 ## Próxima Ação Imediata
 
-1. **Inspeção visual do proprietário:** abrir a janela Demo (`npm run demo:habitat`) ou inspecionar os previews em `dist/g1-previews/` para confirmar **G1.4** e autorizar o fechamento do G1 e início do **G2**.
+1. **Implementar Gate G2:** desenvolver `provider-aggregator.js`, adaptadores Windows para as 6 superfícies (Claude Code/Desktop, Codex CLI/Desktop, Antigravity CLI/IDE) e poda de escopo MVP, mantendo os hooks do usuário intactos até o opt-in no G3.
 
 ## Pendências do Proprietário
 
-- Aprovação visual da Cozy Cottage quando o **G1.4** estiver pronto para captura no desktop real.
+- Nenhuma no G1; próxima validação ao vivo será após integração real do G2/G3.
 
 ## Notas Técnicas Atuais
 

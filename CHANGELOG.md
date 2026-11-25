@@ -14,9 +14,10 @@ Todas as mudanças relevantes do **Agent Habitat** são documentadas neste arqui
 - **G0.2 — Matriz comprovada das 6 superfícies Windows:** documentação em `docs/discovery-g0.md` das evidências reais e lacunas para G2 de Claude Code CLI, Claude Desktop (aba Code), Codex CLI, Codex Desktop/extensão IDE, Antigravity CLI (`agy`) e Antigravity IDE / App 2.0 (incluindo prova de `idle` vs `busy`).
 - **G0.3 — Isolamento técnico de identidade e porta:** criação de `src/habitat-identity.js`, atualização de `package.json` (`agent-habitat` v`0.1.0`, `com.playertwo1.agent-habitat`, protocolo `agent-habitat://`, artefatos `Agent-Habitat`), `src/settings-window-icon.js`, `src/updater.js`, `scripts/verify-updater-metadata.js`, `src/server.js`, `src/local-server-port-hint.js` e `src/main.js` para usar portas `23433–23437`, `~/.agent-habitat/runtime.json`, `userData` próprio e `AGENT_HABITAT_SYNC_HOOKS=0` por padrão até o G2, além de `test/habitat-identity.test.js`.
 
-### Planejado (Próximo Gate — G1)
-- Camadas PNG RGBA modulares da Cozy Cottage (`assets/habitat/cozy-cottage/`) e `habitat-manifest.json`.
-- Integração dos sprites originais de Clawd, Cloudling e Atom, máquina de cena das 8 combinações (`000`–`111`) e `Demo Mode`.
+### Planejado (Próximo Gate — G2)
+- Agregador de 3 slots por provedor (`provider-aggregator.js`).
+- Adaptadores Windows para as 6 superfícies (Claude Code/Desktop, Codex CLI/Desktop, Antigravity CLI/IDE).
+- Poda de escopo MVP dos 26 agentes extras/canais remotos.
 
 ## [0.1.0-kickoff] - 2026-11-24
 

@@ -25,8 +25,8 @@ Construir a composição visual completa da **Cozy Cottage** em camadas PNG RGBA
 - [x] Implementar controlador `Demo Mode` explicitamente identificado por badge `[DEMO]` para alternar com 1 clique entre as 8 combinações (`000`–`111`), pedido de permissão, erro, conclusão e modo movimento reduzido (`T27`).
 
 ### G1.4 — Validação visual humana no desktop (Checkpoint do dono)
-- [ ] Rodar no Windows sobre papel de parede claro e escuro, conferindo recorte alfa, proporção da cabana, legibilidade dos 3 personagens e conforto visual parado (`000`) e cheio (`111`).
+- [x] Rodar no Windows sobre papel de parede claro e escuro, conferindo recorte alfa, proporção da cabana, legibilidade dos 3 personagens e conforto visual parado (`000`) e cheio (`111`). — Aprovado visualmente ao vivo pelo proprietário em 2026-11-25 (Cozy Cottage — Demo Mode, PID 53540, HWND 5770466).
 
 ## Critério de Saída (Checkpoint G1)
 - [x] Testes unitários da máquina de cena e validador de manifest passando (`npm test`).
-- [ ] Capturas reais das 8 combinações registradas e aprovadas visualmente pelo proprietário.
+- [x] Capturas reais das 8 combinações registradas e aprovadas visualmente pelo proprietário em 2026-11-25.
