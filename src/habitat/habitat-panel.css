@@ -9,6 +9,8 @@
   outline: 2px solid #FFC45C;
   outline-offset: 2px;
 }
+
+:root {
   --bg-color: #24232A;
   --surface-color: #2E2C36;
   --border-color: #3E3B49;

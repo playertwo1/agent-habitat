@@ -525,6 +525,37 @@ function runHabitatAppMode(electron) {
     }
   }
 
+  // Fora do whenReady: togglePanel, cards, before-quit e applyPrefsChanges também as usam (só após o app pronto).
+  function getDisplaysSnapshot() {
+    return {
+      displays: screen.getAllDisplays(),
+      primaryDisplay: screen.getPrimaryDisplay(),
+      getDisplayMatching: (b) => screen.getDisplayMatching(b)
+    };
+  }
+
+  function relayoutWindows() {
+    if (!renderWin || renderWin.isDestroyed()) return;
+    const scale = prefs.scale || 1.5;
+    const savedPos = renderWin.getBounds();
+    const safeBounds = computeSafeStageBounds({
+      manifest: manifestData,
+      scale,
+      savedPosition: savedPos,
+      ...getDisplaysSnapshot()
+    });
+    renderWin.setBounds(safeBounds);
+    if (hitWin && !hitWin.isDestroyed()) {
+      hitWin.setBounds(safeBounds);
+    }
+    prefs = saveHabitatPrefs({ filePath: prefsPath, patch: { windowPosition: { x: safeBounds.x, y: safeBounds.y } } });
+    if (panelWin && !panelWin.isDestroyed()) {
+      const workArea = resolveTargetDisplayWorkArea({ bounds: safeBounds, ...getDisplaysSnapshot() });
+      const panelBounds = computeSafePanelBounds({ stageBounds: safeBounds, panelWidth: 480, panelHeight: 640, workArea });
+      panelWin.setBounds(panelBounds);
+    }
+  }
+
   app.whenReady().then(async () => {
     const runtimeConfigPath = defaultHabitatRuntimeConfigPath();
     const serverCtx = buildHabitatServerContext({
@@ -548,14 +579,6 @@ function runHabitatAppMode(electron) {
     const scale = prefs.scale || 1.5;
     const canvasWidth = manifestData.canvas.width;
     const canvasHeight = manifestData.canvas.height;
-
-    function getDisplaysSnapshot() {
-      return {
-        displays: screen.getAllDisplays(),
-        primaryDisplay: screen.getPrimaryDisplay(),
-        getDisplayMatching: (b) => screen.getDisplayMatching(b)
-      };
-    }
 
     const initialBounds = computeSafeStageBounds({
       manifest: manifestData,
@@ -639,28 +662,6 @@ function runHabitatAppMode(electron) {
     tray.on("click", () => {
       togglePanel();
     });
-
-    function relayoutWindows() {
-      if (!renderWin || renderWin.isDestroyed()) return;
-      const scale = prefs.scale || 1.5;
-      const savedPos = renderWin.getBounds();
-      const safeBounds = computeSafeStageBounds({
-        manifest: manifestData,
-        scale,
-        savedPosition: savedPos,
-        ...getDisplaysSnapshot()
-      });
-      renderWin.setBounds(safeBounds);
-      if (hitWin && !hitWin.isDestroyed()) {
-        hitWin.setBounds(safeBounds);
-      }
-      prefs = saveHabitatPrefs({ filePath: prefsPath, patch: { windowPosition: { x: safeBounds.x, y: safeBounds.y } } });
-      if (panelWin && !panelWin.isDestroyed()) {
-        const workArea = resolveTargetDisplayWorkArea({ bounds: safeBounds, ...getDisplaysSnapshot() });
-        const panelBounds = computeSafePanelBounds({ stageBounds: safeBounds, panelWidth: 480, panelHeight: 640, workArea });
-        panelWin.setBounds(panelBounds);
-      }
-    }
 
     screen.on("display-added", relayoutWindows);
     screen.on("display-removed", relayoutWindows);
