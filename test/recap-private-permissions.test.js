@@ -589,6 +589,16 @@ test("Windows ACL helper leaves an unmanaged root entry's ACL unchanged", {
   skip: process.platform !== "win32",
 }, (t) => {
   const parent = fs.mkdtempSync(path.join(os.tmpdir(), "clawd-recap-acl-unknown-"));
+  // ACL determinística: ACEs extras herdadas do %TEMP% da máquina seriam re-propagadas pelo Windows ao endurecer a raiz.
+  runWindowsTool(windowsSystemTool("icacls.exe"), [
+    parent,
+    "/inheritance:r",
+    "/grant:r",
+    `*${currentWindowsUserSid()}:(OI)(CI)F`,
+    "*S-1-5-18:(OI)(CI)F",
+    "*S-1-5-32-544:(OI)(CI)F",
+    "/Q",
+  ]);
   const root = path.join(parent, "recap-v1");
   const unknown = path.join(root, "keep-user-file.txt");
   fs.mkdirSync(root);

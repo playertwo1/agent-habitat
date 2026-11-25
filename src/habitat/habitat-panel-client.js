@@ -330,7 +330,7 @@
 
   if (btnUninstallHooks) {
     btnUninstallHooks.addEventListener("click", () => {
-      if (confirm("Deseja realmente remover os ganchos de integração e restaurar os backups?")) {
+      if (confirm("Deseja realmente remover os ganchos de integração do Habitat? (os demais hooks são preservados e um backup .bak é criado)")) {
         bridge.uninstallHooks().then(res => {
           if (res && res.state) render(res.state);
           alert(res && res.message ? res.message : "Ganchos removidos com sucesso.");

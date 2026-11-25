@@ -2,6 +2,29 @@
 
 This project includes third-party materials.
 
+## clawd-on-desk (base do projeto)
+
+Agent Habitat (Cozy Cottage Edition) é derivado de `playertwo1/clawd-on-desk`,
+commit `e216f924` (`v1.6.4`), que tem origem em `rullerzhou-afk/clawd-on-desk`.
+O código-fonte é licenciado sob **AGPL-3.0-only** (texto completo em
+[`LICENSE`](LICENSE)).
+
+- https://github.com/playertwo1/clawd-on-desk
+- https://github.com/rullerzhou-afk/clawd-on-desk
+
+## Clawd e Cloudling (artes)
+
+Os sprites de **Clawd** e **Cloudling** são artes de personagens e não estão
+cobertos pela licença AGPL-3.0 do código. Seus direitos são dos respectivos
+autores/detentores, conforme [`assets/LICENSE`](assets/LICENSE) e
+[`docs/REFERENCIAS_GITHUB.md`](docs/REFERENCIAS_GITHUB.md). Cloudling: 鹿鹿
+(`@rullerzhou-afk`).
+
+## Ícone do aplicativo
+
+O ícone do aplicativo (`assets/icon.png` e `assets/icon.ico`) é derivado das
+camadas da Cozy Cottage do próprio projeto.
+
 ## Fluent Emoji palette and paintbrush
 
 The palette and paintbrush embedded in `assets/svg/clawd-designing.svg` are

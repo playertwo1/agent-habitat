@@ -14,16 +14,16 @@ Este arquivo registra **apenas** onde estamos, o que aguarda validação do dono
 | **G2 (`G2.1`–`G2.3`)** | **Concluído em 2026-11-25.** `provider-aggregator.js` (`T09`–`T19`), adaptadores das 6 superfícies Windows, `agent-habitat-hook.js`, `habitat-hook-sync.js` (schemas reais Claude/Codex/Antigravity sem tocar em `$HOME`), `habitat-runtime.js` + rotas `/habitat/event` e `/habitat/snapshot`, e poda MVP (`mvp-scope.js` + bloqueio de canais remotos no `main.js`). |
 | **G3 (`G3.1`–`G3.4`)** | **Concluído em 2026-11-25.** Cabana dual-window integrada (`renderWin` + `hitWin` dinâmico), agregador ligado aos 3 adaptadores reais, painel pt-BR, cards locais (`D3`), validação ao vivo `000 -> 111 -> 000` e suíte verde. |
 | **G4 (`G4.1`–`G4.3`)** | **Concluído em 2026-11-25.** Hardening Windows concluído: DPI `100–200%`, multi-monitor, tela cheia (`WS_EX_NOACTIVATE`), soak test de 1 h e medição de CPU/RAM (`docs/evidencias-g4.md`), hooks reversíveis com backup e auditoria de segurança/privacidade (`T24`–`T28`). |
-| **G5** | **Próximo.** Ícone final, build NSIS Windows x64/arm64 local, checksum SHA-256, auditoria de pacote/licenças e release `v0.1.0` em `playertwo1/agent-habitat`. |
+| **G5** | **G5.1 concluído em 2026-11-25:** ícone Cozy Cottage, docs de release, `scripts/release-local.ps1` validado ponta a ponta (testes verdes, NSIS x64/arm64, auditoria nativa, `SHA256SUMS.txt`). **G5.2 pendente:** instalação real validada pelo proprietário e release `v0.1.0`. |
 | **P1 / P2** | Parqueados até o fechamento do G5. |
 
 ## Próxima Ação Imediata
 
-1. **Preparar e executar Gate G5 (`docs/roadmap/g5-release-local.md`):** empacotamento NSIS local, checksums SHA-256, auditoria final e publicação da release `v0.1.0`.
+1. **G5.2:** encerrar só a instância dev do `agent-habitat` (nunca o `clawd-on-desk`), instalar `dist/Agent-Habitat-Setup-0.1.0-x64.exe`, validar primeiro boot (`000`), ativação real, fechamento e desinstalação; então tag `v0.1.0` e `gh release create` local.
 
 ## Pendências do Proprietário
 
-- Nenhuma pendência para o G4. Autorizado empacotamento local no G5.
+- Confirmação visual da instalação real do instalador `v0.1.0` (G5.2).
 
 ## Notas Técnicas Atuais
 

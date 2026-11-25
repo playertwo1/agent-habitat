@@ -4,6 +4,14 @@ Todas as mudanças relevantes do **Agent Habitat** são documentadas neste arqui
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-25
+
+### Concluído (Gate G5.1 — Ícone, metadados e build local — 2026-11-25)
+- **Ícone oficial Cozy Cottage:** `assets/icon.png` (1024×1024 RGBA com canal alfa) e `assets/icon.ico` para a bandeja, o instalador NSIS e o atalho do Windows, gerados por `tools/generate-habitat-icon.py`.
+- **Script de release local:** `scripts/release-local.ps1` executa a suíte de testes, a auditoria de assets, o build NSIS `x64`/`arm64`, a auditoria nativa do pacote extraído e gera o `SHA256SUMS.txt` — tudo localmente via CLI, sem GitHub Actions.
+- **Suíte 100% verde:** corrigidos 11 testes herdados do fork que dependiam do ambiente da máquina (hooks Claude em exec form, CLI `hermes` real e ACL do `%TEMP%`).
+- **Painel:** botão "Remover Conectores do Habitat" com texto fiel ao comportamento (remove só as entradas do Habitat e cria `.bak`; não restaura backup).
+
 ### Concluído (Gate G4 — Hardening Windows, DPI, Economia em 000, Hooks Reversíveis e Acessibilidade — 2026-11-25)
 - **G4.1 — DPI, Multi-Monitor e Tela Cheia (`T20`–`T22`):** validação de layout em escalas de `100%` a `200%`, clamping de painéis em monitores secundários e comportamento robusto de ocultação em fullscreen com `WS_EX_NOACTIVATE`.
 - **G4.2 — Desempenho e Estabilidade de Longa Duração (`T23`):** medição de CPU/RAM em soak test equivalente a 1 h (`tools/measure-habitat-g4.js`, PID `47136` / PID `13680`), comprovando repouso eficiente e zero vazamento de memória (`+0.80 MiB` heap delta).

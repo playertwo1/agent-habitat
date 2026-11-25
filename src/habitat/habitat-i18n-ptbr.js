@@ -56,7 +56,7 @@ const HABITAT_PTBR = Object.freeze({
     hooksSectionTitle: "Integração opcional por conectores",
     hooksWarning: "Aviso: Esta operação grava ganchos de integração locais e cria um backup .agent-habitat-*.bak antes de alterar qualquer configuração. Requer confirmação explícita.",
     requestSyncBtn: "Sincronizar Conectores (Requer Confirmação)",
-    uninstallHooksBtn: "Remover Conectores e Restaurar Backup",
+    uninstallHooksBtn: "Remover Conectores do Habitat",
     confirmSyncModalTitle: "Confirmar Sincronização de Conectores",
     confirmSyncModalText: "Deseja realmente aplicar os ganchos de integração local e criar arquivos de backup?",
     confirmYes: "Sim, sincronizar conectores",

@@ -42,7 +42,7 @@ describe("#1026 r1 cleanupIntegrations structured-result mapping", () => {
       JSON.stringify({ plugin: [copy.replace(/\\/g, "/")] }, null, 2)
     );
 
-    const result = await cleanupIntegrations({ homeDir: home, silent: true });
+    const result = await cleanupIntegrations({ homeDir: home, silent: true, hermesCommand: false });
     const agent = opencodeAgent(result);
     assert.strictEqual(agent.status, "failed");
     assert.strictEqual(agent.registrationRemoved, false);
@@ -60,7 +60,7 @@ describe("#1026 r1 cleanupIntegrations structured-result mapping", () => {
     fs.mkdirSync(path.join(home, ".config", "opencode"), { recursive: true });
     registerOpencodePlugin({ silent: true, v2Host: "v2", homeDir: home });
 
-    const result = await cleanupIntegrations({ homeDir: home, silent: true });
+    const result = await cleanupIntegrations({ homeDir: home, silent: true, hermesCommand: false });
     const agent = opencodeAgent(result);
     assert.strictEqual(agent.registrationRemoved, true);
     assert.strictEqual(agent.activeEntryRemaining, false);

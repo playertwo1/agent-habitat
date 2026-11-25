@@ -58,6 +58,8 @@ scripts/apt/__pycache__/
 !scripts/generate-mac-tray-icons.js
 !scripts/generate-readme-contributors.js
 !scripts/update-official-theme-catalog-snapshot.js
+# Pipeline local de release do Agent Habitat (G5)
+!scripts/release-local.ps1
 !scripts/manual/
 scripts/manual/*
 !scripts/manual/README.md

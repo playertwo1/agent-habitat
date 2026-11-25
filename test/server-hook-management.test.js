@@ -1916,7 +1916,9 @@ function clawdHookCommandCount(settingsPath) {
     if (!Array.isArray(entries)) continue;
     for (const entry of entries) {
       for (const hook of Array.isArray(entry.hooks) ? entry.hooks : [entry]) {
-        if (hook && typeof hook.command === "string" && hook.command.includes("clawd-hook.js")) count++;
+        // Windows + Claude Code recente instalado grava exec form: { command: node.exe, args: [".../clawd-hook.js"] }.
+        const parts = [hook && hook.command, ...(hook && Array.isArray(hook.args) ? hook.args : [])];
+        if (parts.some((part) => typeof part === "string" && part.includes("clawd-hook.js"))) count++;
       }
     }
   }

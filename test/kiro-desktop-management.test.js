@@ -118,12 +118,12 @@ test("kiro-desktop: aggregate cleanup passes the isolated home and preserves for
   assert.equal(AGENT_CLEANERS["kiro-desktop"](plan.byAgent["kiro-desktop"]).removed, 5);
   assert.equal(fs.existsSync(f.hooksPath), false);
   registerKiroDesktopHooks(f.options);
-  const result = await cleanupIntegrations({ homeDir: f.homeDir, env: {}, silent: true, agentIds: ["kiro-desktop"] });
+  const result = await cleanupIntegrations({ homeDir: f.homeDir, env: {}, silent: true, agentIds: ["kiro-desktop"], hermesCommand: false });
   const entry = result.agents.find(agent => agent.agentId === "kiro-desktop");
   assert.equal(entry.registrationRemoved, true);
   assert.equal(fs.existsSync(f.hooksPath), false);
   fs.writeFileSync(f.hooksPath, "{");
-  const failed = await cleanupIntegrations({ homeDir: f.homeDir, env: {}, silent: true, agentIds: ["kiro-desktop"] });
+  const failed = await cleanupIntegrations({ homeDir: f.homeDir, env: {}, silent: true, agentIds: ["kiro-desktop"], hermesCommand: false });
   const failure = failed.agents.find(agent => agent.agentId === "kiro-desktop");
   assert.equal(failure.status, "failed");
   assert.equal(failure.registrationRemoved, null);
