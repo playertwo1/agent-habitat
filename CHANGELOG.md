@@ -4,6 +4,11 @@ Todas as mudanças relevantes do **Agent Habitat** são documentadas neste arqui
 
 ## [Unreleased]
 
+### Concluído (Gate G3 — 2026-11-25)
+- **G3.1 — Cena ligada a eventos reais e `hitWin` dinâmico (`T21`):** integrado o agregador de provedores à máquina de cena e atualização dinâmica de `setShape` no `hitWin`.
+- **G3.2 — Painel compacto do Habitat e menu em pt-BR (`D8`):** painel acolhedor em `#24232A` com saúde dos 3 provedores, sessões, último evento e botão de foco, mais menu de bandeja e Ajustes 100% traduzidos em pt-BR.
+- **G3.3 — Foco de janela e cards locais opcionais (`D3`, `T12`):** cards locais de permissão/conclusão ancorados harmoniosamente à cabana e foco interativo de janelas.
+
 ### Concluído (Gate G2 — 2026-11-25)
 - **G2.1 — Agregador por provedor e invariantes (`T09`–`T19`):** implementado em `src/habitat/provider-aggregator.js`, agregando sessões por provedor (`claude`, `codex`, `antigravity`) com prioridade correta e distinção estrita entre `idle` (dentro) e tarefa ativa (fora).
 - **G2.2 — Adaptadores Windows e Runtime (`D4`):** criados `src/habitat/habitat-adapters.js`, `hooks/agent-habitat-hook.js`, `src/habitat/habitat-hook-sync.js` (schemas reais Claude/Codex/Antigravity sem tocar em `$HOME` por padrão) e `src/habitat/habitat-runtime.js` (`/habitat/event`, `/habitat/snapshot`), além de blindagem do sync legado no `server.js`.
