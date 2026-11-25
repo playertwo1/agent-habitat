@@ -1290,7 +1290,67 @@ function routeHttpRequest(req, res, remoteProfile = null) {
       res.end("not found");
       return;
     }
-    if (req.method === "GET" && req.url === "/state") {
+    if (req.method === "GET" && req.url === "/habitat/snapshot") {
+      if (remoteProfile) {
+        res.writeHead(404);
+        res.end();
+      } else if (!ctx.habitatRuntime) {
+        res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+        res.end(JSON.stringify({ schema: 1, mode: "observed", error: "habitat_runtime_not_loaded" }));
+      } else {
+        res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+        res.end(JSON.stringify(ctx.habitatRuntime.getSnapshot()));
+      }
+    } else if (req.method === "POST" && req.url === "/habitat/event") {
+      if (!remoteProfile && rejectUnsafeLocalHookRequest(req, res, "/habitat/event")) return;
+      if (!ctx.habitatRuntime) {
+        res.writeHead(503, { "Content-Type": "application/json; charset=utf-8" });
+        res.end(JSON.stringify({ ok: false, error: "habitat_runtime_not_loaded" }));
+        req.resume();
+        return;
+      }
+      const MAX_HABITAT_EVENT_BYTES = 16 * 1024;
+      const chunks = [];
+      let size = 0;
+      req.on("data", chunk => {
+        size += chunk.length;
+        if (size > MAX_HABITAT_EVENT_BYTES) {
+          chunks.length = 0;
+          res.writeHead(413, { "Content-Type": "application/json; charset=utf-8" });
+          res.end(JSON.stringify({ ok: false, error: "payload_too_large" }));
+          req.destroy();
+        } else {
+          chunks.push(chunk);
+        }
+      });
+      req.on("end", () => {
+        if (res.destroyed || res.writableEnded) return;
+        let parsed;
+        try {
+          parsed = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+        } catch {
+          res.writeHead(400, { "Content-Type": "application/json; charset=utf-8" });
+          res.end(JSON.stringify({ ok: false, error: "invalid_json" }));
+          return;
+        }
+        let result = null;
+        try {
+          result = ctx.habitatRuntime.handleHttpEvent(parsed);
+        } catch (err) {
+          res.writeHead(500, { "Content-Type": "application/json; charset=utf-8" });
+          res.end(JSON.stringify({ ok: false, error: err && err.message ? err.message : "internal_error" }));
+          return;
+        }
+        res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+        res.end(JSON.stringify({ ok: true, accepted: Boolean(result && result.accepted) }));
+      });
+      req.on("error", () => {
+        if (!res.destroyed && !res.writableEnded) {
+          res.writeHead(500, { "Content-Type": "application/json; charset=utf-8" });
+          res.end(JSON.stringify({ ok: false, error: "stream_error" }));
+        }
+      });
+    } else if (req.method === "GET" && req.url === "/state") {
       sendStateHealthResponse(res, { getHookServerPort });
     } else if (req.method === "POST" && req.url === "/state") {
       if (!remoteProfile && rejectUnsafeLocalHookRequest(req, res, "/state")) return;
@@ -1429,7 +1489,7 @@ function startHttpServer() {
         if (!saved) console.warn("Clawd could not save its local server restart port hint");
       }
       console.log(`Clawd state server listening on 127.0.0.1:${port}`);
-      if (ctx.syncIntegrationsOnStartup !== false) {
+      if (ctx.syncIntegrationsOnStartup === true || (!ctx.habitatRuntime && ctx.syncIntegrationsOnStartup !== false)) {
         setImmediateFn(() => { syncEnabledStartupIntegrations(); });
       }
       settle(port);

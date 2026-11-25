@@ -4,6 +4,14 @@ Todas as mudanças relevantes do **Agent Habitat** são documentadas neste arqui
 
 ## [Unreleased]
 
+### Concluído (Gate G2 — 2026-11-25)
+- **G2.1 — Agregador por provedor e invariantes (`T09`–`T19`):** implementado em `src/habitat/provider-aggregator.js`, agregando sessões por provedor (`claude`, `codex`, `antigravity`) com prioridade correta e distinção estrita entre `idle` (dentro) e tarefa ativa (fora).
+- **G2.2 — Adaptadores Windows e Runtime (`D4`):** criados `src/habitat/habitat-adapters.js`, `hooks/agent-habitat-hook.js`, `src/habitat/habitat-hook-sync.js` (schemas reais Claude/Codex/Antigravity sem tocar em `$HOME` por padrão) e `src/habitat/habitat-runtime.js` (`/habitat/event`, `/habitat/snapshot`), além de blindagem do sync legado no `server.js`.
+- **G2.3 — Poda MVP e isolamento (`D3`, `D4`):** implementado `src/habitat/mvp-scope.js` e bloqueio de canais remotos/agentes extras no `main.js`.
+
+### Planejado (Próximo Gate — G3)
+- Conectar telemetria real à cabana, `hitWin` dinâmico, painel sob demanda em pt-BR com opt-in de hooks e validação ao vivo nos 3 apps reais.
+
 ### Concluído (Gate G1.1–G1.3 — 2026-11-25)
 - **G1.1 — Camadas modulares da Cozy Cottage e props (`D6`):** produção e validação das camadas PNG RGBA em `assets/habitat/cozy-cottage/` (base de jardim, estrutura, janelas amber/night, porta com estados de transição, chaminé com fumaça e lampião, e props das 3 estações) mais `habitat-manifest.json` com limites e âncoras validados por `T26`.
 - **G1.2 — Integração visual dos 3 moradores originais (`D5`):** mapeamento dos clipes originais de Clawd, Cloudling e Atom com ordenação Z por pivô de pé e nitidez pixel-art nas escalas `1×`, `1.5×` e `2×`.

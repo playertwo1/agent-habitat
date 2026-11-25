@@ -3331,7 +3331,17 @@ const _serverCtx = {
   },
 };
 const localServerPortHint = require("./local-server-port-hint");
+let habitatRuntime = null;
+try {
+  habitatRuntime = require("./habitat/habitat-runtime").createHabitatRuntime({
+    repoRoot: path.join(__dirname, ".."),
+  });
+} catch (err) {
+  console.warn("Agent Habitat runtime init failed:", err && err.message);
+}
+
 Object.assign(_serverCtx, {
+  habitatRuntime,
   runtimeConfigPath: defaultHabitatRuntimeConfigPath(),
   getPortCandidates: () => HABITAT_SERVER_PORTS,
   staticServerPorts: HABITAT_SERVER_PORTS,
@@ -6352,13 +6362,20 @@ if (!gotTheLock) {
     recordWindowsProcessChainShadow = createWindowsProcessChainShadowLogger({
       filePath: path.join(app.getPath("userData"), "windows-process-chain-shadow.log"),
     });
-    const telegramMigrationInit = initTelegramMigrationController().catch((err) => {
+    const habitatRemoteDisabled = HABITAT_APP_NAME === "agent-habitat" && process.env.AGENT_HABITAT_ENABLE_REMOTE !== "1";
+    const telegramMigrationInit = habitatRemoteDisabled ? Promise.resolve(null) : initTelegramMigrationController().catch((err) => {
       console.warn("Clawd: migration controller init failed:", err && err.message);
       return null;
     });
-    try { syncDiscordPresence("startup"); }
+    try {
+      if (!habitatRemoteDisabled) {
+        syncDiscordPresence("startup");
+      }
+    }
     catch (err) { console.warn("Clawd: discord presence startup failed:", err && err.message); }
-    queueFeishuApprovalSync("startup");
+    if (!habitatRemoteDisabled) {
+      queueFeishuApprovalSync("startup");
+    }
     createWindow();
     try { recapRuntime.start(); }
     catch (err) { console.warn("Clawd: local recap startup failed:", err && err.code ? err.code : "storage-error"); }
@@ -6379,15 +6396,17 @@ if (!gotTheLock) {
       console.warn("Clawd: Kimi quota startup reconciliation failed:", err && err.message);
     });
     notifyPrefsAuthorityFailure();
-    if (feishuApprovalMigrationNudge) {
+    if (feishuApprovalMigrationNudge && !habitatRemoteDisabled) {
       void feishuApprovalMigrationNudge.sync({ allowNotify: true });
     }
-    void telegramMigrationInit.then((controller) => {
-      if (!controller || !telegramMigrationNudge) return;
-      return telegramMigrationNudge.sync({ allowNotify: true });
-    }).catch((err) => {
-      console.warn("Clawd: Telegram migration startup nudge failed:", err && err.message);
-    });
+    if (!habitatRemoteDisabled) {
+      void telegramMigrationInit.then((controller) => {
+        if (!controller || !telegramMigrationNudge) return;
+        return telegramMigrationNudge.sync({ allowNotify: true });
+      }).catch((err) => {
+        console.warn("Clawd: Telegram migration startup nudge failed:", err && err.message);
+      });
+    }
     holidayAccessoryRuntime.start();
     // WSL agent detection is NOT started here: scanning runs a command inside
     // every installed distro, which boots each stopped VM — too aggressive for
@@ -6532,6 +6551,9 @@ if (!gotTheLock) {
     if (_codexRemoteFallbackNotice) _codexRemoteFallbackNotice.dispose();
     claudeTurnAskReminder.dispose();
     _perm.cleanup();
+    if (habitatRuntime && typeof habitatRuntime.dispose === "function") {
+      habitatRuntime.dispose();
+    }
     _server.cleanup();
     if (_lanWss) _lanWss.cleanup();
     _updateBubble.cleanup();
