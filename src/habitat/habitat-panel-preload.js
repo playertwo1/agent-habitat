@@ -17,6 +17,7 @@ contextBridge.exposeInMainWorld("habitatPanel", {
   triggerDemoPreset: (presetId) => ipcRenderer.invoke("habitat:trigger-demo-preset", presetId),
   stopDemo: () => ipcRenderer.invoke("habitat:stop-demo"),
   focusProvider: (providerId) => ipcRenderer.invoke("habitat:focus-provider", providerId),
+  resumeSession: (req) => ipcRenderer.invoke("habitat:resume-session", req),
   refreshDiagnostics: () => ipcRenderer.invoke("habitat:refresh-diagnostics"),
   requestHookSync: (options) => ipcRenderer.invoke("habitat:request-hook-sync", options),
   uninstallHooks: () => ipcRenderer.invoke("habitat:uninstall-hooks"),

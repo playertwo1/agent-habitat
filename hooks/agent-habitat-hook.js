@@ -212,6 +212,7 @@ async function main() {
     pid: process.pid,
     ...(ppid !== null ? { ppid } : {}),
     cwdName,
+    ...(typeof stdinData.cwd === "string" && stdinData.cwd.length <= 500 ? { cwd: stdinData.cwd } : {}),
     entrypoint: stdinData.entrypoint || process.env.CLAUDE_CODE_ENTRYPOINT || "",
     originator: stdinData.originator || process.env.AGENT_HABITAT_ORIGINATOR || "",
     timestampMs: Date.now(),

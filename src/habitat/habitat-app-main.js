@@ -26,6 +26,9 @@ const { createForegroundFullscreenProbe } = require("../win-fullscreen-detect");
 
 const { readHabitatQuota } = require("./habitat-quota-reader");
 const { createUsageCounter } = require("./habitat-usage-counter");
+const { createHistoryStore, buildHistoryView, resumeHistorySession } = require("./habitat-history");
+const { probeTranscript } = require("../session-history-loader");
+const { launchClaudeSession } = require("../launch-claude");
 
 function resolveHabitatAppPaths(baseDir = __dirname) {
   const repoRoot = path.join(baseDir, "../..");
@@ -259,7 +262,7 @@ function resolveAggregatorSession(runtime, fullSnap, providerId) {
   return null;
 }
 
-function buildHabitatPanelState({ prefs, demoMode, runtime, demoSceneMachine, diagnostics, quota, usage } = {}) {
+function buildHabitatPanelState({ prefs, demoMode, runtime, demoSceneMachine, diagnostics, quota, usage, history } = {}) {
   const now = Date.now();
   const fullSnap = runtime && typeof runtime.getSnapshot === "function" ? runtime.getSnapshot(now) : null;
   const demoSnap = demoMode && demoSceneMachine && typeof demoSceneMachine.getSnapshot === "function"
@@ -292,6 +295,7 @@ function buildHabitatPanelState({ prefs, demoMode, runtime, demoSceneMachine, di
     demoMode: !!demoMode,
     residents: residentList,
     metrics: { quota: quota || null, usage: usage || null },
+    history: history || [],
     diagnostics: diagnostics || computeHabitatDiagnostics(runtime, { inspectLiveProcesses: false })
   };
 }
@@ -332,6 +336,13 @@ function runHabitatAppMode(electron) {
   const prefsPath = path.join(path.dirname(defaultHabitatRuntimeConfigPath()), "prefs.json");
   let prefs = loadHabitatPrefs(prefsPath);
   const usageCounter = createUsageCounter({ filePath: path.join(path.dirname(prefsPath), "usage.json") });
+  const historyStore = createHistoryStore({ filePath: path.join(path.dirname(prefsPath), "history.json") });
+  const historyDeps = () => ({
+    now: Date.now(),
+    probe: probeTranscript,
+    dirExists: (p) => { try { return fs.statSync(p).isDirectory(); } catch { return false; } },
+    launch: (mode, cwd, sessionId) => launchClaudeSession(mode, cwd, sessionId)
+  });
 
   let renderWin = null;
   let hitWin = null;
@@ -395,7 +406,7 @@ function runHabitatAppMode(electron) {
     manifestPath,
     reducedMotion: !!prefs.reducedMotion,
     onActivity: () => { if (stageLoop) stageLoop.wake(); },
-    onAcceptedEvent: (evt, nowMs) => usageCounter.record(evt, nowMs),
+    onAcceptedEvent: (evt, nowMs) => { usageCounter.record(evt, nowMs); historyStore.record(evt, nowMs); },
     onPermissionRequest: async (payload) => {
       if (!prefs.cardsEnabled || demoMode) return "ask";
       if (!renderWin || renderWin.isDestroyed()) return "ask";
@@ -448,7 +459,8 @@ function runHabitatAppMode(electron) {
       demoSceneMachine,
       diagnostics: lastDiagnostics,
       quota: readHabitatQuota(),
-      usage: { today: usageCounter.getUsage("today"), week: usageCounter.getUsage("7d") }
+      usage: { today: usageCounter.getUsage("today"), week: usageCounter.getUsage("7d") },
+      history: buildHistoryView(historyStore, historyDeps())
     });
   }
 
@@ -786,6 +798,11 @@ function runHabitatAppMode(electron) {
     ipcMain.handle("habitat:focus-provider", async (event, provider) => {
       const res = await focusProviderSession(provider);
       return { ok: Boolean(res && res.ok), method: res && res.method, pid: res && res.pid };
+    });
+
+    ipcMain.handle("habitat:resume-session", async (event, req) => {
+      if (!req || typeof req.provider !== "string" || typeof req.sessionId !== "string") return { ok: false, reason: "pedido-invalido" };
+      return resumeHistorySession(historyStore, req, historyDeps());
     });
 
     ipcMain.handle("habitat:refresh-diagnostics", () => {

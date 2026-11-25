@@ -112,7 +112,7 @@ function createHabitatRuntime(options = {}) {
     }
     if (accepted && onAcceptedEvent) {
       try {
-        onAcceptedEvent({ provider, sessionId: normalized.sessionId, event: normalized.event }, nowMs);
+        onAcceptedEvent({ provider, sessionId: normalized.sessionId, event: normalized.event, cwd: rawPayload.cwd }, nowMs);
       } catch {}
     }
 

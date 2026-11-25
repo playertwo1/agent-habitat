@@ -14,6 +14,7 @@
       </div>
       <div class="habitat-tabs" role="tablist" aria-label="Abas do Habitat">
         <button role="tab" id="tab-residents" aria-selected="true" aria-controls="panel-residents" tabindex="0" class="tab-btn active">Moradores</button>
+        <button role="tab" id="tab-history" aria-selected="false" aria-controls="panel-history" tabindex="-1" class="tab-btn">Histórico</button>
         <button role="tab" id="tab-settings" aria-selected="false" aria-controls="panel-settings" tabindex="-1" class="tab-btn">Ajustes</button>
       </div>
     </header>
@@ -45,6 +46,12 @@
         <div class="residents-grid" id="residents-grid">
           <!-- Inserido dinamicamente via client.js -->
         </div>
+      </section>
+
+      <!-- Aba Histórico -->
+      <section id="panel-history" role="tabpanel" aria-labelledby="tab-history" class="tab-panel" hidden>
+        <p class="warning-text">Últimas 10 sessões do Claude e do Codex vistas pelo Habitat. Só o Claude pode ser retomado, e só com o seu clique.</p>
+        <div id="history-list" class="history-list"></div>
       </section>
 
       <!-- Aba Ajustes -->

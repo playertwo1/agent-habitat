@@ -19,7 +19,7 @@ Este arquivo é só um índice. Para trabalhar numa fase, leia apenas o document
 
 ## Regras da etapa
 - **Uma fase por vez, na ordem da tabela.** Só marque `[x]` com evidência executada agora.
-- **Instalar e conferir antes de seguir:** ao fim de cada fase, gerar o instalador x64 (`scripts/release-local.ps1 -SkipArm64`), instalar e conferir o app instalado pela porta de depuração (CDP), porque nenhum teste abre o Electron (lição do G5). Sem isso, a fase não fecha.
+- **Build só no fim (decisão de 25/11/2026):** nenhuma fase gera instalador. Cada fase fecha com a suíte verde (e, no que for visual, conferência em `npm start`); as conferências no app instalado marcadas "(no fim)" nas fases ficam para a verificação única do CP-P1, com um só `release-local.ps1` e conferência pelo CDP de tudo (cotas, histórico e retomada, ajudantes, jardim).
 - As fases P1.3 e P1.4 começam por **protótipo visual** aprovado pelo dono antes de qualquer ligação a eventos.
 - **Release (CP-P1):** só depois de P1.1 a P1.4 fechadas: suíte verde, `release-local.ps1` completo, remoção de conectores e desinstalação conferidas, tag `v0.2.0` no commit certo (conferir tags herdadas antes), `gh release create` local e confirmação do dono antes de publicar.
 

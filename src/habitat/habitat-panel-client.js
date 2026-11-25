@@ -82,36 +82,27 @@
   const prefOpenAtLogin = document.getElementById("pref-openAtLogin");
 
   // Keyboard navigation for tabs
-  const tabButtons = [tabResidentsBtn, tabSettingsBtn];
+  const tabHistoryBtn = document.getElementById("tab-history");
+  const panelHistory = document.getElementById("panel-history");
+  const historyList = document.getElementById("history-list");
+  const TAB_NAMES = ["residents", "history", "settings"];
+  const tabButtons = [tabResidentsBtn, tabHistoryBtn, tabSettingsBtn];
+  const tabPanels = [panelResidents, panelHistory, panelSettings];
   let currentTabIdx = 0;
 
   function switchTab(tabName) {
     currentState.activeTab = tabName;
-    if (tabName === "residents") {
-      tabResidentsBtn.setAttribute("aria-selected", "true");
-      tabResidentsBtn.setAttribute("tabindex", "0");
-      tabResidentsBtn.classList.add("active");
-      tabSettingsBtn.setAttribute("aria-selected", "false");
-      tabSettingsBtn.setAttribute("tabindex", "-1");
-      tabSettingsBtn.classList.remove("active");
-      panelResidents.hidden = false;
-      panelSettings.hidden = true;
-      currentTabIdx = 0;
-    } else {
-      tabSettingsBtn.setAttribute("aria-selected", "true");
-      tabSettingsBtn.setAttribute("tabindex", "0");
-      tabSettingsBtn.classList.add("active");
-      tabResidentsBtn.setAttribute("aria-selected", "false");
-      tabResidentsBtn.setAttribute("tabindex", "-1");
-      tabResidentsBtn.classList.remove("active");
-      panelSettings.hidden = false;
-      panelResidents.hidden = true;
-      currentTabIdx = 1;
-    }
+    currentTabIdx = Math.max(0, TAB_NAMES.indexOf(tabName));
+    tabButtons.forEach((btn, i) => {
+      const on = i === currentTabIdx;
+      btn.setAttribute("aria-selected", String(on));
+      btn.setAttribute("tabindex", on ? "0" : "-1");
+      btn.classList.toggle("active", on);
+      tabPanels[i].hidden = !on;
+    });
   }
 
-  tabResidentsBtn.addEventListener("click", () => switchTab("residents"));
-  tabSettingsBtn.addEventListener("click", () => switchTab("settings"));
+  tabButtons.forEach((btn, i) => btn.addEventListener("click", () => switchTab(TAB_NAMES[i])));
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
@@ -128,12 +119,12 @@
       if (e.key === "ArrowRight" || e.key === "ArrowDown") {
         currentTabIdx = (currentTabIdx + 1) % tabButtons.length;
         tabButtons[currentTabIdx].focus();
-        switchTab(currentTabIdx === 0 ? "residents" : "settings");
+        switchTab(TAB_NAMES[currentTabIdx]);
         e.preventDefault();
       } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
         currentTabIdx = (currentTabIdx - 1 + tabButtons.length) % tabButtons.length;
         tabButtons[currentTabIdx].focus();
-        switchTab(currentTabIdx === 0 ? "residents" : "settings");
+        switchTab(TAB_NAMES[currentTabIdx]);
         e.preventDefault();
       }
     }
@@ -184,6 +175,7 @@
   function render(state) {
     if (!state) return;
     currentState = state;
+    renderHistory(state.history);
 
     // Scale
     bodyEl.setAttribute("data-scale", String(state.scale || 1));
@@ -274,6 +266,43 @@
         diagnosticsGrid.appendChild(item);
       });
     }
+  }
+
+const HISTORY_PROVIDER_NAMES = { claude: "Claude Code", codex: "Codex" };
+  const HISTORY_REASONS = {
+    "codex-somente-leitura": "A retomada de sessões do Codex ainda não está disponível.",
+    "pasta-desconhecida": "A pasta da sessão é desconhecida.",
+    "pasta-ausente": "A pasta do projeto não existe mais.",
+    "transcricao-ausente": "O Claude não guardou a transcrição desta sessão.",
+    "em-andamento": "A sessão ainda está em andamento.",
+    "falha-ao-abrir": "Não foi possível abrir o terminal.",
+    "desconhecida": "Sessão não encontrada no histórico."
+  };
+
+  function renderHistory(rows) {
+    if (!historyList) return;
+    if (!rows || !rows.length) {
+      historyList.innerHTML = '<p class="metrics-note">Nenhuma sessão registrada ainda. Elas aparecem aqui conforme você usa o Claude e o Codex com os conectores ligados.</p>';
+      return;
+    }
+    historyList.innerHTML = rows.map((r, i) => {
+      const when = new Date(r.lastEventAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+      const action = r.canResume
+        ? `<button class="action-btn" data-resume="${i}">Retomar</button>`
+        : `<span class="metrics-note">${escapeHtml(HISTORY_REASONS[r.reason] || "Indisponível.")}</span>`;
+      return `<div class="history-row"><div><strong>${escapeHtml(r.project)}</strong><span class="metrics-note"> · ${escapeHtml(HISTORY_PROVIDER_NAMES[r.provider] || r.provider)} · ${escapeHtml(when)}</span></div>${action}</div>`;
+    }).join("");
+    historyList.querySelectorAll("button[data-resume]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const row = rows[Number(btn.getAttribute("data-resume"))];
+        btn.disabled = true;
+        const res = await bridge.resumeSession({ provider: row.provider, sessionId: row.sessionId });
+        if (!res || !res.ok) {
+          btn.disabled = false;
+          btn.insertAdjacentHTML("afterend", `<span class="metrics-note">${escapeHtml(HISTORY_REASONS[res && res.reason] || "Não foi possível retomar.")}</span>`);
+        }
+      });
+    });
   }
 
   function escapeHtml(str) {

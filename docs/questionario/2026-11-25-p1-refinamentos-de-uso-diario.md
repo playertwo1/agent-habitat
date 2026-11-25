@@ -70,8 +70,14 @@ Objetivo: decidir escopo, ordem e regras de cada subetapa do P1 (métricas, hist
 - Descartado: coleta própria só do Codex; combinação dos dois; só anel real para o Atom.
 - Difícil de reverter: não
 
+### D9 - Fonte, tamanho e lugar do histórico (P1.2)
+- Pergunta: de onde vem o histórico, quantas sessões e onde fica no painel?
+- Decisão: **histórico próprio do Habitat** em `~/.agent-habitat/history.json`, gravado a partir dos eventos de hook (Claude e Codex); **10 sessões** por padrão; **nova aba "Histórico"** ao lado de Moradores e Ajustes. O hook passa a enviar o `cwd` completo (só para a porta local 127.0.0.1) porque a retomada precisa dele.
+- Por quê: o carregador herdado de `~/.clawd/session-history-v1` apaga arquivos e locks lá ao ler, e a regra é nunca escrever em `~/.clawd`.
+- Descartado: ler o histórico do clawd-on-desk; misturar as duas fontes.
+- Difícil de reverter: não
+
 ## Em aberto
-- Quantas sessões recentes listar e onde fica no painel (P1.2).
 - Aparência dos ajudantes, limite por provedor e quando somem (decidir no protótipo do P1.3).
 - Posições fixas dos objetos e horário de virada dia/noite (decidir no protótipo do P1.4).
 - Como retomar sessões do Codex no Windows (investigar no P1.2b).
