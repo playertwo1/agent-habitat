@@ -330,6 +330,8 @@ function runHabitatAppMode(electron) {
 
   let renderWin = null;
   let hitWin = null;
+  let hitActivationRuntime = null;
+  let stageLoop = null;
   let panelWin = null;
   let tray = null;
   let demoMode = false;

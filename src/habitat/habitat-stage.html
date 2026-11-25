@@ -25,38 +25,6 @@
 <body>
   <div id="stage-root"></div>
   <script src="habitat-renderer.js"></script>
-  <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      const container = document.getElementById('stage-root');
-      let renderer = null;
-
-      window.habitatStage.onRenderData((payload) => {
-        if (!payload || !payload.manifest) return;
-        const { manifest, manifestDirUrl, atomMetaMap, scale, reducedMotion, snapshot } = payload;
-
-        if (!renderer) {
-          renderer = window.createHabitatRenderer({
-            container,
-            manifest,
-            manifestDirUrl,
-            atomMetaMap: atomMetaMap || {},
-            scale: scale || 2,
-            reducedMotion: !!reducedMotion,
-            disableTransitions: false
-          });
-        } else {
-          if (scale !== undefined) {
-            renderer.setScale(scale);
-          }
-        }
-
-        if (snapshot) {
-          renderer.render(snapshot);
-        }
-      });
-
-      window.habitatStage.notifyReady();
-    });
-  </script>
+  <script src="habitat-stage-client.js"></script>
 </body>
 </html>
