@@ -4,8 +4,8 @@ param(
 
 $ErrorActionPreference = "Stop"
 $Utf8NoBom = New-Object System.Text.UTF8Encoding -ArgumentList $false
-$ClawdPermissionPorts = @(23333, 23334, 23335, 23336, 23337)
-$ClawdCommandMarkers = @("clawd-hook.js", "auto-start.js", "auto-start.sh")
+# Remove apenas entradas do Agent Habitat; hooks do clawd-on-desk (clawd-hook.js, auto-start, HTTP de permissao) coexistem e ficam intactos.
+$ClawdCommandMarkers = @("agent-habitat-hook.js")
 
 function Normalize-PathForCompare {
   param([string]$PathValue)
@@ -139,39 +139,6 @@ function Test-ClawdCommandHook {
   return $ClawdCommandMarkers -ccontains $scriptName
 }
 
-function Test-ClawdPermissionUrl {
-  param([string]$Url)
-  if ([string]::IsNullOrWhiteSpace($Url)) { return $false }
-
-  # Exact raw marker, before Uri normalizes dot segments or backslashes.
-  if ($Url -cmatch '^http://127\.0\.0\.1:([1-9][0-9]{0,4})/permission/clawd-on-desk\z') {
-    return [int]$Matches[1] -le 65535
-  }
-  try {
-    $uri = [System.Uri]$Url
-    return $uri.IsAbsoluteUri `
-      -and $uri.Scheme -eq "http" `
-      -and $uri.Host -eq "127.0.0.1" `
-      -and $uri.AbsolutePath -eq "/permission" `
-      -and [string]::IsNullOrEmpty($uri.Query) `
-      -and [string]::IsNullOrEmpty($uri.Fragment) `
-      -and [string]::IsNullOrEmpty($uri.UserInfo) `
-      -and ($ClawdPermissionPorts -contains $uri.Port)
-  } catch {
-    return $false
-  }
-}
-
-function Test-ClawdHttpHook {
-  param([object]$Hook)
-
-  $type = Get-StringPropertyValue $Hook "type"
-  if ($type -ne "http") { return $false }
-
-  $url = Get-StringPropertyValue $Hook "url"
-  return Test-ClawdPermissionUrl $url
-}
-
 function Remove-ClawdHooksFromEntries {
   param([object[]]$Entries)
 
@@ -192,12 +159,6 @@ function Remove-ClawdHooksFromEntries {
       continue
     }
 
-    if (Test-ClawdHttpHook $entry) {
-      $removed++
-      $changed = $true
-      continue
-    }
-
     $hooksProperty = Get-JsonProperty $entry "hooks"
     if ($null -eq $hooksProperty -or -not ($hooksProperty.Value -is [System.Array])) {
       [void]$nextEntries.Add($entry)
@@ -211,8 +172,6 @@ function Remove-ClawdHooksFromEntries {
       $removeHook = $false
       if ($null -ne $hook -and $null -ne $hook.PSObject) {
         if (Test-ClawdCommandHook $hook) {
-          $removeHook = $true
-        } elseif (Test-ClawdHttpHook $hook) {
           $removeHook = $true
         }
       }
@@ -292,7 +251,7 @@ try {
   if ($null -eq $settings) { exit 0 }
   if (-not (Remove-ClawdHooksFromSettings $settings)) { exit 0 }
 
-  $backupName = "settings.json.clawd-uninstall-{0}.bak" -f (Get-Date -Format "yyyyMMdd-HHmmss-fff")
+  $backupName = "settings.json.agent-habitat-uninstall-{0}.bak" -f (Get-Date -Format "yyyyMMdd-HHmmss-fff")
   $backupPath = Join-Path (Split-Path -Parent $settingsPath) $backupName
   [System.IO.File]::Copy($settingsPath, $backupPath, $false)
 

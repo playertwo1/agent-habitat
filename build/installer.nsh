@@ -150,11 +150,11 @@ Var pid
 
   clawd_old_install_removable_denied:
     ${if} $LANGUAGE == 2052
-      StrCpy $0 "无法更新 Clawd on Desk：当前 Windows 账户没有权限修改这个文件夹里的文件：$\r$\n$\r$\n$1$\r$\n$\r$\n可以给当前账户这个文件夹（含子文件夹）的“修改”权限，然后点“重试”；或者点“取消”，再以管理员身份运行安装程序。"
+      StrCpy $0 "无法更新 ${PRODUCT_NAME}：当前 Windows 账户没有权限修改这个文件夹里的文件：$\r$\n$\r$\n$1$\r$\n$\r$\n可以给当前账户这个文件夹（含子文件夹）的“修改”权限，然后点“重试”；或者点“取消”，再以管理员身份运行安装程序。"
     ${elseif} $LANGUAGE == 1028
-      StrCpy $0 "無法更新 Clawd on Desk：目前的 Windows 帳戶沒有權限修改這個資料夾裡的檔案：$\r$\n$\r$\n$1$\r$\n$\r$\n可以給目前的帳戶這個資料夾（含子資料夾）的「修改」權限，然後按「重試」；或按「取消」，再以系統管理員身分執行安裝程式。"
+      StrCpy $0 "無法更新 ${PRODUCT_NAME}：目前的 Windows 帳戶沒有權限修改這個資料夾裡的檔案：$\r$\n$\r$\n$1$\r$\n$\r$\n可以給目前的帳戶這個資料夾（含子資料夾）的「修改」權限，然後按「重試」；或按「取消」，再以系統管理員身分執行安裝程式。"
     ${else}
-      StrCpy $0 "Clawd on Desk can't be updated because your Windows account doesn't have permission to change the files in this folder:$\r$\n$\r$\n$1$\r$\n$\r$\nGive your account Modify permission on this folder and its subfolders, then click Retry. Or click Cancel and run the installer as administrator."
+      StrCpy $0 "${PRODUCT_NAME} can't be updated because your Windows account doesn't have permission to change the files in this folder:$\r$\n$\r$\n$1$\r$\n$\r$\nGive your account Modify permission on this folder and its subfolders, then click Retry. Or click Cancel and run the installer as administrator."
     ${endif}
     MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "$0" /SD IDCANCEL IDRETRY clawd_old_install_removable_retry
     Pop $5
@@ -231,14 +231,7 @@ Var pid
       FileClose $0
     clawd_node_cleanup_home_done:
 
-    IfFileExists "$INSTDIR\Clawd on Desk.exe" 0 clawd_node_cleanup_done
-    IfFileExists "$INSTDIR\resources\app.asar.unpacked\hooks\cleanup-integrations.js" 0 clawd_node_cleanup_done
-      System::Call 'Kernel32::SetEnvironmentVariable(t, t)i("ELECTRON_RUN_AS_NODE", "1").r0'
-      nsExec::ExecToLog '"$INSTDIR\Clawd on Desk.exe" "$INSTDIR\resources\app.asar.unpacked\hooks\cleanup-integrations.js" --apply --user-home "$1" --source nsis --fail-open'
-      Pop $0
-      System::Call 'Kernel32::SetEnvironmentVariable(t, t)i("ELECTRON_RUN_AS_NODE", "").r0'
-    clawd_node_cleanup_done:
-
+    ; Sem o cleaner de integracoes herdado: ele limpa hooks do clawd-on-desk em todos os agentes.
     IfFileExists "$INSTDIR\uninstall-claude-hooks.ps1" 0 clawd_uninstall_hooks_done
       nsExec::ExecToLog 'powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$INSTDIR\uninstall-claude-hooks.ps1" -InstallDir "$INSTDIR"'
       Pop $0

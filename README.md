@@ -64,7 +64,7 @@ O hash calculado deve ser idêntico ao da linha do arquivo correspondente. Se n�
 
 > **Aviso:** o instalador **não é assinado** com certificado de assinatura de código. O Windows SmartScreen pode exibir um alerta ("O Windows protegeu o seu PC"). Isso é esperado nesta versão; confira o hash antes de prosseguir.
 
-Para desinstalar, use o desinstalador do Windows (**Configurações > Aplicativos**). Antes disso, recomendamos remover os conectores pelo painel (veja [Hooks: ativação e reversão](#hooks-ativação-e-reversão)).
+Para desinstalar, use o desinstalador do Windows (**Configurações > Aplicativos**). Antes disso, remova os conectores pelo painel (veja [Hooks: ativação e reversão](#hooks-ativação-e-reversão)): o desinstalador só limpa as entradas do Habitat em `~/.claude/settings.json` (com backup `.agent-habitat-uninstall-*.bak`) e **não** mexe em `~/.codex` nem em `~/.gemini`. Os hooks do `clawd-on-desk` nunca são removidos.
 
 ## Coexistência com o clawd-on-desk
 

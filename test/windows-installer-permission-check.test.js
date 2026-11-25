@@ -112,9 +112,9 @@ describe("Windows NSIS old-install permission check", () => {
     const messages = precheck.match(/\$\{if\} \$LANGUAGE == 2052\nStrCpy \$0 "([^"\n]*)"\n\$\{elseif\} \$LANGUAGE == 1028\nStrCpy \$0 "([^"\n]*)"\n\$\{else\}\nStrCpy \$0 "([^"\n]*)"\n\$\{endif\}/);
     assert.ok(messages);
     assert.deepStrictEqual(messages.slice(1), [
-      String.raw`无法更新 Clawd on Desk：当前 Windows 账户没有权限修改这个文件夹里的文件：$\r$\n$\r$\n$1$\r$\n$\r$\n可以给当前账户这个文件夹（含子文件夹）的“修改”权限，然后点“重试”；或者点“取消”，再以管理员身份运行安装程序。`,
-      String.raw`無法更新 Clawd on Desk：目前的 Windows 帳戶沒有權限修改這個資料夾裡的檔案：$\r$\n$\r$\n$1$\r$\n$\r$\n可以給目前的帳戶這個資料夾（含子資料夾）的「修改」權限，然後按「重試」；或按「取消」，再以系統管理員身分執行安裝程式。`,
-      String.raw`Clawd on Desk can't be updated because your Windows account doesn't have permission to change the files in this folder:$\r$\n$\r$\n$1$\r$\n$\r$\nGive your account Modify permission on this folder and its subfolders, then click Retry. Or click Cancel and run the installer as administrator.`,
+      String.raw`无法更新 ${"${PRODUCT_NAME}"}：当前 Windows 账户没有权限修改这个文件夹里的文件：$\r$\n$\r$\n$1$\r$\n$\r$\n可以给当前账户这个文件夹（含子文件夹）的“修改”权限，然后点“重试”；或者点“取消”，再以管理员身份运行安装程序。`,
+      String.raw`無法更新 ${"${PRODUCT_NAME}"}：目前的 Windows 帳戶沒有權限修改這個資料夾裡的檔案：$\r$\n$\r$\n$1$\r$\n$\r$\n可以給目前的帳戶這個資料夾（含子資料夾）的「修改」權限，然後按「重試」；或按「取消」，再以系統管理員身分執行安裝程式。`,
+      String.raw`${"${PRODUCT_NAME}"} can't be updated because your Windows account doesn't have permission to change the files in this folder:$\r$\n$\r$\n$1$\r$\n$\r$\nGive your account Modify permission on this folder and its subfolders, then click Retry. Or click Cancel and run the installer as administrator.`,
     ]);
     assert.doesNotMatch(precheck, /\bLangString\b/);
     assert.notStrictEqual(installer.charCodeAt(0), 0xFEFF, "NSIS include must remain UTF-8 without BOM");
