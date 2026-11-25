@@ -15,7 +15,7 @@ Antes de trabalhar numa etapa, leia [`STATE.md`](STATE.md) e abra **somente** o 
 | Gate | Arquivo | Objetivo curto | Estado |
 |---|---|---|---|
 | **G0** | [`arquivadas/etapas/g0-descoberta-e-base.md`](arquivadas/etapas/g0-descoberta-e-base.md) | Auditar `Arnav8452/atom` (sprites + Antigravity IDE), provar superfícies reais no Windows e isolar identidade do app (`appId`/porta/hooks) | Concluído (2026-11-24) |
-| **G1** | [`roadmap/g1-cabana-e-demo.md`](roadmap/g1-cabana-e-demo.md) | Camadas PNG RGBA da Cozy Cottage + sprites originais (Clawd, Cloudling, Atom) + máquina visual das 8 combinações (`000`–`111`) + `Demo Mode` | A fazer (próxima) |
+| **G1** | [`roadmap/g1-cabana-e-demo.md`](roadmap/g1-cabana-e-demo.md) | Camadas PNG RGBA da Cozy Cottage + sprites originais (Clawd, Cloudling, Atom) + máquina visual das 8 combinações (`000`–`111`) + `Demo Mode` | G1.1–G1.3 concluídas; aguardando validação visual G1.4 do dono |
 | **G2** | [`roadmap/g2-agregador-e-adaptadores.md`](roadmap/g2-agregador-e-adaptadores.md) | Agregador de 3 slots por provedor, adaptador Antigravity IDE/CLI + Codex Desktop/CLI + Claude CLI/Desktop e poda dos 26 agentes extras/canais remotos | Pendente |
 | **G3** | [`roadmap/g3-habitat-integrado.md`](roadmap/g3-habitat-integrado.md) | Conectar telemetria real à cabana, `hitWin` dinâmico, painel sob demanda em pt-BR, foco de janela e cards opcionais de permissão/conclusão | Pendente |
 | **G4** | [`roadmap/g4-hardening-windows.md`](roadmap/g4-hardening-windows.md) | Validação em DPI `100/125/150/200%`, múltiplos monitores, tela cheia, movimento reduzido, medição de CPU/RAM (1 h) e reversibilidade de hooks | Pendente |

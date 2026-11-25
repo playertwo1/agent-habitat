@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "id": "cozy-cottage",
+  "name": "Cozy Cottage",
+  "canvas": { "width": 320, "height": 192 },
+  "doorAnchor": { "x": 160, "y": 132 },
+  "cottageHitBox": { "x": 104, "y": 24, "width": 112, "height": 116 },
+  "layers": {
+    "shadow": "layer-0-shadow.png",
+    "backdrop": "layer-1-backdrop.png",
+    "cottageNight": "cottage-night.png",
+    "cottageAmber": "cottage-amber-lights.png",
+    "foreground": "layer-6-foreground.png",
+    "door": {
+      "x": 136,
+      "y": 84,
+      "width": 48,
+      "height": 52,
+      "frames": {
+        "closed": "door-closed.png",
+        "opening": "door-opening.png",
+        "open": "door-open.png",
+        "closing": "door-closing.png"
+      }
+    },
+    "smoke": {
+      "x": 174,
+      "y": 4,
+      "width": 32,
+      "height": 32,
+      "frameMs": 450,
+      "frames": ["smoke-0.png", "smoke-1.png", "smoke-2.png", "smoke-3.png"]
+    }
+  },
+  "stations": {
+    "claude": {
+      "character": "clawd",
+      "anchor": { "x": 74, "y": 148 },
+      "actorSize": { "width": 44, "height": 44 },
+      "props": { "file": "station-left-props.png", "x": 26, "y": 116, "width": 96, "height": 56 }
+    },
+    "codex": {
+      "character": "cloudling",
+      "anchor": { "x": 164, "y": 166 },
+      "actorSize": { "width": 46, "height": 42 },
+      "props": { "file": "station-center-props.png", "x": 116, "y": 132, "width": 96, "height": 54 }
+    },
+    "antigravity": {
+      "character": "atom",
+      "anchor": { "x": 252, "y": 144 },
+      "actorSize": { "width": 50, "height": 40 },
+      "props": { "file": "station-right-props.png", "x": 204, "y": 112, "width": 96, "height": 56 }
+    }
+  },
+  "actors": {
+    "clawd": {
+      "kind": "svg",
+      "baseDir": "../../svg",
+      "clips": {
+        "exiting": "clawd-mini-crabwalk.svg",
+        "busy": "clawd-working-typing.svg",
+        "waiting_input": "clawd-idle-bubble.svg",
+        "needs_approval": "clawd-notification.svg",
+        "error": "clawd-error.svg",
+        "done": "clawd-happy.svg",
+        "entering": "clawd-mini-crabwalk.svg"
+      }
+    },
+    "cloudling": {
+      "kind": "svg",
+      "baseDir": "../../../themes/cloudling/assets",
+      "clips": {
+        "exiting": "cloudling-mini-crabwalk.svg",
+        "busy": "cloudling-typing.svg",
+        "waiting_input": "cloudling-thinking.svg",
+        "needs_approval": "cloudling-notification.svg",
+        "error": "cloudling-error.svg",
+        "done": "cloudling-attention.svg",
+        "entering": "cloudling-mini-crabwalk.svg"
+      }
+    },
+    "atom": {
+      "kind": "spritesheet-webp",
+      "baseDir": "../actors/atom",
+      "clips": {
+        "exiting": { "sheet": "exploring.webp", "meta": "exploring.json" },
+        "busy": { "sheet": "working.webp", "meta": "working.json" },
+        "waiting_input": { "sheet": "asking.webp", "meta": "asking.json" },
+        "needs_approval": { "sheet": "listening.webp", "meta": "listening.json" },
+        "error": { "sheet": "error.webp", "meta": "error.json" },
+        "done": { "sheet": "done.webp", "meta": "done.json" },
+        "entering": { "sheet": "exploring.webp", "meta": "exploring.json" }
+      }
+    }
+  }
+}

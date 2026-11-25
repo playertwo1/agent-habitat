@@ -5,6 +5,7 @@
   "main": "src/main.js",
   "scripts": {
     "start": "node launch.js",
+    "demo:habitat": "node launch.js --habitat-demo",
     "build": "electron-builder --win",
     "build:win:x64": "electron-builder --win nsis:x64",
     "build:win:arm64": "electron-builder --win nsis:arm64",
@@ -171,6 +172,7 @@
     "files": [
       "NOTICE.md",
       "src/**/*",
+      "assets/habitat/**/*",
       "assets/icon.png",
       "assets/icons/**/*",
       "assets/icons/agents/**/*",
@@ -186,6 +188,7 @@
       "pwa/**/*"
     ],
     "asarUnpack": [
+      "assets/habitat/**/*",
       "assets/svg/**/*",
       "assets/accessories/**/*",
       "hooks/**/*",
