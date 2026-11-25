@@ -1,6 +1,6 @@
 # STATE — Ponto de Retomada do Agent Habitat
 
-**Atualizado:** 2026-11-25 · **Versão atual:** `0.1.0` (Gates G0 a G5 concluídos; release `v0.1.0` publicada) · **Etapa da vez:** [P1 — Refinamentos de uso diário](roadmap/p1-pos-mvp.md) (próxima: P1.1 métricas)
+**Atualizado:** 2026-11-25 · **Versão atual:** `0.1.0` (Gates G0 a G5 concluídos; release `v0.1.0` publicada) · **Etapa da vez:** [P1 — Refinamentos de uso diário](roadmap/p1-pos-mvp.md) (P1.1 concluída; próxima: P1.2 histórico)
 
 Este arquivo registra **apenas** onde estamos, o que aguarda validação do dono e qual é a próxima ação imediata. Para detalhes das etapas, consulte o [ROADMAP](ROADMAP.md).
 
@@ -20,7 +20,7 @@ Este arquivo registra **apenas** onde estamos, o que aguarda validação do dono
 
 ## Próxima Ação Imediata
 
-1. **P1.1:** mapear os módulos de cota e recap herdados e ligar as métricas ao painel (ver [P1.1](roadmap/p1/P1.1-metricas.md)).
+1. **P1.2:** histórico de sessões recentes no painel (ver [P1.2](roadmap/p1/P1.2-historico.md)); antes, decidir quantas sessões listar.
 
 ## Pendências do Proprietário
 

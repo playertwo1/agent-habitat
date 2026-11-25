@@ -17,6 +17,7 @@ function createHabitatRuntime(options = {}) {
   const onPermissionRequest = typeof options.onPermissionRequest === "function" ? options.onPermissionRequest : null;
   const onStateTransition = typeof options.onStateTransition === "function" ? options.onStateTransition : null;
   const onActivity = typeof options.onActivity === "function" ? options.onActivity : null;
+  const onAcceptedEvent = typeof options.onAcceptedEvent === "function" ? options.onAcceptedEvent : null;
 
   let lastStatesMap = new Map();
 
@@ -107,6 +108,11 @@ function createHabitatRuntime(options = {}) {
     if (accepted && onActivity) {
       try {
         onActivity({ provider, source: "event" });
+      } catch {}
+    }
+    if (accepted && onAcceptedEvent) {
+      try {
+        onAcceptedEvent({ provider, sessionId: normalized.sessionId, event: normalized.event }, nowMs);
       } catch {}
     }
 

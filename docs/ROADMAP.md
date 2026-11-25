@@ -20,7 +20,7 @@ Antes de trabalhar numa etapa, leia [`STATE.md`](STATE.md) e abra **somente** o 
 | **G3** | [`arquivadas/etapas/g3-habitat-integrado.md`](arquivadas/etapas/g3-habitat-integrado.md) | Conectar telemetria real à cabana, `hitWin` dinâmico, painel sob demanda em pt-BR, foco de janela e cards opcionais de permissão/conclusão | Concluído (2026-11-25) |
 | **G4** | [`arquivadas/etapas/g4-hardening-windows.md`](arquivadas/etapas/g4-hardening-windows.md) | Validação em DPI `100/125/150/200%`, múltiplos monitores, tela cheia, movimento reduzido, medição de CPU/RAM (1 h) e reversibilidade de hooks | Concluído (2026-11-25) |
 | **G5** | [`arquivadas/etapas/g5-release-local.md`](arquivadas/etapas/g5-release-local.md) | Ícone final, build NSIS Windows x64/arm64 local, checksum SHA-256, auditoria de pacote/licenças e release `v0.1.0` em `playertwo1/agent-habitat` | Concluído em 2026-11-25 (release `v0.1.0` publicada) |
-| **P1** | [`roadmap/p1-pos-mvp.md`](roadmap/p1-pos-mvp.md) | Métricas verificadas, histórico com retomada, subagentes visuais e jardim personalizável; uma release `v0.2.0` no fim | Roadmap aprovado em 25/11/2026; P1.1 é a próxima |
+| **P1** | [`roadmap/p1-pos-mvp.md`](roadmap/p1-pos-mvp.md) | Métricas verificadas, histórico com retomada, subagentes visuais e jardim personalizável; uma release `v0.2.0` no fim | Roadmap aprovado em 25/11/2026; P1.1 concluída (25/11); P1.2 é a próxima |
 | **P2** | [`roadmap/p1-pos-mvp.md`](roadmap/p1-pos-mvp.md#p2--parqueado) | Novos temas, ponte opcional com Lumen e 4º morador | Parqueado |
 
 ## Matriz de Testes Mínimos (T01–T28; P1 acrescenta T29–T33)

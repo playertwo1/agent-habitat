@@ -62,6 +62,14 @@ Objetivo: decidir escopo, ordem e regras de cada subetapa do P1 (métricas, hist
 - Descartado: release por subetapa.
 - Difícil de reverter: não
 
+### D8 - Fonte das cotas e revisão da D2 (2026-11-25, durante a P1.1)
+- Pergunta: de onde o Habitat tira as cotas, e como fica o Atom?
+- Fato novo: os hooks do Habitat não carregam cota; Claude e Antigravity só a recebem por statusline (a do Claude é do Coucou) e o Codex por rollout. O Antigravity **tem** cota real (Gemini 5 h e semanal), o que corrige a premissa da D2.
+- Decisão: o Habitat lê, **somente leitura**, `~/.clawd/account-quota.json` (só percentuais e horários de reinício) quando existir; sem o arquivo ou sem dado, mostra "sem dados". Nunca escreve em `~/.clawd`. O Atom mostra anel real quando houver cota e "uso observado" (contagem de sessões e turnos) só como reserva.
+- Por quê: dá os três provedores agora com o menor código, sem tomar a statusline de outro app nem ler rollouts.
+- Descartado: coleta própria só do Codex; combinação dos dois; só anel real para o Atom.
+- Difícil de reverter: não
+
 ## Em aberto
 - Quantas sessões recentes listar e onde fica no painel (P1.2).
 - Aparência dos ajudantes, limite por provedor e quando somem (decidir no protótipo do P1.3).

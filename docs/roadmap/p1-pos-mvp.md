@@ -1,6 +1,6 @@
 # Etapa: P1 — Refinamentos de uso diário
 
-**Estado:** Não iniciada (roadmap aprovado em 25/11/2026). Próxima: P1.1. Atualizado em 25/11/2026.
+**Estado:** P1.1 concluída em 25/11/2026. Próxima: P1.2. Atualizado em 25/11/2026.
 
 **Objetivo:** métricas verificadas, histórico com retomada, subagentes visuais e personalização do jardim no Habitat, publicados juntos em **uma release v0.2.0 no fim**. Nada de estimativa inventada: sem dado real, o painel diz que não há dado.
 
@@ -10,7 +10,7 @@ Este arquivo é só um índice. Para trabalhar numa fase, leia apenas o document
 
 | Fase | Resultado | Checkpoint | Estado | Documento |
 |---|---|---|---|---|
-| P1.1 | Painel com cotas reais de Claude e Codex, "uso observado" do Atom, hoje e 7 dias | CP-P1.1 | Não iniciada | [P1.1 — Métricas](p1/P1.1-metricas.md) |
+| P1.1 | Painel com cotas reais de Claude e Codex, "uso observado" do Atom, hoje e 7 dias | CP-P1.1 | Concluída 25/11 | [P1.1 — Métricas](p1/P1.1-metricas.md) |
 | P1.2 | Histórico de sessões recentes no painel, retomando as do Claude | CP-P1.2 | Não iniciada | [P1.2 — Histórico](p1/P1.2-historico.md) |
 | P1.2b | Retomada de sessões do Codex | CP-P1.2b | Condicional a CP-P1.2 | [P1.2b — Retomada do Codex](p1/P1.2b-retomada-codex.md) |
 | P1.3 | Mini-ajudantes desenhados por subagente ativo | CP-P1.3 | Não iniciada | [P1.3 — Subagentes](p1/P1.3-subagentes.md) |

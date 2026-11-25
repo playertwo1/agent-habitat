@@ -139,6 +139,47 @@
     }
   });
 
+  // P1.1: métricas por morador. Cota vem só do arquivo de cotas do clawd-on-desk (somente leitura); sem dado, o painel diz "sem dados".
+  let metricsPeriod = "today";
+  const btnPeriodToday = document.getElementById("metrics-period-today");
+  const btnPeriodWeek = document.getElementById("metrics-period-week");
+  function setMetricsPeriod(period) {
+    metricsPeriod = period;
+    btnPeriodToday.classList.toggle("active", period === "today");
+    btnPeriodToday.setAttribute("aria-pressed", String(period === "today"));
+    btnPeriodWeek.classList.toggle("active", period === "week");
+    btnPeriodWeek.setAttribute("aria-pressed", String(period === "week"));
+    render(currentState);
+  }
+  if (btnPeriodToday) btnPeriodToday.addEventListener("click", () => setMetricsPeriod("today"));
+  if (btnPeriodWeek) btnPeriodWeek.addEventListener("click", () => setMetricsPeriod("week"));
+
+  function metricsHtml(providerId, state) {
+    const metrics = state.metrics || {};
+    const quota = metrics.quota;
+    const q = quota && quota.providers ? quota.providers[providerId] : null;
+    let quotaPart;
+    if (q && q.status === "ok") {
+      const rings = q.buckets.map((b) => {
+        const pct = Math.round(b.usedPercent);
+        const label = `${escapeHtml(b.label)}: ${pct}% usado${b.expired ? " (janela reiniciada)" : ""}`;
+        return `<div class="quota-ring${b.expired ? " expired" : ""}" role="img" aria-label="${label}" title="${label}" style="--used:${pct}"><span>${pct}%</span><em>${escapeHtml(b.label)}</em></div>`;
+      }).join("");
+      const mins = q.lastSeenAt ? Math.max(0, Math.round((Date.now() - q.lastSeenAt) / 60000)) : null;
+      quotaPart = `<div class="quota-rings">${rings}</div>` + (mins !== null ? `<span class="metrics-note">Cota vista há ${mins} min</span>` : "");
+    } else if (quota && quota.file !== "ok") {
+      quotaPart = `<span class="metrics-note">Sem dados de cota: o arquivo de cotas do clawd-on-desk não está disponível.</span>`;
+    } else {
+      quotaPart = `<span class="metrics-note">Sem dados de cota para este morador.</span>`;
+    }
+    const usage = metrics.usage ? (metricsPeriod === "week" ? metrics.usage.week : metrics.usage.today) : null;
+    const u = usage ? usage[providerId] : null;
+    const usagePart = u
+      ? `<span class="metrics-usage"><strong>${metricsPeriod === "week" ? "7 dias" : "Hoje"}:</strong> ${u.sessions} sessões · ${u.interactions} interações</span>`
+      : "";
+    return `<div class="resident-metrics">${quotaPart}${usagePart}</div>`;
+  }
+
   // Render state
   function render(state) {
     if (!state) return;
@@ -188,6 +229,7 @@
             <span><strong>Projeto:</strong> ${escapeHtml(r.project || "Nenhum")}</span>
             <span><strong>Superfície:</strong> ${escapeHtml(r.surface || "Padrão")}</span>
           </div>
+          ${metricsHtml(r.id, state)}
           <div class="resident-actions">
             <button class="action-btn" data-focus-provider="${escapeHtml(r.id)}">Focar janela</button>
           </div>
