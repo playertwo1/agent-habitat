@@ -12,6 +12,16 @@ Todas as mudanças relevantes do **Agent Habitat** são documentadas neste arqui
 - **Suíte 100% verde:** corrigidos 11 testes herdados do fork que dependiam do ambiente da máquina (hooks Claude em exec form, CLI `hermes` real e ACL do `%TEMP%`).
 - **Painel:** botão "Remover Conectores do Habitat" com texto fiel ao comportamento (remove só as entradas do Habitat e cria `.bak`; não restaura backup).
 
+### Corrigido (Gate G5.2 — Teste do instalador real — 2026-11-25)
+Defeitos que só apareceram com o app instalado (nenhum teste abre o Electron de verdade):
+- **Cabana e bandeja não apareciam:** `hitActivationRuntime` e `stageLoop` não eram declarados e o modo estrito abortava a inicialização; os scripts inline de `habitat-stage.html` e `habitat-hit.html` foram movidos para `habitat-stage-client.js` e `habitat-hit-client.js` porque a CSP `script-src 'self'` os bloqueava.
+- **Painel não abria:** `getDisplaysSnapshot` e `relayoutWindows` estavam dentro do callback de `app.whenReady` e eram chamadas de fora.
+- **Painel ilegível:** o G4 apagou a linha `:root {` de `habitat-panel.css` e o texto ficou preto sobre o fundo escuro.
+- **Conectores gravavam um caminho inválido:** o comando apontava para dentro de `app.asar`, que o `node` externo não lê; passou a apontar para `app.asar.unpacked`.
+- **Ninguém saía da cabana:** o laço do Stage chamava `wake()` sem `start()` e nenhum quadro era enviado; a cena ficava congelada em `000`.
+- **Desinstalador:** não remove mais os hooks do `clawd-on-desk` nem executa o limpador de integrações herdado; remove só as entradas com `agent-habitat-hook.js`.
+- Testes novos em `test/habitat-g5-csp-inline.test.js` cobrem cada uma dessas regressões.
+
 ### Concluído (Gate G4 — Hardening Windows, DPI, Economia em 000, Hooks Reversíveis e Acessibilidade — 2026-11-25)
 - **G4.1 — DPI, Multi-Monitor e Tela Cheia (`T20`–`T22`):** validação de layout em escalas de `100%` a `200%`, clamping de painéis em monitores secundários e comportamento robusto de ocultação em fullscreen com `WS_EX_NOACTIVATE`.
 - **G4.2 — Desempenho e Estabilidade de Longa Duração (`T23`):** medição de CPU/RAM em soak test equivalente a 1 h (`tools/measure-habitat-g4.js`, PID `47136` / PID `13680`), comprovando repouso eficiente e zero vazamento de memória (`+0.80 MiB` heap delta).

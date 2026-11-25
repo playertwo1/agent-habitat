@@ -106,6 +106,13 @@ Regras aplicadas na gravação:
 - **JSON inválido não é reescrito:** o provedor é reportado com erro e o arquivo permanece como está.
 - **Repetir é seguro:** executar a sincronização de novo não duplica entradas. Ela também repara entradas do Habitat que estejam ausentes ou alteradas.
 
+Depois de sincronizar, cada agente ainda precisa aceitar os hooks e ser reiniciado:
+
+- **Codex:** só executa um hook depois que você o aprova, e a aprovação vale por cliente. Aprove as entradas do `agent-habitat-hook.js` no Codex CLI (`/hooks`) e também no app desktop (configurações, **Hooks**).
+- **Antigravity:** lê o `hooks.json` ao abrir; reabra o app depois de sincronizar. Um perfil separado (`--user-data-dir`) pode não carregar hooks: se o Atom não sair da cabana, teste no perfil padrão.
+- **Claude Code:** sessões já abertas continuam com os hooks antigos; abra uma sessão nova.
+- O morador só sai da cabana enquanto o agente está trabalhando. Ao ficar ocioso, ele volta para dentro.
+
 ### Reverter (remover os conectores)
 
 1. Abra o painel do Habitat e clique em **Remover Conectores do Habitat**.
