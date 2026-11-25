@@ -1,6 +1,6 @@
 # Gate G1 — Prova Visual da Cozy Cottage e Demo das 8 Combinações
 
-**Esforço:** G (dividido em G1.1–G1.4) · **Depende de:** [G0](g0-descoberta-e-base.md) · **Próximo:** [G2 — Agregador e Adaptadores](g2-agregador-e-adaptadores.md)
+**Esforço:** G (dividido em G1.1–G1.4) · **Depende de:** [G0](../arquivadas/etapas/g0-descoberta-e-base.md) · **Próximo:** [G2 — Agregador e Adaptadores](g2-agregador-e-adaptadores.md)
 
 ## Objetivo
 Construir a composição visual completa da **Cozy Cottage** em camadas PNG RGBA com canal alfa real, posicionar os 3 mascotes originais (**Clawd**, **Cloudling**, **Atom**) em suas estações sem colisão e validar as **8 combinações (`000` a `111`)** + transições de porta através de um `Demo Mode` interativo na área de trabalho real.

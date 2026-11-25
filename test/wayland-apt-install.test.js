@@ -305,58 +305,10 @@ function addCachedDeb(harness, name = "cached.deb") {
   fs.writeFileSync(path.join(harness.cacheDir, name), "");
 }
 
-test("Wayland workflows parse and share one apt cache key and path", () => {
-  const smokeText = fs.readFileSync(SMOKE_WORKFLOW, "utf8");
-  const cacheText = fs.readFileSync(CACHE_WORKFLOW, "utf8");
-  const smoke = yaml.load(smokeText);
-  const cache = yaml.load(cacheText);
-
-  assert.ok(smoke.jobs, "wayland-smoke.yml must parse as a workflow");
-  assert.ok(cache.jobs, "wayland-apt-cache.yml must parse as a workflow");
-  assert.equal(countOccurrences(smokeText, `key: ${CACHE_KEY}`), 3);
-  assert.equal(countOccurrences(cacheText, `key: ${CACHE_KEY}`), 2);
-  assert.equal(countOccurrences(smokeText, `path: ${CACHE_PATH}`), 3);
-  assert.equal(countOccurrences(cacheText, `path: ${CACHE_PATH}`), 2);
-});
-
-test("Wayland smoke jobs restore the cache and install from the script", () => {
-  const smoke = yaml.load(fs.readFileSync(SMOKE_WORKFLOW, "utf8"));
-  const jobNames = ["xwayland-smoke", "native-wayland-contract", "appimage-claude-hooks"];
-
-  for (const jobName of jobNames) {
-    const steps = smoke.jobs[jobName].steps;
-    const restore = steps.find((step) => step.uses === "actions/cache/restore@v4");
-    const install = steps.find((step) => step.name === "Install isolated headless Wayland stack");
-    assert.ok(restore, `${jobName} must restore the apt package cache`);
-    assert.equal(restore.with.path, CACHE_PATH);
-    assert.equal(restore.with.key, CACHE_KEY);
-    assert.equal(restore.if, "steps.apt-key.outputs.skip != 'true'");
-    assert.ok(install, `${jobName} must install the Wayland stack`);
-    assert.equal(install["timeout-minutes"], 10);
-    assert.match(install.run, /ci\/install-wayland-deps\.sh install "\$HOME\/\.cache\/wayland-apt-debs"/);
-    assert.ok(!steps.some((step) => step.uses === "actions/cache/save@v4"));
-  }
-});
-
-test("Wayland cache warm-up only saves after a successful publish", () => {
-  const cache = yaml.load(fs.readFileSync(CACHE_WORKFLOW, "utf8"));
-  const workflow = fs.readFileSync(CACHE_WORKFLOW, "utf8");
-  const steps = cache.jobs["warm-cache"].steps;
-  const lookup = steps.find((step) => step.id === "cache");
-  const publish = steps.find((step) => step.name === "Publish apt packages into the cache");
-  const save = steps.find((step) => step.uses === "actions/cache/save@v4");
-
-  assert.equal(cache.jobs["warm-cache"].if, "github.ref == 'refs/heads/main'");
-  assert.equal(lookup.uses, "actions/cache/restore@v4");
-  assert.equal(lookup.with["lookup-only"], true);
-  assert.match(publish.run, /install-wayland-deps\.sh publish/);
-  assert.equal(save["continue-on-error"], true);
-  assert.equal(
-    save.if,
-    "steps.apt-key.outputs.skip != 'true' && steps.cache.outputs.cache-hit != 'true'"
-  );
-  assert.match(workflow, /group: wayland-apt-cache/);
-  assert.match(workflow, /cancel-in-progress: false/);
+test("local-only policy removes GitHub Actions workflows while retaining Wayland install script", () => {
+  assert.equal(fs.existsSync(path.join(ROOT, ".github", "workflows")), false);
+  assert.equal(fs.existsSync(INSTALL_SCRIPT), true);
+  assert.equal(fs.existsSync(PACKAGES_FILE), true);
 });
 
 test("Wayland apt package list matches the smoke stack", () => {

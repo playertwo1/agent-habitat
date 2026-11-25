@@ -78,31 +78,9 @@ function unwrapExpression(value) {
     .trim();
 }
 
-test("CI test report: workflow uploads the TAP report only on failure", () => {
-  const workflow = yaml.load(fs.readFileSync(path.join(ROOT, ".github", "workflows", "test.yml"), "utf8"));
-  const steps = workflow.jobs.test.steps;
-
-  // Identify by the command actually run, not by the step's display name.
-  const fullSuiteSteps = steps.filter(
-    (step) => step.run === "npm test" || step.run === "xvfb-run -a npm test",
-  );
-  assert.strictEqual(fullSuiteSteps.length, 2, "both Linux and non-Linux full-suite steps must exist");
-  for (const step of fullSuiteSteps) {
-    assert.strictEqual(step.env?.[REPORT_VAR], REPORT_DESTINATION);
-  }
-
-  const uploadStep = steps.find((step) => step.uses === "actions/upload-artifact@v4");
-  assert.ok(uploadStep, "an upload-artifact@v4 step must exist");
-  assert.strictEqual(unwrapExpression(uploadStep.if), "failure()");
-  assert.strictEqual(uploadStep.with?.path, REPORT_DESTINATION);
-  assert.strictEqual(uploadStep.with?.["retention-days"], 14);
-  // Without the matrix suffix all three platforms collide on one artifact name.
-  assert.strictEqual(uploadStep.with?.name, "node-test-report-${{ matrix.os }}");
-  assert.strictEqual(uploadStep.with?.["if-no-files-found"], "ignore");
-  assert.ok(
-    steps.indexOf(uploadStep) > steps.indexOf(fullSuiteSteps[fullSuiteSteps.length - 1]),
-    "upload must follow the full-suite steps",
-  );
+test("local-only policy removes GitHub Actions workflows while retaining local TAP report support", () => {
+  assert.strictEqual(fs.existsSync(path.join(ROOT, ".github", "workflows")), false);
+  assert.ok(resolveReporterArgs({ [REPORT_VAR]: "reports/local.tap" }).includes("--test-reporter=tap"));
 });
 
 const PASS_FIXTURE = [

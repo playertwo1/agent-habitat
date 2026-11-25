@@ -79,6 +79,13 @@
       "retentionReason": "Editable or retained source artwork; never a packaging input."
     },
     {
+      "pattern": "assets/originals/**",
+      "class": "source-of-truth",
+      "owner": "design-assets",
+      "packaged": false,
+      "retentionReason": "Original authorized character sprites (Atom from Arnav8452/atom) retained as source inputs before G1 habitat packaging."
+    },
+    {
       "pattern": "test/fixtures/**",
       "class": "tests-fixtures",
       "owner": "test-suite",

@@ -1,7 +1,7 @@
 {
-  "name": "clawd-on-desk",
-  "version": "1.6.4",
-  "description": "A desktop pet that reacts to your Claude Code sessions in real-time.",
+  "name": "agent-habitat",
+  "version": "0.1.0",
+  "description": "Habitat 2D vivo na área de trabalho para Claude, Codex e Antigravity.",
   "main": "src/main.js",
   "scripts": {
     "start": "node launch.js",
@@ -90,21 +90,21 @@
   "license": "AGPL-3.0-only",
   "type": "commonjs",
   "build": {
-    "appId": "com.clawd.on-desk",
-    "productName": "Clawd on Desk",
+    "appId": "com.playertwo1.agent-habitat",
+    "productName": "Agent Habitat",
     "afterPack": "scripts/after-pack-koffi.js",
     "protocols": [
       {
-        "name": "Clawd Import Protocol",
+        "name": "Agent Habitat Protocol",
         "schemes": [
-          "clawd"
+          "agent-habitat"
         ]
       }
     ],
     "mac": {
       "icon": "assets/icon.png",
       "identity": "-",
-      "artifactName": "Clawd-on-Desk-${version}-${arch}.${ext}",
+      "artifactName": "Agent-Habitat-${version}-${arch}.${ext}",
       "target": [
         {
           "target": "dmg",
@@ -128,7 +128,7 @@
     },
     "win": {
       "icon": "assets/icon.ico",
-      "artifactName": "Clawd-on-Desk-Setup-${version}-${arch}.${ext}",
+      "artifactName": "Agent-Habitat-Setup-${version}-${arch}.${ext}",
       "target": [
         {
           "target": "nsis",
@@ -143,7 +143,7 @@
       "maintainer": "rullerzhou-afk <rullerzhou-afk@users.noreply.github.com>",
       "icon": "assets/icons",
       "category": "Utility",
-      "artifactName": "Clawd-on-Desk-${version}-${arch}.${ext}",
+      "artifactName": "Agent-Habitat-${version}-${arch}.${ext}",
       "target": [
         {
           "target": "AppImage",
@@ -204,7 +204,7 @@
       {
         "provider": "github",
         "owner": "playertwo1",
-        "repo": "clawd-on-desk"
+        "repo": "agent-habitat"
       }
     ]
   },
