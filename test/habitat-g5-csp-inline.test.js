@@ -68,6 +68,25 @@ test("hook do Habitat no app empacotado aponta para app.asar.unpacked (node exte
   assert.ok(fs.existsSync(dev));
 });
 
+test("app real inicia o loop do Stage (wake sem start não envia quadros e ninguém sai da cabana)", () => {
+  const source = fs.readFileSync(path.join(HABITAT_DIR, "habitat-app-main.js"), "utf8");
+  assert.match(source, /stageLoop = createAdaptiveStageLoop\([\s\S]*?\n {4}\}\);\s*(?:\/\/[^\n]*\n\s*)?stageLoop\.start\(\);/);
+  const { createAdaptiveStageLoop } = require("../src/habitat/habitat-app-main");
+  let ticks = 0;
+  const timers = [];
+  const loop = createAdaptiveStageLoop({
+    isIdle000: () => false,
+    onTick: () => ticks++,
+    setIntervalFn: (fn) => { timers.push(fn); return timers.length; },
+    clearIntervalFn: () => {}
+  });
+  loop.wake();
+  assert.strictEqual(timers.length, 0, "wake antes de start não agenda tick");
+  loop.start();
+  timers[0]();
+  assert.strictEqual(ticks, 1);
+});
+
 test("habitat-app-main declara o estado que atribui depois (modo estrito)", () => {
   const source = fs.readFileSync(path.join(HABITAT_DIR, "habitat-app-main.js"), "utf8");
   for (const name of ["hitActivationRuntime", "stageLoop"]) {

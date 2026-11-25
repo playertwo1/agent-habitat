@@ -682,7 +682,8 @@ function runHabitatAppMode(electron) {
         pushStageFrame();
       }
     });
-    stageLoop.wake();
+    // start(), não wake(): wake() é no-op enquanto o loop não foi iniciado e a cena congelava em 000.
+    stageLoop.start();
 
     ipcMain.on("habitat-hit:click", async (event, pt) => {
       if (!pt || typeof pt.x !== "number" || typeof pt.y !== "number") return;
