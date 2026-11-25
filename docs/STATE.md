@@ -1,6 +1,6 @@
 # STATE — Ponto de Retomada do Agent Habitat
 
-**Atualizado:** 2026-11-25 · **Versão atual:** `0.1.0` (Gates G0 a G5 concluídos; release `v0.1.0` publicada) · **Etapa da vez:** P1/P2 (parqueados, a decidir com o proprietário)
+**Atualizado:** 2026-11-25 · **Versão atual:** `0.1.0` (Gates G0 a G5 concluídos; release `v0.1.0` publicada) · **Etapa da vez:** [P1 — Refinamentos de uso diário](roadmap/p1-pos-mvp.md) (próxima: P1.1 métricas)
 
 Este arquivo registra **apenas** onde estamos, o que aguarda validação do dono e qual é a próxima ação imediata. Para detalhes das etapas, consulte o [ROADMAP](ROADMAP.md).
 
@@ -15,11 +15,12 @@ Este arquivo registra **apenas** onde estamos, o que aguarda validação do dono
 | **G3 (`G3.1`–`G3.4`)** | **Concluído em 2026-11-25.** Cabana dual-window integrada (`renderWin` + `hitWin` dinâmico), agregador ligado aos 3 adaptadores reais, painel pt-BR, cards locais (`D3`), validação ao vivo `000 -> 111 -> 000` e suíte verde. |
 | **G4 (`G4.1`–`G4.3`)** | **Concluído em 2026-11-25.** Hardening Windows concluído: DPI `100–200%`, multi-monitor, tela cheia (`WS_EX_NOACTIVATE`), soak test de 1 h e medição de CPU/RAM (`docs/evidencias-g4.md`), hooks reversíveis com backup e auditoria de segurança/privacidade (`T24`–`T28`). |
 | **G5 (`G5.1`–`G5.2`)** | **Concluído em 2026-11-25.** Ícone, metadados, `scripts/release-local.ps1`, instalação real, ativação dos 3 moradores, remoção de conectores e desinstalação reais validadas pelo proprietário; release `v0.1.0` em `playertwo1/agent-habitat` (tag `820f0c42`, 6 anexos). 5 defeitos do app instalado corrigidos (ver `CHANGELOG.md`). |
-| **P1 / P2** | Parqueados até o fechamento do G5. |
+| **P1** | Roadmap aprovado em 2026-11-25 ([questionário](questionario/2026-11-25-p1-refinamentos-de-uso-diario.md)): P1.1 métricas, P1.2 histórico, P1.2b retomada do Codex, P1.3 subagentes, P1.4 jardim; release `v0.2.0` só no fim. |
+| **P2** | Parqueado até o fechamento do P1. |
 
 ## Próxima Ação Imediata
 
-1. Decidir com o proprietário o escopo de P1/P2 (ex.: assinatura do instalador, ajustar as notas da release, limpar `.bak`).
+1. **P1.1:** mapear os módulos de cota e recap herdados e ligar as métricas ao painel (ver [P1.1](roadmap/p1/P1.1-metricas.md)).
 
 ## Pendências do Proprietário
 

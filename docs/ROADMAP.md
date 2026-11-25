@@ -20,9 +20,10 @@ Antes de trabalhar numa etapa, leia [`STATE.md`](STATE.md) e abra **somente** o 
 | **G3** | [`arquivadas/etapas/g3-habitat-integrado.md`](arquivadas/etapas/g3-habitat-integrado.md) | Conectar telemetria real à cabana, `hitWin` dinâmico, painel sob demanda em pt-BR, foco de janela e cards opcionais de permissão/conclusão | Concluído (2026-11-25) |
 | **G4** | [`arquivadas/etapas/g4-hardening-windows.md`](arquivadas/etapas/g4-hardening-windows.md) | Validação em DPI `100/125/150/200%`, múltiplos monitores, tela cheia, movimento reduzido, medição de CPU/RAM (1 h) e reversibilidade de hooks | Concluído (2026-11-25) |
 | **G5** | [`arquivadas/etapas/g5-release-local.md`](arquivadas/etapas/g5-release-local.md) | Ícone final, build NSIS Windows x64/arm64 local, checksum SHA-256, auditoria de pacote/licenças e release `v0.1.0` em `playertwo1/agent-habitat` | Concluído em 2026-11-25 (release `v0.1.0` publicada) |
-| **P1/P2** | [`roadmap/p1-pos-mvp.md`](roadmap/p1-pos-mvp.md) | Cotas/métricas verificadas, personalização do jardim, subagentes visuais, novos habitats e ponte opcional com Lumen | Parqueado pós-MVP |
+| **P1** | [`roadmap/p1-pos-mvp.md`](roadmap/p1-pos-mvp.md) | Métricas verificadas, histórico com retomada, subagentes visuais e jardim personalizável; uma release `v0.2.0` no fim | Roadmap aprovado em 25/11/2026; P1.1 é a próxima |
+| **P2** | [`roadmap/p1-pos-mvp.md`](roadmap/p1-pos-mvp.md#p2--parqueado) | Novos temas, ponte opcional com Lumen e 4º morador | Parqueado |
 
-## Matriz de Testes Mínimos (T01–T28)
+## Matriz de Testes Mínimos (T01–T28; P1 acrescenta T29–T33)
 
 - **Cena e verdade (`T01`–`T11`):** combinações `000` a `111` (`T01`–`T08`); app aberto ocioso = `000` (`T09`); 2 sessões do mesmo provedor (`T10`); encerrar 1 de 2 sessões mantém mascote fora (`T11`).
 - **Eventos e resiliência (`T12`–`T19`):** permissão pendente + card local (`T12`); erro terminal vs erro com ação (`T13`); evento duplicado (`T14`); evento fora de ordem (`T15`); crash/restart do agente (`T16`); perda de fonte → `unknown` (`T17`); novo turno durante retorno `entering` (`T18`); fonte sem fase granular usa `busy` padrão (`T19`).
