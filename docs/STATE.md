@@ -1,6 +1,6 @@
 # STATE — Ponto de Retomada do Agent Habitat
 
-**Atualizado:** 2026-11-25 · **Versão atual:** `0.1.0` (Gates G0 a G4 concluídos e endurecidos) · **Etapa da vez:** [G5 — Release Local](roadmap/g5-release-local.md)
+**Atualizado:** 2026-11-25 · **Versão atual:** `0.1.0` (Gates G0 a G5 concluídos; release `v0.1.0` publicada) · **Etapa da vez:** P1/P2 (parqueados, a decidir com o proprietário)
 
 Este arquivo registra **apenas** onde estamos, o que aguarda validação do dono e qual é a próxima ação imediata. Para detalhes das etapas, consulte o [ROADMAP](ROADMAP.md).
 
@@ -14,16 +14,15 @@ Este arquivo registra **apenas** onde estamos, o que aguarda validação do dono
 | **G2 (`G2.1`–`G2.3`)** | **Concluído em 2026-11-25.** `provider-aggregator.js` (`T09`–`T19`), adaptadores das 6 superfícies Windows, `agent-habitat-hook.js`, `habitat-hook-sync.js` (schemas reais Claude/Codex/Antigravity sem tocar em `$HOME`), `habitat-runtime.js` + rotas `/habitat/event` e `/habitat/snapshot`, e poda MVP (`mvp-scope.js` + bloqueio de canais remotos no `main.js`). |
 | **G3 (`G3.1`–`G3.4`)** | **Concluído em 2026-11-25.** Cabana dual-window integrada (`renderWin` + `hitWin` dinâmico), agregador ligado aos 3 adaptadores reais, painel pt-BR, cards locais (`D3`), validação ao vivo `000 -> 111 -> 000` e suíte verde. |
 | **G4 (`G4.1`–`G4.3`)** | **Concluído em 2026-11-25.** Hardening Windows concluído: DPI `100–200%`, multi-monitor, tela cheia (`WS_EX_NOACTIVATE`), soak test de 1 h e medição de CPU/RAM (`docs/evidencias-g4.md`), hooks reversíveis com backup e auditoria de segurança/privacidade (`T24`–`T28`). |
-| **G5** | **G5.1 concluído em 2026-11-25:** ícone Cozy Cottage, docs de release, `scripts/release-local.ps1` validado ponta a ponta (testes verdes, NSIS x64/arm64, auditoria nativa, `SHA256SUMS.txt`). **G5.2 em andamento:** instalação real e ativação dos 3 moradores validadas pelo proprietário (Clawd, Cloudling e Atom saindo da cabana); 5 defeitos do app instalado corrigidos (ver `CHANGELOG.md`). **Release `v0.1.0` publicada** (tag no commit `820f0c42`, 6 anexos). **Pendentes:** remoção dos conectores e desinstalação reais. |
+| **G5 (`G5.1`–`G5.2`)** | **Concluído em 2026-11-25.** Ícone, metadados, `scripts/release-local.ps1`, instalação real, ativação dos 3 moradores, remoção de conectores e desinstalação reais validadas pelo proprietário; release `v0.1.0` em `playertwo1/agent-habitat` (tag `820f0c42`, 6 anexos). 5 defeitos do app instalado corrigidos (ver `CHANGELOG.md`). |
 | **P1 / P2** | Parqueados até o fechamento do G5. |
 
 ## Próxima Ação Imediata
 
-1. **G5.2:** fazer a remoção de conectores e a desinstalação reais, conferir os hooks do `clawd-on-desk` e, só então, arquivar `roadmap/g5-release-local.md` em `docs/arquivadas/etapas/`.
+1. Decidir com o proprietário o escopo de P1/P2 (ex.: assinatura do instalador, ajustar as notas da release, limpar `.bak`).
 
 ## Pendências do Proprietário
 
-- Remover os conectores pelo painel do app instalado e desinstalar pelo desinstalador real, conferindo que os hooks do `clawd-on-desk` ficam intactos (adiado em 2026-11-25).
 
 ## Notas Técnicas Atuais
 

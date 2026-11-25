@@ -6,7 +6,7 @@
   <img src="docs/referencias_visuais/01_visao_geral.png" width="780" alt="Conceito visual do Agent Habitat — Cozy Cottage Edition">
 </p>
 
-> **Status atual:** `0.1.0` — Gates G0 a G4 concluídos (cabana, agregador por provedor, painel, hardening Windows e hooks reversíveis). Empacotamento local do instalador em andamento no **[Gate G5](docs/roadmap/g5-release-local.md)**. Acompanhe o andamento em **[`docs/STATE.md`](docs/STATE.md)**.
+> **Status atual:** `0.1.0` — Gates G0 a G5 concluídos (cabana, agregador por provedor, painel, hardening Windows, hooks reversíveis e release local). Acompanhe o andamento em **[`docs/STATE.md`](docs/STATE.md)**.
 
 ---
 

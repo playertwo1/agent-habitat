@@ -19,7 +19,7 @@ Antes de trabalhar numa etapa, leia [`STATE.md`](STATE.md) e abra **somente** o 
 | **G2** | [`arquivadas/etapas/g2-agregador-e-adaptadores.md`](arquivadas/etapas/g2-agregador-e-adaptadores.md) | Agregador de 3 slots por provedor, adaptador Antigravity IDE/CLI + Codex Desktop/CLI + Claude CLI/Desktop e poda dos 26 agentes extras/canais remotos | Concluído (2026-11-25) |
 | **G3** | [`arquivadas/etapas/g3-habitat-integrado.md`](arquivadas/etapas/g3-habitat-integrado.md) | Conectar telemetria real à cabana, `hitWin` dinâmico, painel sob demanda em pt-BR, foco de janela e cards opcionais de permissão/conclusão | Concluído (2026-11-25) |
 | **G4** | [`arquivadas/etapas/g4-hardening-windows.md`](arquivadas/etapas/g4-hardening-windows.md) | Validação em DPI `100/125/150/200%`, múltiplos monitores, tela cheia, movimento reduzido, medição de CPU/RAM (1 h) e reversibilidade de hooks | Concluído (2026-11-25) |
-| **G5** | [`roadmap/g5-release-local.md`](roadmap/g5-release-local.md) | Ícone final, build NSIS Windows x64/arm64 local, checksum SHA-256, auditoria de pacote/licenças e release `v0.1.0` em `playertwo1/agent-habitat` | Em andamento (G5.1 concluído; release `v0.1.0` publicada; falta a desinstalação real) |
+| **G5** | [`arquivadas/etapas/g5-release-local.md`](arquivadas/etapas/g5-release-local.md) | Ícone final, build NSIS Windows x64/arm64 local, checksum SHA-256, auditoria de pacote/licenças e release `v0.1.0` em `playertwo1/agent-habitat` | Concluído em 2026-11-25 (release `v0.1.0` publicada) |
 | **P1/P2** | [`roadmap/p1-pos-mvp.md`](roadmap/p1-pos-mvp.md) | Cotas/métricas verificadas, personalização do jardim, subagentes visuais, novos habitats e ponte opcional com Lumen | Parqueado pós-MVP |
 
 ## Matriz de Testes Mínimos (T01–T28)

@@ -21,6 +21,7 @@ Defeitos que só apareceram com o app instalado (nenhum teste abre o Electron de
 - **Ninguém saía da cabana:** o laço do Stage chamava `wake()` sem `start()` e nenhum quadro era enviado; a cena ficava congelada em `000`.
 - **Desinstalador:** não remove mais os hooks do `clawd-on-desk` nem executa o limpador de integrações herdado; remove só as entradas com `agent-habitat-hook.js`.
 - Testes novos em `test/habitat-g5-csp-inline.test.js` cobrem cada uma dessas regressões.
+- Validados no app instalado: remoção de conectores pelo painel e desinstalador real, sem tocar nos hooks do `clawd-on-desk`.
 
 ### Concluído (Gate G4 — Hardening Windows, DPI, Economia em 000, Hooks Reversíveis e Acessibilidade — 2026-11-25)
 - **G4.1 — DPI, Multi-Monitor e Tela Cheia (`T20`–`T22`):** validação de layout em escalas de `100%` a `200%`, clamping de painéis em monitores secundários e comportamento robusto de ocultação em fullscreen com `WS_EX_NOACTIVATE`.
