@@ -1,4 +1,14 @@
 const { app, BrowserWindow, Notification, screen, ipcMain, globalShortcut, nativeTheme, dialog, shell, nativeImage, powerSaveBlocker, powerMonitor, clipboard, safeStorage, net } = require("electron");
+
+// ── Habitat Demo Mode / Preview Capture Support ──
+const hasHabitatDemoArg = process.argv.includes("--habitat-demo") || process.argv.some(arg => arg.startsWith("--habitat-capture-previews"));
+if (hasHabitatDemoArg) {
+  const path = require("path");
+  const { runHabitatDemoMode } = require("./habitat/demo-window-main");
+  runHabitatDemoMode({ app, BrowserWindow, ipcMain, argv: process.argv, repoRoot: path.join(__dirname, "..") });
+  return;
+}
+
 const { maybeRunPackageKoffiSmoke } = require("./package-koffi-smoke");
 if (maybeRunPackageKoffiSmoke({ app, BrowserWindow })) {
   return;

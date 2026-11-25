@@ -1,6 +1,6 @@
 # STATE — Ponto de Retomada do Agent Habitat
 
-**Atualizado:** 2026-11-24 · **Versão atual:** `0.1.0` (Gate G0 concluído) · **Etapa da vez:** [G1 — Cabana e Demo](roadmap/g1-cabana-e-demo.md)
+**Atualizado:** 2026-11-25 · **Versão atual:** `0.1.0` (Gate G0 concluído) · **Etapa da vez:** [G1 — Cabana e Demo](roadmap/g1-cabana-e-demo.md)
 
 Este arquivo registra **apenas** onde estamos, o que aguarda validação do dono e qual é a próxima ação imediata. Para detalhes das etapas, consulte o [ROADMAP](ROADMAP.md).
 
@@ -10,14 +10,13 @@ Este arquivo registra **apenas** onde estamos, o que aguarda validação do dono
 |---|---|
 | **Kickoff (`D1`–`D8`)** | **Concluído em 2026-11-24** (`8495b4a0`). Repositório criado sobre `playertwo1/clawd-on-desk` (`e216f924`), zero GitHub Actions, referências visuais e documentação fundacional prontas. |
 | **G0 (`G0.1`–`G0.3`)** | **Concluído em 2026-11-24.** `Arnav8452/atom` auditado (19 pares `.webp`/`.json` em `assets/originals/atom/` + `NOTICE.md`), 6 superfícies Windows comprovadas em `docs/discovery-g0.md` e identidade isolada (`src/habitat-identity.js`, `com.playertwo1.agent-habitat`, portas `23433–23437`, `~/.agent-habitat/runtime.json`, `AGENT_HABITAT_SYNC_HOOKS=0`). |
-| **G1 (`G1.1`–`G1.4`)** | **Próxima etapa** (camadas PNG RGBA da Cozy Cottage, props, manifesto e `Demo Mode` das 8 combinações). |
+| **G1 (`G1.1`–`G1.4`)** | **G1.1–G1.3 concluídas com capturas e testes verdes; `G1.4` aguardando aprovação visual ao vivo do proprietário.** |
 | **G2 – G5** | Pendentes na fila do MVP. |
 | **P1 / P2** | Parqueados até o fechamento do G5. |
 
 ## Próxima Ação Imediata
 
-1. **Executar `G1.1` ([`g1-cabana-e-demo.md`](roadmap/g1-cabana-e-demo.md)):** produzir e validar transparência alfa real (zero checkerboard residual) das camadas modulares da Cozy Cottage e props em `assets/habitat/cozy-cottage/`, além do `habitat-manifest.json` com dimensões, pivôs, `doorAnchor` e coordenadas das 3 estações (`T26`).
-2. **Em seguida (`G1.2`–`G1.4`):** integrar os sprites originais de Clawd, Cloudling e Atom, implementar `src/habitat/scene-machine.js` + `Demo Mode` (`000`–`111`) e validar visualmente no desktop.
+1. **Inspeção visual do proprietário:** abrir a janela Demo (`npm run demo:habitat`) ou inspecionar os previews em `dist/g1-previews/` para confirmar **G1.4** e autorizar o fechamento do G1 e início do **G2**.
 
 ## Pendências do Proprietário
 

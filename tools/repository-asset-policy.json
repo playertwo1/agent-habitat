@@ -29,6 +29,13 @@
   },
   "pathRules": [
     {
+      "pattern": "assets/habitat/**",
+      "class": "runtime-required",
+      "owner": "theme-runtime",
+      "packaged": true,
+      "retentionReason": "Cozy Cottage layered PNG RGBA habitat assets, manifest, and packaged Atom actor clips."
+    },
+    {
       "pattern": "docs/referencias_visuais/**",
       "class": "docs-marketing",
       "owner": "design-assets",

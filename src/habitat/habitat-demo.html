@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Cozy Cottage — Demo Mode</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' file:; img-src 'self' file: data: blob:; object-src 'self' file:; style-src 'self' 'unsafe-inline'; script-src 'self';">
+  <link rel="stylesheet" href="habitat-demo.css">
+</head>
+<body>
+  <div id="demo-root" class="bg-dark">
+    <!-- Top Demo Stamp & Window Drag Bar -->
+    <div id="demo-drag-header">
+      <div id="demo-stamp">[DEMO — Dados Simulados]</div>
+      <div id="window-actions">
+        <button id="btn-close" title="Fechar Demo" tabindex="10">×</button>
+      </div>
+    </div>
+
+    <!-- Stage Container -->
+    <div id="habitat-stage-container">
+      <div id="habitat-stage"></div>
+    </div>
+
+    <!-- Controls Panel -->
+    <div id="demo-controls" role="region" aria-label="Controles do Demo">
+      <div class="control-group">
+        <span class="group-title">Combinações Rápidas (000–111)</span>
+        <div class="btn-row" id="presets-row">
+          <button class="preset-btn" data-preset="000" tabindex="1">000 (Dentro)</button>
+          <button class="preset-btn" data-preset="100" tabindex="2">100 (Claude)</button>
+          <button class="preset-btn" data-preset="010" tabindex="3">010 (Codex)</button>
+          <button class="preset-btn" data-preset="001" tabindex="4">001 (AGY)</button>
+          <button class="preset-btn" data-preset="110" tabindex="5">110</button>
+          <button class="preset-btn" data-preset="101" tabindex="6">101</button>
+          <button class="preset-btn" data-preset="011" tabindex="7">011</button>
+          <button class="preset-btn" data-preset="111" tabindex="8">111 (Todos Fora)</button>
+        </div>
+      </div>
+
+      <div class="providers-grid">
+        <!-- Claude -->
+        <div class="provider-card" data-provider="claude">
+          <div class="provider-header">Claude (Clawd)</div>
+          <div class="btn-grid">
+            <button class="state-btn" data-action="busy">Ocupado</button>
+            <button class="state-btn" data-action="needs_approval">Permissão</button>
+            <button class="state-btn" data-action="waiting_input">Pergunta</button>
+            <button class="state-btn" data-action="error">Erro</button>
+            <button class="state-btn" data-action="done">Concluir</button>
+            <button class="state-btn" data-action="offline">Parar</button>
+          </div>
+        </div>
+
+        <!-- Codex -->
+        <div class="provider-card" data-provider="codex">
+          <div class="provider-header">Codex (Cloudling)</div>
+          <div class="btn-grid">
+            <button class="state-btn" data-action="busy">Ocupado</button>
+            <button class="state-btn" data-action="needs_approval">Permissão</button>
+            <button class="state-btn" data-action="waiting_input">Pergunta</button>
+            <button class="state-btn" data-action="error">Erro</button>
+            <button class="state-btn" data-action="done">Concluir</button>
+            <button class="state-btn" data-action="offline">Parar</button>
+          </div>
+        </div>
+
+        <!-- Antigravity -->
+        <div class="provider-card" data-provider="antigravity">
+          <div class="provider-header">Antigravity (Atom)</div>
+          <div class="btn-grid">
+            <button class="state-btn" data-action="busy">Ocupado</button>
+            <button class="state-btn" data-action="needs_approval">Permissão</button>
+            <button class="state-btn" data-action="waiting_input">Pergunta</button>
+            <button class="state-btn" data-action="error">Erro</button>
+            <button class="state-btn" data-action="done">Concluir</button>
+            <button class="state-btn" data-action="offline">Parar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <label>Escala:
+          <select id="select-scale" tabindex="20">
+            <option value="1">1×</option>
+            <option value="1.5">1.5×</option>
+            <option value="2" selected>2×</option>
+          </select>
+        </label>
+        <label>
+          <input type="checkbox" id="chk-reduced-motion" tabindex="21"> Movimento Reduzido
+        </label>
+        <label>Fundo:
+          <select id="select-bg" tabindex="22">
+            <option value="dark" selected>Escuro</option>
+            <option value="light">Claro</option>
+            <option value="transparent">Transparente</option>
+          </select>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <script src="habitat-renderer.js"></script>
+  <script src="demo-client.js"></script>
+</body>
+</html>
