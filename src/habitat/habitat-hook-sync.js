@@ -7,6 +7,11 @@ const { writeJsonAtomic } = require("../../hooks/json-utils");
 
 const AGENT_HABITAT_HOOK_MARKER = "agent-habitat-hook.js";
 const ANTIGRAVITY_GROUP_ID = "agent-habitat";
+// No app empacotado o node externo não lê dentro do app.asar; hooks/** vai para app.asar.unpacked (asarUnpack).
+function resolveDefaultHookScriptPath(baseDir = __dirname) {
+  return path.resolve(baseDir, "../../hooks/agent-habitat-hook.js").replace(/([\\/])app\.asar(?=[\\/])/, "$1app.asar.unpacked");
+}
+const DEFAULT_HOOK_SCRIPT_PATH = resolveDefaultHookScriptPath();
 
 const CLAUDE_EVENTS = [
   "SessionStart",
@@ -56,7 +61,7 @@ function defaultAntigravityHooksPath() {
 }
 
 function buildHabitatHookCommand({ nodeBin = "node", hookScriptPath, provider, eventName }) {
-  const script = hookScriptPath || path.resolve(__dirname, "../../hooks/agent-habitat-hook.js");
+  const script = hookScriptPath || DEFAULT_HOOK_SCRIPT_PATH;
   const escapedScript = script.replace(/\\/g, "/");
   return `${nodeBin} "${escapedScript}" ${provider} ${eventName}`;
 }
@@ -83,7 +88,7 @@ function hasAgentHabitatMarker(entry) {
 
 function planHabitatHookSync(options = {}) {
   const nodeBin = options.nodeBin || "node";
-  const hookScriptPath = options.hookScriptPath || path.resolve(__dirname, "../../hooks/agent-habitat-hook.js");
+  const hookScriptPath = options.hookScriptPath || DEFAULT_HOOK_SCRIPT_PATH;
 
   const claudePath = options.claudeSettingsPath || defaultClaudeSettingsPath();
   const codexPath = options.codexHooksPath || defaultCodexHooksPath();
@@ -187,7 +192,7 @@ function planHabitatHookSync(options = {}) {
 
 function mutateHooksData(existingData, events, provider, options) {
   const nodeBin = options.nodeBin || "node";
-  const hookScriptPath = options.hookScriptPath || path.resolve(__dirname, "../../hooks/agent-habitat-hook.js");
+  const hookScriptPath = options.hookScriptPath || DEFAULT_HOOK_SCRIPT_PATH;
 
   if (provider === "antigravity") {
     if (!existingData[ANTIGRAVITY_GROUP_ID] || typeof existingData[ANTIGRAVITY_GROUP_ID] !== "object") {
@@ -250,7 +255,7 @@ function installHabitatHooks(options = {}) {
   }
 
   const nodeBin = options.nodeBin || "node";
-  const hookScriptPath = options.hookScriptPath || path.resolve(__dirname, "../../hooks/agent-habitat-hook.js");
+  const hookScriptPath = options.hookScriptPath || DEFAULT_HOOK_SCRIPT_PATH;
 
   const paths = [
     { provider: "claude", filePath: options.claudeSettingsPath || defaultClaudeSettingsPath(), events: CLAUDE_EVENTS },
@@ -421,6 +426,7 @@ module.exports = {
   defaultCodexHooksPath,
   defaultAntigravityHooksPath,
   buildHabitatHookCommand,
+  resolveDefaultHookScriptPath,
   hasAgentHabitatMarker,
   planHabitatHookSync,
   installHabitatHooks,

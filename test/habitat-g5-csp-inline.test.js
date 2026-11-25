@@ -56,6 +56,18 @@ test("CSS do Habitat não tem declaração fora de regra (G4 perdeu o :root do p
   }
 });
 
+test("hook do Habitat no app empacotado aponta para app.asar.unpacked (node externo não lê o asar)", () => {
+  const { resolveDefaultHookScriptPath } = require("../src/habitat/habitat-hook-sync");
+  const packaged = path.join("C:", "Apps", "Agent Habitat", "resources", "app.asar", "src", "habitat");
+  assert.strictEqual(
+    resolveDefaultHookScriptPath(packaged),
+    path.join("C:", "Apps", "Agent Habitat", "resources", "app.asar.unpacked", "hooks", "agent-habitat-hook.js")
+  );
+  const dev = resolveDefaultHookScriptPath(HABITAT_DIR);
+  assert.strictEqual(dev, path.join(__dirname, "..", "hooks", "agent-habitat-hook.js"));
+  assert.ok(fs.existsSync(dev));
+});
+
 test("habitat-app-main declara o estado que atribui depois (modo estrito)", () => {
   const source = fs.readFileSync(path.join(HABITAT_DIR, "habitat-app-main.js"), "utf8");
   for (const name of ["hitActivationRuntime", "stageLoop"]) {
