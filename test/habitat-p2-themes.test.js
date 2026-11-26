@@ -32,21 +32,21 @@ test("T34: o tema padrão é a Cozy Cottage e o painel só oferece temas que car
 });
 
 test("T34: tema desconhecido, não instalado ou inválido cai na Cozy Cottage sem derrubar o app", () => {
-  assert.strictEqual(normalizeTheme("../../etc"), "cozy-cottage");
+  assert.strictEqual(normalizeTheme("../../etc"), "cozy-cottage-v2");
   const t = loadTheme({ repoRoot: ROOT, theme: "japanese-garden" });
   if (!fs.existsSync(path.join(ROOT, "assets", "habitat", "japanese-garden"))) {
     assert.strictEqual(t.id, "cozy-cottage");
     assert.match(t.fallbackReason, /não instalado/);
   }
-  assert.strictEqual(loadTheme({ repoRoot: ROOT, theme: "xyz" }).id, "cozy-cottage");
+  assert.strictEqual(loadTheme({ repoRoot: ROOT, theme: "xyz" }).id, "cozy-cottage-v2");
 });
 
 test("T34: o tema escolhido persiste entre reinícios e valor inválido volta ao padrão", () => {
   const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "habitat-theme-")), "prefs.json");
-  assert.strictEqual(loadHabitatPrefs(file).theme, "cozy-cottage");
+  assert.strictEqual(loadHabitatPrefs(file).theme, "cozy-cottage-v2");
   saveHabitatPrefs({ filePath: file, patch: { theme: "fantasy-village" } });
   assert.strictEqual(loadHabitatPrefs(file).theme, "fantasy-village");
-  assert.strictEqual(saveHabitatPrefs({ filePath: file, patch: { theme: "../x" } }).theme, "cozy-cottage");
+  assert.strictEqual(saveHabitatPrefs({ filePath: file, patch: { theme: "../x" } }).theme, "cozy-cottage-v2");
 });
 
 test("T34: o repouso 000 não depende do tema (cena fechada, ninguém fora)", () => {
@@ -114,10 +114,10 @@ test("T34: o renderizador usa helpers.frames (4 quadros) em vez de 2 fixos", () 
   }
 });
 
-test("T34: Japanese Garden e Fantasy Village instalados carregam sem fallback, com arte válida e casa própria", () => {
+test("T34: Cozy Cottage v2, Japanese Garden e Fantasy Village instalados carregam sem fallback, com arte válida e casa própria", () => {
   const ids = listThemes({ repoRoot: ROOT }).map((t) => t.id);
-  assert.deepStrictEqual(ids, ["cozy-cottage", "japanese-garden", "fantasy-village"]);
-  for (const id of ["japanese-garden", "fantasy-village"]) {
+  assert.deepStrictEqual(ids, ["cozy-cottage-v2", "cozy-cottage", "japanese-garden", "fantasy-village"]);
+  for (const id of ["cozy-cottage-v2", "japanese-garden", "fantasy-village"]) {
     const t = loadTheme({ repoRoot: ROOT, theme: id });
     assert.strictEqual(t.id, id);
     assert.strictEqual(t.fallbackReason, null);

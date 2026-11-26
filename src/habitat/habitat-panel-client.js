@@ -202,7 +202,7 @@
     const themes = Array.isArray(state.themes) ? state.themes : [];
     if (themeCard && themeBox) {
       themeCard.hidden = themes.length < 2;
-      themeBox.innerHTML = themes.map((t) => `<label><input type="radio" name="theme" value="${escapeHtml(t.id)}"${t.id === (prefs.theme || "cozy-cottage") ? " checked" : ""}> ${escapeHtml(t.name)}</label>`).join("");
+      themeBox.innerHTML = themes.map((t) => `<label><input type="radio" name="theme" value="${escapeHtml(t.id)}"${t.id === (prefs.theme || "cozy-cottage-v2") ? " checked" : ""}> ${escapeHtml(t.name)}</label>`).join("");
       themeBox.querySelectorAll('input[name="theme"]').forEach((el) => {
         el.addEventListener("change", () => bridge.updatePref("theme", el.value).then((s) => { if (s) render(s); }));
       });

@@ -19,7 +19,7 @@ const DEFAULT_HABITAT_PREFS = Object.freeze({
   windowPosition: null,
   garden: normalizeGarden(null),
   lightMode: "auto",
-  theme: "cozy-cottage",
+  theme: "cozy-cottage-v2",
 });
 
 function normalizeHabitatPrefs(input) {

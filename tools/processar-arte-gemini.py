@@ -20,14 +20,15 @@ from PIL import Image, ImageEnhance
 
 RAIZ = Path(__file__).resolve().parent.parent
 BASE = RAIZ / "assets" / "habitat" / "cozy-cottage"
-NOMES = {"japanese-garden": "Japanese Garden", "fantasy-village": "Fantasy Village"}
+NOMES = {"cozy-cottage-v2": "Cozy Cottage", "japanese-garden": "Japanese Garden", "fantasy-village": "Fantasy Village"}
 CASA_CAIXA = (92, 88)  # largura x altura máximas da casa no canvas (a casa fica ao fundo, deixando o cenário aparecer)
-CASA_CHAO_Y = {"japanese-garden": 134, "fantasy-village": 124}  # onde a base da casa pisa (o japonês tem lago atrás: fica mais à frente)
+CASA_CHAO_Y = {"cozy-cottage-v2": 132, "japanese-garden": 134, "fantasy-village": 124}  # onde a base da casa pisa (o japonês tem lago atrás: fica mais à frente)
 ESCALA_ADERECOS = 0.7   # adereços das estações e objetos do jardim ficam menores que a caixa, na escala da casa
 ESCALA_OBJETOS = 0.65
 # posição, relativa à casa já colocada, de: porta (centro x, base y, largura, altura) e chaminé (centro x)
-PORTA_REL = {"japanese-garden": (0.496, 0.876, 0.30, 0.35), "fantasy-village": (0.524, 0.903, 0.282, 0.40)}
-CHAMINE_X = 0.78
+PORTA_REL = {"cozy-cottage-v2": (0.501, 0.88, 0.275, 0.423), "japanese-garden": (0.496, 0.876, 0.30, 0.35), "fantasy-village": (0.524, 0.903, 0.282, 0.40)}
+CHAMINE_X = {"cozy-cottage-v2": 0.743}  # padrão 0.78
+
 LIMIAR_MAGENTA = 90  # distância RGB até #FF00FF para contar como fundo
 BOX = Image.Resampling.BOX
 MAG = np.array([255, 0, 255], dtype=np.float32)
@@ -237,7 +238,7 @@ def main():
     cx_rel, base_rel, pw_rel, ph_rel = PORTA_REL[a.tema]
     pw, ph = round(pw_rel * hw), round(ph_rel * hh)
     L["door"].update(x=round(hx0 + cx_rel * hw - pw / 2), y=round(hy0 + base_rel * hh - ph), width=pw, height=ph)
-    L["smoke"].update(x=round(hx0 + CHAMINE_X * hw - L["smoke"]["width"] / 2), y=max(0, hy0 - 20))
+    L["smoke"].update(x=round(hx0 + CHAMINE_X.get(a.tema, 0.78) * hw - L["smoke"]["width"] / 2), y=max(0, hy0 - 20))
     man["cottageHitBox"] = {"x": hx0, "y": hy0, "width": hw, "height": hh}
     salvar(casa_ok, saida / L["cottageNight"], cores)
     luz = luz_ambar(casa_ok, acesa_ok)

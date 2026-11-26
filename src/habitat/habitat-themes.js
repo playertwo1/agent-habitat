@@ -8,11 +8,13 @@ const { loadAndValidateHabitatManifest } = require("./manifest-validator");
 const { readPng } = require("./habitat-png");
 
 const THEMES = Object.freeze({
-  "cozy-cottage": "Cozy Cottage",
+  "cozy-cottage-v2": "Cozy Cottage",
+  "cozy-cottage": "Cozy Cottage (clássico)",
   "japanese-garden": "Japanese Garden",
   "fantasy-village": "Fantasy Village",
 });
-const DEFAULT_THEME = "cozy-cottage";
+const BASE_THEME = "cozy-cottage"; // arte original: define a geometria de todos os temas e é a reserva quando um tema falha
+const DEFAULT_THEME = "cozy-cottage-v2";
 const themeManifestPath = (repoRoot, id) => path.join(repoRoot, "assets", "habitat", id, "habitat-manifest.json");
 
 function normalizeTheme(v) {
@@ -72,15 +74,15 @@ function loadTheme({ repoRoot, theme }) {
 }
 
 function loadThemeUncached(repoRoot, id) {
-  const basePath = themeManifestPath(repoRoot, DEFAULT_THEME);
+  const basePath = themeManifestPath(repoRoot, BASE_THEME);
   const baseManifest = JSON.parse(fs.readFileSync(basePath, "utf8"));
   const make = (manifestId, manifest, manifestPath, fallbackReason) => ({
     id: manifestId, manifest, fallbackReason: fallbackReason || null,
     dirUrl: `file://${path.resolve(path.dirname(manifestPath)).replace(/\\/g, "/")}/`,
   });
-  if (id === DEFAULT_THEME) return make(DEFAULT_THEME, baseManifest, basePath);
+  if (id === BASE_THEME) return make(BASE_THEME, baseManifest, basePath);
   const mp = themeManifestPath(repoRoot, id);
-  const fallback = (reason) => make(DEFAULT_THEME, baseManifest, basePath, reason);
+  const fallback = (reason) => make(BASE_THEME, baseManifest, basePath, reason);
   if (!fs.existsSync(mp)) return fallback("tema não instalado");
   const v = loadAndValidateHabitatManifest({ manifestPath: mp, repoRoot, checkFiles: true });
   if (!v.ok) return fallback(`manifesto inválido: ${v.errors[0]}`);
@@ -99,4 +101,4 @@ function listThemes({ repoRoot }) {
 
 function clearThemeCache() { cache.clear(); }
 
-module.exports = { THEMES, DEFAULT_THEME, normalizeTheme, loadTheme, listThemes, checkThemeArt, geometry, clearThemeCache };
+module.exports = { THEMES, BASE_THEME, DEFAULT_THEME, normalizeTheme, loadTheme, listThemes, checkThemeArt, geometry, clearThemeCache };
