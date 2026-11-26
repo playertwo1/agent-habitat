@@ -1,6 +1,6 @@
 # STATE — Ponto de Retomada do Agent Habitat
 
-**Atualizado:** 2026-11-25 · **Versão atual:** `0.2.0` (Gates G0 a G5 e P1 concluídos; releases `v0.1.0` e `v0.2.0` publicadas) · **Etapa da vez:** [P1 — Refinamentos de uso diário](roadmap/p1-pos-mvp.md) (P1.1 a P1.4 publicadas na `v0.2.0`; restam duas conferências suas)
+**Atualizado:** 2026-11-26 · **Versão atual:** `0.3.1` (G0 a G5, P1 e P2 concluídos; última release `v0.3.1`) · **Etapa da vez:** [P3 — Space Habitat, confiabilidade, Lumen e aviso de versão](roadmap/p3-proximo-ciclo.md) (P3.1: prompts prontos, espera a arte)
 
 Este arquivo registra **apenas** onde estamos, o que aguarda validação do dono e qual é a próxima ação imediata. Para detalhes das etapas, consulte o [ROADMAP](ROADMAP.md).
 
@@ -18,15 +18,18 @@ Este arquivo registra **apenas** onde estamos, o que aguarda validação do dono
 | **P1** | Roadmap aprovado em 2026-11-25 ([questionário](questionario/2026-11-25-p1-refinamentos-de-uso-diario.md)): P1.1 métricas, P1.2 histórico, P1.2b retomada do Codex, P1.3 subagentes, P1.4 jardim; release `v0.2.0` publicada em 2026-11-25 (tag `882d22aa`, instalador x64). |
 | **P2** | Roadmap montado em 2026-11-25 ([questionário](questionario/2026-11-25-p2-novos-temas.md), [índice](roadmap/p2-novos-temas.md)): P2.1 infra de temas, P2.2 Japanese Garden, P2.3 Fantasy Village, P2.4 animações; release `v0.3.0` só no fim. Arte pelo Gemini com [prompts prontos](arte-p2/prompts-gemini.md). |
 
+| **P3** | Roadmap montado em 2026-11-26 ([questionário](questionario/2026-11-26-p3-proximo-ciclo.md), [índice](roadmap/p3-proximo-ciclo.md)): P3.1 arte do Space Habitat, P3.2 confiabilidade, P3.3 ponte local com o Lumen, P3.4 aviso de versão, P3.5 tema Space; release `v0.4.0` só no fim. [Prompts do Gemini prontos](arte-p3/prompts-gemini-space.md). |
+
 ## Próxima Ação Imediata
 
+0. **P3 (26/11):** o dono gera as 8 peças do Space Habitat no Gemini com o pacote de prompts; em paralelo, começar o código pela P3.2 (confiabilidade).
 1. **Retomada real conferida em 26/11** (Claude e Codex; o id do hook do Codex é o UUID do `codex resume`); a correção do `wt.exe` saiu na release `v0.3.1`.
 2. **Jardim aprovado pelo dono em 26/11** (`docs/prototipos/p1.4/`); P1 e P2 sem pendências do dono.
 3. **P2:** P2.1 a P2.4 concluídas e conferidas no app instalado `0.3.0` em 26/11 (temas de dia e de noite, moradores, luz, consumo em `000`). Release `v0.3.0` publicada em 26/11. A Cozy Cottage v2 (arte refeita) já é o tema padrão desde a `v0.3.0`.
 
 ## Pendências do Proprietário
 
-- Nenhuma pendência aberta (jardim aprovado em 26/11).
+- **P3.1:** gerar no Gemini as 8 peças do Space Habitat com [`docs/arte-p3/prompts-gemini-space.md`](arte-p3/prompts-gemini-space.md) e entregar a pasta ou o zip.
 
 
 ## Notas Técnicas Atuais
