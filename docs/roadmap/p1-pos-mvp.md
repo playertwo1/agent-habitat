@@ -1,6 +1,6 @@
 # Etapa: P1 — Refinamentos de uso diário
 
-**Estado:** P1.1 a P1.4 implementadas e conferidas no instalado 0.2.0 em 25/11/2026; falta a retomada real (Claude e Codex), a aprovação visual do dono e a publicação da release. Atualizado em 25/11/2026.
+**Estado:** P1.1 a P1.4 implementadas, conferidas no instalado 0.2.0 e publicadas na `v0.2.0` em 25/11/2026; pendentes: retomada real de Claude e Codex e aprovação visual do jardim pelo dono. Atualizado em 25/11/2026.
 
 **Objetivo:** métricas verificadas, histórico com retomada, subagentes visuais e personalização do jardim no Habitat, publicados juntos em **uma release v0.2.0 no fim**. Nada de estimativa inventada: sem dado real, o painel diz que não há dado.
 
@@ -15,7 +15,7 @@ Este arquivo é só um índice. Para trabalhar numa fase, leia apenas o document
 | P1.2b | Retomada de sessões do Codex | CP-P1.2b | Implementada 25/11 (conferência instalada no fim) | [P1.2b — Retomada do Codex](p1/P1.2b-retomada-codex.md) |
 | P1.3 | Mini-ajudantes desenhados por subagente ativo | CP-P1.3 | Implementada 25/11 (conferência instalada no fim) | [P1.3 — Subagentes](p1/P1.3-subagentes.md) |
 | P1.4 | Objetos do jardim escolhidos no painel e luz dia/noite pelo relógio | CP-P1.4 | Implementada 25/11 (conferência instalada no fim) | [P1.4 — Jardim](p1/P1.4-jardim.md) |
-| Release | `v0.2.0` publicada com tudo | CP-P1 | Condicional a todos os CPs | (regra abaixo) |
+| Release | `v0.2.0` publicada com tudo | CP-P1 | Publicada 25/11 (`v0.2.0`, tag `882d22aa`) | (regra abaixo) |
 
 ## Regras da etapa
 - **Uma fase por vez, na ordem da tabela.** Só marque `[x]` com evidência executada agora.

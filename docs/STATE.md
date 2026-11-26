@@ -1,6 +1,6 @@
 # STATE — Ponto de Retomada do Agent Habitat
 
-**Atualizado:** 2026-11-25 · **Versão atual:** `0.1.0` (Gates G0 a G5 concluídos; release `v0.1.0` publicada) · **Etapa da vez:** [P1 — Refinamentos de uso diário](roadmap/p1-pos-mvp.md) (P1.1 a P1.4 implementadas; falta build único, conferência instalada e release `v0.2.0`)
+**Atualizado:** 2026-11-25 · **Versão atual:** `0.2.0` (Gates G0 a G5 e P1 concluídos; releases `v0.1.0` e `v0.2.0` publicadas) · **Etapa da vez:** [P1 — Refinamentos de uso diário](roadmap/p1-pos-mvp.md) (P1.1 a P1.4 publicadas na `v0.2.0`; restam duas conferências suas)
 
 Este arquivo registra **apenas** onde estamos, o que aguarda validação do dono e qual é a próxima ação imediata. Para detalhes das etapas, consulte o [ROADMAP](ROADMAP.md).
 
@@ -15,14 +15,18 @@ Este arquivo registra **apenas** onde estamos, o que aguarda validação do dono
 | **G3 (`G3.1`–`G3.4`)** | **Concluído em 2026-11-25.** Cabana dual-window integrada (`renderWin` + `hitWin` dinâmico), agregador ligado aos 3 adaptadores reais, painel pt-BR, cards locais (`D3`), validação ao vivo `000 -> 111 -> 000` e suíte verde. |
 | **G4 (`G4.1`–`G4.3`)** | **Concluído em 2026-11-25.** Hardening Windows concluído: DPI `100–200%`, multi-monitor, tela cheia (`WS_EX_NOACTIVATE`), soak test de 1 h e medição de CPU/RAM (`docs/evidencias-g4.md`), hooks reversíveis com backup e auditoria de segurança/privacidade (`T24`–`T28`). |
 | **G5 (`G5.1`–`G5.2`)** | **Concluído em 2026-11-25.** Ícone, metadados, `scripts/release-local.ps1`, instalação real, ativação dos 3 moradores, remoção de conectores e desinstalação reais validadas pelo proprietário; release `v0.1.0` em `playertwo1/agent-habitat` (tag `820f0c42`, 6 anexos). 5 defeitos do app instalado corrigidos (ver `CHANGELOG.md`). |
-| **P1** | Roadmap aprovado em 2026-11-25 ([questionário](questionario/2026-11-25-p1-refinamentos-de-uso-diario.md)): P1.1 métricas, P1.2 histórico, P1.2b retomada do Codex, P1.3 subagentes, P1.4 jardim; release `v0.2.0` só no fim. |
+| **P1** | Roadmap aprovado em 2026-11-25 ([questionário](questionario/2026-11-25-p1-refinamentos-de-uso-diario.md)): P1.1 métricas, P1.2 histórico, P1.2b retomada do Codex, P1.3 subagentes, P1.4 jardim; release `v0.2.0` publicada em 2026-11-25 (tag `882d22aa`, instalador x64). |
 | **P2** | Parqueado até o fechamento do P1. |
 
 ## Próxima Ação Imediata
 
-1. **Fim do P1:** um só `release-local.ps1`, instalar, conferir pelo CDP (cotas, histórico e retomada de Claude e Codex, ajudantes, jardim de dia e de noite) e, com sua confirmação, tag `v0.2.0` + `gh release`.
+1. Conferir a retomada real do histórico (Claude e Codex) e se o id de sessão do hook do Codex é o UUID aceito por `codex resume`.
+2. Aprovar visualmente o jardim (`docs/prototipos/p1.4/`).
+3. P2 (novos temas, Lumen, 4º morador) só reabre por decisão sua.
 
 ## Pendências do Proprietário
+
+- Retomada real e aprovação do jardim (acima).
 
 
 ## Notas Técnicas Atuais
