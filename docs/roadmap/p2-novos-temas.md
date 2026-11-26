@@ -1,6 +1,6 @@
 # Etapa: P2 — Novos temas, animações e ajudantes por tema
 
-**Estado:** P2.1, P2.2, P2.3 e P2.4 implementadas (arte dos dois temas aprovada pelo dono em 26/11/2026); falta a conferência no app instalado, o build único e a release `v0.3.0`. Atualizado em 26/11/2026.
+**Estado:** P2.1 a P2.4 concluídas e conferidas no app instalado 0.3.0 (26/11/2026); falta só a release `v0.3.0` (build já gerado). Atualizado em 26/11/2026.
 
 **Objetivo:** o dono escolhe em Ajustes entre a Cozy Cottage e dois temas novos (**Japanese Garden** e **Fantasy Village**), cada um com cenário, ajudantes de subagente e objetos de jardim próprios; os moradores ganham mais animações (clipes originais ainda sem uso e movimento por código). Publicados juntos em **uma release `v0.3.0` no fim**. Se a arte do Gemini não alcançar a qualidade da Cozy Cottage depois de duas rodadas de ajuste, o tema é **abandonado** e a Cozy Cottage segue como padrão.
 

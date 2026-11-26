@@ -4,6 +4,13 @@ Todas as mudanças relevantes do **Agent Habitat** são documentadas neste arqui
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-26
+
+### Adicionado (P2 — Novos temas e animações)
+- **Temas do habitat (P2.1–P2.3):** seletor em Ajustes com Cozy Cottage (nova, padrão), Cozy Cottage clássico, Japanese Garden e Fantasy Village; troca ao vivo, cada tema com cenário, casa, porta animada, adereços, ajudantes e objetos do jardim próprios, de dia e de noite. Tema inválido ou ausente cai na Cozy Cottage clássica.
+- **Mais animações (P2.4):** variação de clipes originais em todos os estados (exceto erro e aprovação), clipe de delegar quando há ajudante ativo e movimento leve por código (pulinho ao concluir, passeio curto, olhar em volta), desligado com movimento reduzido e em `000`.
+- **Ferramentas:** `tools/processar-arte-gemini.py` transforma a arte do Gemini em camadas RGBA com alfa real.
+
 ## [0.2.0] - 2026-11-25
 
 ### Adicionado (P1 — Refinamentos de uso diário)
