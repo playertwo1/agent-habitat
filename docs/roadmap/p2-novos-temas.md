@@ -1,6 +1,6 @@
 # Etapa: P2 — Novos temas, animações e ajudantes por tema
 
-**Estado:** P2.1 e P2.4 implementadas em 25/11/2026; P2.2 e P2.3 esperam a arte do Gemini. Atualizado em 25/11/2026.
+**Estado:** P2.1, P2.2, P2.3 e P2.4 implementadas (arte dos dois temas aprovada pelo dono em 26/11/2026); falta a conferência no app instalado, o build único e a release `v0.3.0`. Atualizado em 26/11/2026.
 
 **Objetivo:** o dono escolhe em Ajustes entre a Cozy Cottage e dois temas novos (**Japanese Garden** e **Fantasy Village**), cada um com cenário, ajudantes de subagente e objetos de jardim próprios; os moradores ganham mais animações (clipes originais ainda sem uso e movimento por código). Publicados juntos em **uma release `v0.3.0` no fim**. Se a arte do Gemini não alcançar a qualidade da Cozy Cottage depois de duas rodadas de ajuste, o tema é **abandonado** e a Cozy Cottage segue como padrão.
 
@@ -11,8 +11,8 @@ Este arquivo é só um índice. Para trabalhar numa fase, leia apenas o document
 | Fase | Resultado | Checkpoint | Estado | Documento |
 |---|---|---|---|---|
 | P2.1 | Infra de temas: seletor em Ajustes, manifesto por tema, ajudantes com N quadros e script que transforma a arte do Gemini em camadas RGBA | CP-P2.1 | Implementada 25/11 (conferência instalada no fim) | [P2.1 — Infra de temas](p2/P2.1-infra-de-temas.md) |
-| P2.2 | Tema Japanese Garden completo, de dia e de noite | CP-P2.2 | Condicional a CP-P2.1 e à arte do dono | [P2.2 — Japanese Garden](p2/P2.2-japanese-garden.md) |
-| P2.3 | Tema Fantasy Village completo, de dia e de noite | CP-P2.3 | Condicional a CP-P2.1 e à arte do dono | [P2.3 — Fantasy Village](p2/P2.3-fantasy-village.md) |
+| P2.2 | Tema Japanese Garden completo, de dia e de noite | CP-P2.2 | Arte aprovada em 26/11; falta o app instalado | [P2.2 — Japanese Garden](p2/P2.2-japanese-garden.md) |
+| P2.3 | Tema Fantasy Village completo, de dia e de noite | CP-P2.3 | Arte aprovada em 26/11; falta o app instalado | [P2.3 — Fantasy Village](p2/P2.3-fantasy-village.md) |
 | P2.4 | Mais animações dos moradores (clipes originais e movimento por código) | CP-P2.4 | Implementada 25/11 (conferência instalada no fim) | [P2.4 — Animações](p2/P2.4-animacoes.md) |
 | Release | `v0.3.0` publicada com tudo | CP-P2 | Condicional a todos os CPs | (regra abaixo) |
 

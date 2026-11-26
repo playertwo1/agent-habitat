@@ -481,7 +481,7 @@ function runHabitatAppMode(electron) {
   function updateHitShapes(currentSceneSnap, scaleVal) {
     if (!hitWin || hitWin.isDestroyed()) return;
     try {
-      const hit = computeHabitatHitRects({ manifest: manifestData, snapshot: currentSceneSnap, scale: scaleVal });
+      const hit = computeHabitatHitRects({ manifest: { ...manifestData, cottageHitBox: currentTheme().manifest.cottageHitBox }, snapshot: currentSceneSnap, scale: scaleVal });
       if (hit && Array.isArray(hit.rects)) {
         const mappedRects = hit.rects.map(r => ({ x: r.x, y: r.y, width: r.width, height: r.height }));
         const hash = JSON.stringify(mappedRects);

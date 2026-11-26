@@ -22,7 +22,7 @@ Este arquivo registra **apenas** onde estamos, o que aguarda validação do dono
 
 1. Conferir a retomada real do histórico (Claude e Codex) e se o id de sessão do hook do Codex é o UUID aceito por `codex resume`.
 2. Aprovar visualmente o jardim (`docs/prototipos/p1.4/`).
-3. **P2:** pedir ao Gemini as 8 peças de cada tema com os [prompts](arte-p2/prompts-gemini.md) e salvar em `assets-novos/<tema>/`; a [P2.1](roadmap/p2/P2.1-infra-de-temas.md) (infra de temas e script de pós-processamento) já está pronta; a [P2.4](roadmap/p2/P2.4-animacoes.md) (animações dos moradores) também está implementada; só falta a arte e o fechamento do P2. Space Habitat, 4º morador e Lumen seguem parqueados.
+3. **P2:** P2.1 a P2.4 implementadas; a arte do Japanese Garden e do Fantasy Village foi aprovada pelo dono em 26/11. Falta conferir no app instalado (temas de dia e de noite, animações, consumo em `000`), o build único e a release `v0.3.0`. Opcional: refazer a Cozy Cottage com os [prompts v2](arte-p2/prompts-gemini-cozy-v2.md). Space Habitat, 4º morador e Lumen seguem parqueados.
 
 ## Pendências do Proprietário
 

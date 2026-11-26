@@ -113,3 +113,17 @@ test("T34: o renderizador usa helpers.frames (4 quadros) em vez de 2 fixos", () 
     delete global.document;
   }
 });
+
+test("T34: Japanese Garden e Fantasy Village instalados carregam sem fallback, com arte válida e casa própria", () => {
+  const ids = listThemes({ repoRoot: ROOT }).map((t) => t.id);
+  assert.deepStrictEqual(ids, ["cozy-cottage", "japanese-garden", "fantasy-village"]);
+  for (const id of ["japanese-garden", "fantasy-village"]) {
+    const t = loadTheme({ repoRoot: ROOT, theme: id });
+    assert.strictEqual(t.id, id);
+    assert.strictEqual(t.fallbackReason, null);
+    assert.deepStrictEqual(checkThemeArt(t.manifest, path.join(ROOT, "assets", "habitat", id)), []);
+    const hit = t.manifest.cottageHitBox, door = t.manifest.layers.door;
+    assert.ok(door.x >= hit.x && door.x + door.width <= hit.x + hit.width, "a porta fica dentro da casa");
+    assert.ok(hit.width < 112 + 20, "a casa do tema é menor que a da Cozy");
+  }
+});

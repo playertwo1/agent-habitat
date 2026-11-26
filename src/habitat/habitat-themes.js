@@ -1,6 +1,6 @@
 "use strict";
 
-// P2.1: temas de habitat. A geometria (porta, casa, estações, fumaça) é a da Cozy Cottage em todos os temas;
+// P2.1: temas de habitat. A geometria (canvas, saída da porta, estações) é a da Cozy Cottage; porta, fumaça e área de clique da casa são do tema (a casa muda de tamanho e de lugar) em todos os temas;
 // cada tema troca só a arte. Tema inválido nunca derruba o app: cai na Cozy Cottage.
 const fs = require("fs");
 const path = require("path");
@@ -22,8 +22,7 @@ function normalizeTheme(v) {
 const pick = (o, keys) => keys.map((k) => o && o[k]);
 function geometry(m) {
   return JSON.stringify({
-    canvas: m.canvas, doorAnchor: m.doorAnchor, cottageHitBox: m.cottageHitBox,
-    door: pick(m.layers.door, ["x", "y", "width", "height"]), smoke: pick(m.layers.smoke, ["x", "y", "width", "height"]),
+    canvas: m.canvas, doorAnchor: m.doorAnchor,
     stations: Object.fromEntries(Object.entries(m.stations).map(([k, s]) => [k, { anchor: s.anchor, props: pick(s.props, ["x", "y", "width", "height"]) }])),
   });
 }
