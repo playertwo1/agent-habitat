@@ -4,6 +4,11 @@ Todas as mudanças relevantes do **Agent Habitat** são documentadas neste arqui
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-11-26
+
+### Corrigido
+- **Retomar do histórico no Windows:** o Windows Terminal (`wt.exe`) aceitava o lançamento mas a aba falhava (erro 0x80070002), e o app achava que tinha aberto. A retomada de Claude e de Codex agora pula o `wt.exe` e abre uma janela de console (`cmd.exe`) já na pasta da sessão. Conferido com sessões reais das duas CLIs; o id gravado pelo hook do Codex é o UUID aceito por `codex resume`.
+
 ## [0.3.0] - 2026-11-26
 
 ### Adicionado (P2 — Novos temas e animações)

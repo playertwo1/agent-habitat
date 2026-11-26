@@ -102,3 +102,20 @@ test("T31: o Codex abre num terminal com 'codex resume <uuid>' e recusa id fora 
   assert.strictEqual(r.ok, true);
   assert.match(seen[0][1], new RegExp(`codex.*resume.*${CX}`));
 });
+
+test("T31: a retomada no Windows pula o wt.exe (que aceita o spawn mas falha a aba) e usa o cmd.exe", async () => {
+  const { launchCodexResume, tryLaunchSemWt } = require("../src/habitat/habitat-codex-launch");
+  const { launchClaudeSession } = require("../src/launch-claude");
+  const seen = [];
+  const tryLaunch = async (bin, args) => { seen.push(bin); return { ok: true }; };
+  const wt = await tryLaunchSemWt("wt.exe", ["--"], {}, { tryLaunch });
+  assert.strictEqual(wt.ok, false);
+  assert.deepStrictEqual(seen, [], "wt.exe nunca é executado");
+  const cx = await launchCodexResume(CWD, CX, { tryLaunch, platform: () => "win32" });
+  assert.deepStrictEqual([cx.ok, cx.terminal, seen[0]], [true, "cmd.exe", "cmd.exe"]);
+  seen.length = 0;
+  const cl = await launchClaudeSession("resume", CWD, "53510278-0b86-4326-bf41-4be13f71a44c", {
+    platform: () => "win32", findClaudeCmd: async () => "C:\bin\claude.exe", tryLaunch: (b, a, o) => tryLaunchSemWt(b, a, o, { tryLaunch }),
+  });
+  assert.deepStrictEqual([cl.ok, cl.terminal, seen[0]], [true, "cmd.exe", "cmd.exe"]);
+});

@@ -7,7 +7,7 @@ const { createHabitatRuntime } = require("./habitat-runtime");
 const { createHabitatSceneMachine } = require("./scene-machine");
 const { loadHabitatPrefs, saveHabitatPrefs } = require("./habitat-prefs");
 const { resolveGardenState } = require("./habitat-garden");
-const { launchCodexResume } = require("./habitat-codex-launch");
+const { launchCodexResume, tryLaunchSemWt } = require("./habitat-codex-launch");
 const { loadTheme, listThemes } = require("./habitat-themes");
 const { computeHabitatHitRects, classifyHabitatHitPoint } = require("./habitat-hit-geometry");
 const { createHitWindowActivationRuntime } = require("../win-hit-window-activation");
@@ -348,7 +348,7 @@ function runHabitatAppMode(electron) {
     now: Date.now(),
     probe: probeTranscript,
     dirExists: (p) => { try { return fs.statSync(p).isDirectory(); } catch { return false; } },
-    launch: (mode, cwd, sessionId) => (mode === "codex-resume" ? launchCodexResume(cwd, sessionId) : launchClaudeSession(mode, cwd, sessionId))
+    launch: (mode, cwd, sessionId) => (mode === "codex-resume" ? launchCodexResume(cwd, sessionId) : launchClaudeSession(mode, cwd, sessionId, { tryLaunch: tryLaunchSemWt }))
   });
 
   let renderWin = null;

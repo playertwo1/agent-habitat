@@ -1,6 +1,6 @@
 {
   "name": "agent-habitat",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Habitat 2D vivo na área de trabalho para Claude, Codex e Antigravity.",
   "main": "src/main.js",
   "scripts": {

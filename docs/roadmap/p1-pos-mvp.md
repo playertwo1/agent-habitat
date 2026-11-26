@@ -1,6 +1,6 @@
 # Etapa: P1 — Refinamentos de uso diário
 
-**Estado:** P1.1 a P1.4 implementadas, conferidas no instalado 0.2.0 e publicadas na `v0.2.0` em 25/11/2026; pendentes: retomada real de Claude e Codex e aprovação visual do jardim pelo dono. Atualizado em 25/11/2026.
+**Estado:** P1.1 a P1.4 implementadas, conferidas no instalado 0.2.0 e publicadas na `v0.2.0` em 25/11/2026; retomada real de Claude e Codex conferida em 26/11/2026 (corrigido o `wt.exe`); pendente só a aprovação visual do jardim pelo dono. Atualizado em 26/11/2026.
 
 **Objetivo:** métricas verificadas, histórico com retomada, subagentes visuais e personalização do jardim no Habitat, publicados juntos em **uma release v0.2.0 no fim**. Nada de estimativa inventada: sem dado real, o painel diz que não há dado.
 
