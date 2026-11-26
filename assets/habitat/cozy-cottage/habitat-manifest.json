@@ -60,11 +60,12 @@
       "baseDir": "../../svg",
       "clips": {
         "exiting": "clawd-mini-crabwalk.svg",
-        "busy": "clawd-working-typing.svg",
-        "waiting_input": "clawd-idle-bubble.svg",
+        "busy": ["clawd-working-typing.svg", "clawd-working-building.svg", "clawd-working-debugger.svg", "clawd-working-wizard.svg"],
+        "delegating": "clawd-working-juggling.svg",
+        "waiting_input": ["clawd-idle-bubble.svg", "clawd-idle-look.svg", "clawd-idle-reading.svg"],
         "needs_approval": "clawd-notification.svg",
         "error": "clawd-error.svg",
-        "done": "clawd-happy.svg",
+        "done": ["clawd-happy.svg", "clawd-heart-eyes.svg", "clawd-headphones-groove.svg"],
         "entering": "clawd-mini-crabwalk.svg"
       }
     },
@@ -73,7 +74,8 @@
       "baseDir": "../../../themes/cloudling/assets",
       "clips": {
         "exiting": "cloudling-mini-crabwalk.svg",
-        "busy": "cloudling-typing.svg",
+        "busy": ["cloudling-typing.svg", "cloudling-building.svg", "cloudling-carrying.svg", "cloudling-sweeping.svg"],
+        "delegating": "cloudling-conducting.svg",
         "waiting_input": "cloudling-thinking.svg",
         "needs_approval": "cloudling-notification.svg",
         "error": "cloudling-error.svg",
@@ -86,11 +88,12 @@
       "baseDir": "../actors/atom",
       "clips": {
         "exiting": { "sheet": "exploring.webp", "meta": "exploring.json" },
-        "busy": { "sheet": "working.webp", "meta": "working.json" },
-        "waiting_input": { "sheet": "asking.webp", "meta": "asking.json" },
+        "busy": [{ "sheet": "working.webp", "meta": "working.json" }, { "sheet": "typing.webp", "meta": "typing.json" }, { "sheet": "running.webp", "meta": "running.json" }],
+        "delegating": { "sheet": "delegating.webp", "meta": "delegating.json" },
+        "waiting_input": [{ "sheet": "asking.webp", "meta": "asking.json" }, { "sheet": "watching.webp", "meta": "watching.json" }],
         "needs_approval": { "sheet": "listening.webp", "meta": "listening.json" },
         "error": { "sheet": "error.webp", "meta": "error.json" },
-        "done": { "sheet": "done.webp", "meta": "done.json" },
+        "done": [{ "sheet": "done.webp", "meta": "done.json" }, { "sheet": "happy.webp", "meta": "happy.json" }, { "sheet": "dance.webp", "meta": "dance.json" }],
         "entering": { "sheet": "exploring.webp", "meta": "exploring.json" }
       }
     }

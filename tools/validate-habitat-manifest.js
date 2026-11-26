@@ -46,7 +46,8 @@ Object.values(manifest.stations).forEach(station => {
 
 // Check actor clips
 Object.entries(manifest.actors).forEach(([actorName, actorConfig]) => {
-  Object.entries(actorConfig.clips).forEach(([clipName, clipValue]) => {
+  Object.entries(actorConfig.clips).forEach(([clipName, clipEntry]) => {
+    for (const clipValue of Array.isArray(clipEntry) ? clipEntry : [clipEntry]) { // P2.4: variantes
     if (actorConfig.kind === 'spritesheet-webp') {
       const sheetPath = path.join(baseDir, actorConfig.baseDir, clipValue.sheet);
       const metaPath = path.join(baseDir, actorConfig.baseDir, clipValue.meta);
@@ -63,6 +64,7 @@ Object.entries(manifest.actors).forEach(([actorName, actorConfig]) => {
       // svg or similar
       const clipPath = path.join(baseDir, actorConfig.baseDir, clipValue);
       checkFile(path.join(actorConfig.baseDir, clipValue), `actor clip ${actorName}.${clipName}`);
+    }
     }
   });
 });

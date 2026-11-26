@@ -204,6 +204,31 @@ function createHabitatRenderer({ container, manifest, manifestDirUrl, atomMetaMa
     el.style.imageRendering = 'pixelated';
   }
 
+  // P2.4: variantes de clipe por estado, clipe de "delegando" com ajudante ativo e movimento por código.
+  // Nada aqui desenha personagem novo: só escolhe entre clipes originais e desloca o conjunto em poucos pixels.
+  const VARIANT_PERIOD_MS = { busy: 20000, delegating: 20000, waiting_input: 12000 };
+  const clipState = {};
+  function chooseClip(provider, key, actorDef, snapshot, helperCount) {
+    const now = snapshot.nowMs || Date.now();
+    const clipKey = key === 'busy' && helperCount > 0 && actorDef.clips.delegating ? 'delegating' : key;
+    const defs = actorDef.clips[clipKey] || actorDef.clips['busy'] || actorDef.clips['done'];
+    const list = Array.isArray(defs) ? defs : [defs];
+    const st = clipState[provider] || (clipState[provider] = { key: null, start: now, count: 0 });
+    if (st.key !== clipKey) { st.key = clipKey; st.start = now; st.count++; }
+    const period = VARIANT_PERIOD_MS[clipKey];
+    const rot = period && !snapshot.reducedMotion ? Math.floor((now - st.start) / period) : 0;
+    return { clipKey, def: list[(st.count + rot) % list.length], elapsed: now - st.start };
+  }
+  // dx/dy em px do canvas; look = vira o morador por um instante. Tudo zerado com movimento reduzido.
+  function codeMotion(clipKey, elapsed, now, reduced) {
+    const m = { dx: 0, dy: 0, look: false };
+    if (reduced) return m;
+    if (clipKey === 'busy' || clipKey === 'delegating') m.dx = Math.sin((now / 10000) * 2 * Math.PI) * 3;
+    if (clipKey === 'done' && elapsed < 1600) m.dy = -Math.abs(Math.sin((elapsed / 800) * Math.PI)) * 5;
+    if (clipKey === 'busy' || clipKey === 'delegating' || clipKey === 'waiting_input') m.look = Math.floor(now / 6000) % 5 === 4;
+    return m;
+  }
+
   let assetCache = {};
   function getCachedImage(url) {
     if (assetCache[url]) return assetCache[url];
@@ -297,14 +322,16 @@ function createHabitatRenderer({ container, manifest, manifestDirUrl, atomMetaMa
         actElInfo.wrapper.style.left = `${left}px`;
         actElInfo.wrapper.style.top = `${top}px`;
 
-        const scaleX = res.facing === 'left' ? -1 : 1;
-        actElInfo.wrapper.style.transform = `scaleX(${scaleX})`;
-
-        const clipKey = (res.presence === 'exiting' || res.presence === 'entering')
+        const actorDef = actElInfo.actorDef;
+        const baseKey = (res.presence === 'exiting' || res.presence === 'entering')
           ? res.presence
           : (res.visualClip || 'busy');
-        const actorDef = actElInfo.actorDef;
-        const clipDef = actorDef.clips[clipKey] || actorDef.clips['busy'] || actorDef.clips['done'];
+        const helperCount = snapshot.helpers ? (snapshot.helpers[provider] || 0) : 0;
+        const picked = chooseClip(provider, baseKey, actorDef, snapshot, helperCount);
+        const clipDef = picked.def;
+        const mo = res.presence === 'outside' ? codeMotion(picked.clipKey, picked.elapsed, snapshot.nowMs || Date.now(), snapshot.reducedMotion) : { dx: 0, dy: 0, look: false };
+        const scaleX = (res.facing === 'left' ? -1 : 1) * (mo.look ? -1 : 1);
+        actElInfo.wrapper.style.transform = `translate(${mo.dx.toFixed(2)}px, ${mo.dy.toFixed(2)}px) scaleX(${scaleX})`;
 
         if (actElInfo.type === 'svg' && typeof clipDef === 'string') {
           const svgUrl = new URL(`${actorDef.baseDir}/${clipDef}`, manifestDirUrl).href;

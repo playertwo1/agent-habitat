@@ -117,15 +117,19 @@ function validateHabitatManifest({ manifest, manifestDir, repoRoot, checkFiles =
       if (!clips || typeof clips !== 'object') {
         errors.push(`actors.${a}.clips object is required`);
       } else {
-        for (const c of requiredClips) {
-          const clipVal = clips[c];
-          if (act.kind === 'svg') {
-            if (typeof clipVal !== 'string') {
-              errors.push(`actors.${a}.clips.${c} must be a string path for svg kind`);
-            }
-          } else if (act.kind === 'spritesheet-webp') {
-            if (!clipVal || typeof clipVal !== 'object' || typeof clipVal.sheet !== 'string' || typeof clipVal.meta !== 'string') {
-              errors.push(`actors.${a}.clips.${c} must be { sheet: string, meta: string } for spritesheet-webp kind`);
+        // P2.4: um estado pode ter uma lista de variantes de clipe; "delegating" é opcional.
+        for (const c of [...requiredClips, ...(clips.delegating !== undefined ? ['delegating'] : [])]) {
+          const variants = Array.isArray(clips[c]) ? clips[c] : [clips[c]];
+          if (variants.length === 0) errors.push(`actors.${a}.clips.${c} must not be an empty list`);
+          for (const clipVal of variants) {
+            if (act.kind === 'svg') {
+              if (typeof clipVal !== 'string') {
+                errors.push(`actors.${a}.clips.${c} must be a string path for svg kind`);
+              }
+            } else if (act.kind === 'spritesheet-webp') {
+              if (!clipVal || typeof clipVal !== 'object' || typeof clipVal.sheet !== 'string' || typeof clipVal.meta !== 'string') {
+                errors.push(`actors.${a}.clips.${c} must be { sheet: string, meta: string } for spritesheet-webp kind`);
+              }
             }
           }
         }
@@ -242,9 +246,10 @@ function validateHabitatManifest({ manifest, manifestDir, repoRoot, checkFiles =
     for (const a of expectedActors) {
       const act = actors[a];
       if (act && act.clips && act.baseDir) {
-        for (const c of requiredClips) {
-          const clipVal = act.clips[c];
-          validateClipPathOrObject(clipVal, act.baseDir);
+        for (const c of [...requiredClips, ...(act.clips.delegating !== undefined ? ['delegating'] : [])]) {
+          for (const clipVal of (Array.isArray(act.clips[c]) ? act.clips[c] : [act.clips[c]])) {
+            validateClipPathOrObject(clipVal, act.baseDir);
+          }
         }
       }
     }

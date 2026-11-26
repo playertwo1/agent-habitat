@@ -36,6 +36,11 @@ Objetivo: decidir escopo e método de arte do P2 antes de montar o roadmap da et
 - Descartado: eu desenhar tudo por script (cenários inteiros ficariam mais simples que a cabana); o dono fornecer tudo sem prompts.
 - Difícil de reverter: não
 
+### D7 - Variedade de clipes e movimento por código (P2.4)
+- Decisão: variar **todos os estados exceto erro e aprovação** (inclusive esperando) com clipes originais; clipe de **delegar** quando há ajudante ativo; movimento por código: **pulinho ao concluir, passeio curto no trabalho e virar para olhar em volta**.
+- Por quê: escolha do dono; erro e aprovação ficam fixos por fidelidade ao estado.
+- Difícil de reverter: não
+
 ## Em aberto
 - Como o tema é escolhido: proposta (assumida até você dizer o contrário) = seletor em Ajustes, troca ao vivo sem reiniciar, padrão Cozy Cottage, escolha salva em `prefs.json`.
 - Lista exata de camadas por tema e tamanhos (assumido o mesmo conjunto da Cozy Cottage: fundo, casa, primeiro plano, porta em 4 quadros, fumaça, 3 adereços de estação, luzes âmbar, folha de objetos, folha de ajudantes).
