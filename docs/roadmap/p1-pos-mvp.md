@@ -23,5 +23,5 @@ Este arquivo é só um índice. Para trabalhar numa fase, leia apenas o document
 - As fases P1.3 e P1.4 começam por **protótipo visual** aprovado pelo dono antes de qualquer ligação a eventos.
 - **Release (CP-P1):** só depois de P1.1 a P1.4 fechadas: suíte verde, `release-local.ps1` completo, remoção de conectores e desinstalação conferidas, tag `v0.2.0` no commit certo (conferir tags herdadas antes), `gh release create` local e confirmação do dono antes de publicar.
 
-## P2 — Parqueado
-Novos temas de habitat (*Japanese Garden*, *Space Habitat*, *Fantasy Village*), ponte opcional com o **Lumen** e 4º morador opcional. Só reabre por decisão explícita do proprietário após o CP-P1.
+## P2
+Roadmap em [P2 — Novos temas](p2-novos-temas.md) (*Japanese Garden*, *Fantasy Village*, ajudantes por tema e mais animações). Parqueados: *Space Habitat*, ponte opcional com o **Lumen** e 4º morador opcional.

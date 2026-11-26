@@ -16,13 +16,13 @@ Este arquivo registra **apenas** onde estamos, o que aguarda validação do dono
 | **G4 (`G4.1`–`G4.3`)** | **Concluído em 2026-11-25.** Hardening Windows concluído: DPI `100–200%`, multi-monitor, tela cheia (`WS_EX_NOACTIVATE`), soak test de 1 h e medição de CPU/RAM (`docs/evidencias-g4.md`), hooks reversíveis com backup e auditoria de segurança/privacidade (`T24`–`T28`). |
 | **G5 (`G5.1`–`G5.2`)** | **Concluído em 2026-11-25.** Ícone, metadados, `scripts/release-local.ps1`, instalação real, ativação dos 3 moradores, remoção de conectores e desinstalação reais validadas pelo proprietário; release `v0.1.0` em `playertwo1/agent-habitat` (tag `820f0c42`, 6 anexos). 5 defeitos do app instalado corrigidos (ver `CHANGELOG.md`). |
 | **P1** | Roadmap aprovado em 2026-11-25 ([questionário](questionario/2026-11-25-p1-refinamentos-de-uso-diario.md)): P1.1 métricas, P1.2 histórico, P1.2b retomada do Codex, P1.3 subagentes, P1.4 jardim; release `v0.2.0` publicada em 2026-11-25 (tag `882d22aa`, instalador x64). |
-| **P2** | Parqueado até o fechamento do P1. |
+| **P2** | Roadmap montado em 2026-11-25 ([questionário](questionario/2026-11-25-p2-novos-temas.md), [índice](roadmap/p2-novos-temas.md)): P2.1 infra de temas, P2.2 Japanese Garden, P2.3 Fantasy Village, P2.4 animações; release `v0.3.0` só no fim. Arte pelo Gemini com [prompts prontos](arte-p2/prompts-gemini.md). |
 
 ## Próxima Ação Imediata
 
 1. Conferir a retomada real do histórico (Claude e Codex) e se o id de sessão do hook do Codex é o UUID aceito por `codex resume`.
 2. Aprovar visualmente o jardim (`docs/prototipos/p1.4/`).
-3. P2 (novos temas, Lumen, 4º morador) só reabre por decisão sua.
+3. **P2:** pedir ao Gemini as 8 peças de cada tema com os [prompts](arte-p2/prompts-gemini.md) e salvar em `assets-novos/<tema>/`; enquanto isso começo a [P2.1](roadmap/p2/P2.1-infra-de-temas.md). Space Habitat, 4º morador e Lumen seguem parqueados.
 
 ## Pendências do Proprietário
 
