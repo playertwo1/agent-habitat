@@ -23,7 +23,7 @@ describe("agent-habitat identity isolation (G0.3)", () => {
   it("declares isolated package metadata and build contract", () => {
     assert.equal(pkg.name, HABITAT_APP_NAME);
     assert.equal(pkg.name, "agent-habitat");
-    assert.equal(pkg.version, "0.1.0");
+    assert.equal(pkg.version, "0.2.0");
     assert.equal(pkg.build.appId, HABITAT_APP_ID);
     assert.equal(pkg.build.appId, "com.playertwo1.agent-habitat");
     assert.equal(pkg.build.productName, HABITAT_PRODUCT_NAME);

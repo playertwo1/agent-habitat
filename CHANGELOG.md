@@ -4,6 +4,14 @@ Todas as mudanças relevantes do **Agent Habitat** são documentadas neste arqui
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-25
+
+### Adicionado (P1 — Refinamentos de uso diário)
+- **Métricas verificadas (P1.1):** cotas reais de Claude e Codex (leitura somente de arquivo local) e "uso observado" do Atom, hoje e 7 dias; sem dado real o painel diz que não há dado.
+- **Histórico (P1.2/P1.2b):** aba Histórico com as 10 sessões mais recentes, guardadas só em `~/.agent-habitat/history.json` (provedor, id, pasta e horários); "Retomar" abre um terminal com `claude --resume` ou `codex resume`, por clique explícito e revalidado.
+- **Subagentes visuais (P1.3):** um mini-ajudante por subagente confirmado, no máximo 3 por provedor, junto ao morador que está fora; some no fim do subagente.
+- **Jardim e luz (P1.4):** banco, fogueira, gatinho e caixa de correio escolhidos em Ajustes, e luz dia/noite pelo relógio do Windows (ou forçada); a regra `000` não muda.
+
 ## [0.1.0] - 2026-11-25
 
 ### Concluído (Gate G5.1 — Ícone, metadados e build local — 2026-11-25)

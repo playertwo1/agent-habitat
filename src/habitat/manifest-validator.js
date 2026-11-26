@@ -218,6 +218,18 @@ function validateHabitatManifest({ manifest, manifestDir, repoRoot, checkFiles =
     else if (resolvedManifestDir && resolvedRepoRoot) validateClipPathOrObject(helpers.file);
   }
 
+  // P1.4: objetos do jardim e filtro noturno (opcional); se existir, precisa estar íntegro.
+  const garden = manifest.garden;
+  if (garden !== undefined) {
+    const f = garden && garden.frame;
+    const items = garden && garden.items;
+    const ok = garden && typeof garden.file === 'string' && typeof garden.nightFilter === 'string'
+      && f && f.width > 0 && f.height > 0 && items && ['bench', 'campfire', 'kitten', 'mailbox'].every((k) => items[k]
+        && Number.isInteger(items[k].col) && items[k].col >= 0 && Number.isFinite(items[k].x) && Number.isFinite(items[k].y));
+    if (!ok) errors.push('garden must have file, frame, nightFilter and bench/campfire/kitten/mailbox items with col, x, y');
+    else if (resolvedManifestDir && resolvedRepoRoot) validateClipPathOrObject(garden.file);
+  }
+
   if (stations && resolvedManifestDir && resolvedRepoRoot) {
     for (const p of expectedProviders) {
       if (stations[p] && stations[p].props) {

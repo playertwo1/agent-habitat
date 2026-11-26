@@ -33,6 +33,7 @@
     }
   },
   "helpers": { "file": "helpers.png", "frame": { "width": 16, "height": 16 }, "frameMs": 400, "max": 3, "offset": { "x": 26, "y": 6 }, "spacing": 18, "rows": { "claude": 0, "codex": 1, "antigravity": 2 } },
+  "garden": { "file": "garden-objects.png", "frame": { "width": 24, "height": 24 }, "nightFilter": "brightness(0.6) saturate(0.85) hue-rotate(8deg)", "items": { "bench": { "col": 0, "x": 276, "y": 168 }, "campfire": { "col": 1, "x": 232, "y": 174 }, "kitten": { "col": 2, "x": 100, "y": 176 }, "mailbox": { "col": 3, "x": 36, "y": 170 } } },
   "stations": {
     "claude": {
       "character": "clawd",

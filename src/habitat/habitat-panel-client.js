@@ -196,6 +196,11 @@
     if (prefCardsEnabled) prefCardsEnabled.checked = prefs.cardsEnabled !== false;
     if (prefOpenAtLogin) prefOpenAtLogin.checked = Boolean(prefs.openAtLogin);
 
+    // Jardim e luz (P1.4)
+    const garden = prefs.garden || {};
+    document.querySelectorAll("[data-garden]").forEach((el) => { el.checked = garden[el.dataset.garden] === true; });
+    document.querySelectorAll('input[name="light-mode"]').forEach((el) => { el.checked = el.value === (prefs.lightMode || "auto"); });
+
     // Global pill status
     const residents = Array.isArray(state.residents) ? state.residents : [];
     let anyBusy = residents.some(r => r.state === "busy" || r.state === "needs_approval");
@@ -270,7 +275,7 @@
 
 const HISTORY_PROVIDER_NAMES = { claude: "Claude Code", codex: "Codex" };
   const HISTORY_REASONS = {
-    "codex-somente-leitura": "A retomada de sessões do Codex ainda não está disponível.",
+    "sessao-invalida": "Esta sessão do Codex não tem um id válido para retomar.",
     "pasta-desconhecida": "A pasta da sessão é desconhecida.",
     "pasta-ausente": "A pasta do projeto não existe mais.",
     "transcricao-ausente": "O Claude não guardou a transcrição desta sessão.",
@@ -361,6 +366,17 @@ const HISTORY_PROVIDER_NAMES = { claude: "Claude Code", codex: "Codex" };
         });
       });
     }
+  });
+
+  document.querySelectorAll("[data-garden]").forEach((el) => {
+    el.addEventListener("change", () => {
+      const garden = { ...(currentState.prefs.garden || {}) };
+      document.querySelectorAll("[data-garden]").forEach((o) => { garden[o.dataset.garden] = o.checked; });
+      bridge.updatePref("garden", garden).then((s) => { if (s) render(s); });
+    });
+  });
+  document.querySelectorAll('input[name="light-mode"]').forEach((el) => {
+    el.addEventListener("change", () => bridge.updatePref("lightMode", el.value).then((s) => { if (s) render(s); }));
   });
 
   // Diagnostics & Hooks buttons

@@ -6,6 +6,8 @@ const { loadAndValidateHabitatManifest } = require("./manifest-validator");
 const { createHabitatRuntime } = require("./habitat-runtime");
 const { createHabitatSceneMachine } = require("./scene-machine");
 const { loadHabitatPrefs, saveHabitatPrefs } = require("./habitat-prefs");
+const { resolveGardenState } = require("./habitat-garden");
+const { launchCodexResume } = require("./habitat-codex-launch");
 const { computeHabitatHitRects, classifyHabitatHitPoint } = require("./habitat-hit-geometry");
 const { createHitWindowActivationRuntime } = require("../win-hit-window-activation");
 const { resolveTargetDisplayWorkArea, computeSafeStageBounds, computeSafePanelBounds } = require("./habitat-display-layout");
@@ -341,7 +343,7 @@ function runHabitatAppMode(electron) {
     now: Date.now(),
     probe: probeTranscript,
     dirExists: (p) => { try { return fs.statSync(p).isDirectory(); } catch { return false; } },
-    launch: (mode, cwd, sessionId) => launchClaudeSession(mode, cwd, sessionId)
+    launch: (mode, cwd, sessionId) => (mode === "codex-resume" ? launchCodexResume(cwd, sessionId) : launchClaudeSession(mode, cwd, sessionId))
   });
 
   let renderWin = null;
@@ -492,8 +494,10 @@ function runHabitatAppMode(electron) {
     const sceneSnap = getActiveSceneSnapshot(now);
     const scaleVal = prefs.scale || 1.5;
     const idle000 = isSceneIdle000(sceneSnap, demoMode);
+    const garden = resolveGardenState(prefs, new Date(now));
     const sceneKey = JSON.stringify({
       ...sceneSnap,
+      garden,
       nowMs: 0,
       scale: scaleVal,
       reducedMotion: !!prefs.reducedMotion
@@ -507,7 +511,7 @@ function runHabitatAppMode(electron) {
         atomMetaMap,
         scale: scaleVal,
         reducedMotion: !!prefs.reducedMotion,
-        snapshot: sceneSnap
+        snapshot: { ...sceneSnap, garden }
       });
       updateHitShapes(sceneSnap, scaleVal);
     }

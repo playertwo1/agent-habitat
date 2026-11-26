@@ -3,6 +3,7 @@
 const fs = require("fs");
 const path = require("path");
 const { defaultHabitatRuntimeConfigPath } = require("../habitat-identity");
+const { normalizeGarden, normalizeLightMode } = require("./habitat-garden");
 
 const HABITAT_ALLOWED_SCALES = Object.freeze([1, 1.5, 2]);
 
@@ -15,6 +16,8 @@ const DEFAULT_HABITAT_PREFS = Object.freeze({
   clickThrough: false,
   cardsEnabled: true,
   windowPosition: null,
+  garden: normalizeGarden(null),
+  lightMode: "auto",
 });
 
 function normalizeHabitatPrefs(input) {
@@ -53,6 +56,9 @@ function normalizeHabitatPrefs(input) {
   if (typeof input.cardsEnabled === "boolean") {
     prefs.cardsEnabled = input.cardsEnabled;
   }
+
+  prefs.garden = normalizeGarden(input.garden);
+  prefs.lightMode = normalizeLightMode(input.lightMode);
 
   // windowPosition
   if (input.windowPosition && typeof input.windowPosition === "object") {

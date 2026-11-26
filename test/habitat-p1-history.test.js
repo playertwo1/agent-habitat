@@ -1,6 +1,6 @@
 "use strict";
 
-// T30 (P1.2): histórico próprio; só o Claude retoma, e só por pedido explícito e revalidado.
+// T30 (P1.2) e T31 (P1.2b): histórico próprio; Claude e Codex retomam só por pedido explícito e revalidado.
 const assert = require("node:assert");
 const fs = require("node:fs");
 const os = require("node:os");
@@ -11,6 +11,7 @@ const { createHabitatRuntime } = require("../src/habitat/habitat-runtime");
 
 const T0 = 1_800_000_000_000;
 const CWD = path.resolve(os.tmpdir());
+const CX = "01a21547-7d8c-4eb0-83e0-d55c786095db";
 
 function store() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "habitat-hist-"));
@@ -30,12 +31,12 @@ test("T30: lista só sessões reais de Claude e Codex, mais recentes primeiro, l
   assert.ok(!v.some((r) => r.provider === "antigravity"));
 });
 
-test("T30: Codex nunca mostra 'Retomar' e a razão é informada", () => {
+test("T30: Codex só retoma com id UUID válido; id estranho é bloqueado com a razão", () => {
   const { s } = store();
   s.record({ provider: "codex", sessionId: "c", cwd: CWD }, T0);
   const [row] = buildHistoryView(s, deps());
   assert.strictEqual(row.canResume, false);
-  assert.strictEqual(row.reason, "codex-somente-leitura");
+  assert.strictEqual(row.reason, "sessao-invalida");
 });
 
 test("T30: transcrição ausente, pasta ausente e sessão em andamento desabilitam a retomada", () => {
@@ -51,10 +52,13 @@ test("T30: retomar exige pedido explícito, revalida e só abre o Claude", async
   const { s } = store();
   s.record({ provider: "claude", sessionId: "ok", cwd: CWD }, T0);
   s.record({ provider: "codex", sessionId: "cx", cwd: CWD }, T0);
+  s.record({ provider: "codex", sessionId: CX, cwd: CWD }, T0);
   const calls = [];
   const launch = async (...a) => { calls.push(a); return { ok: true }; };
   assert.deepStrictEqual(await resumeHistorySession(s, { provider: "claude", sessionId: "inexistente" }, deps({ launch })), { ok: false, reason: "desconhecida" });
   assert.strictEqual((await resumeHistorySession(s, { provider: "codex", sessionId: "cx" }, deps({ launch }))).ok, false);
+  assert.deepStrictEqual(await resumeHistorySession(s, { provider: "codex", sessionId: CX }, deps({ launch })), { ok: true });
+  assert.deepStrictEqual(calls.pop(), ["codex-resume", CWD, CX]);
   assert.strictEqual((await resumeHistorySession(s, { provider: "claude", sessionId: "ok" }, deps({ launch, probe: () => false }))).reason, "transcricao-ausente");
   assert.strictEqual(calls.length, 0, "nada abre sem passar pelas checagens");
   assert.deepStrictEqual(await resumeHistorySession(s, { provider: "claude", sessionId: "ok" }, deps({ launch })), { ok: true });
@@ -86,4 +90,15 @@ test("T30: o painel tem a aba Histórico e nada do módulo escreve em ~/.clawd",
   assert.match(html, /id="history-list"/);
   const src = fs.readFileSync(path.join(__dirname, "..", "src", "habitat", "habitat-history.js"), "utf8");
   assert.doesNotMatch(src, /["'`]\.clawd/);
+});
+
+test("T31: o Codex abre num terminal com 'codex resume <uuid>' e recusa id fora do formato", async () => {
+  const { launchCodexResume } = require("../src/habitat/habitat-codex-launch");
+  const seen = [];
+  const tryLaunch = async (bin, args) => { seen.push([bin, args.join(" ")]); return { ok: true }; };
+  assert.strictEqual((await launchCodexResume(CWD, "x; calc", { tryLaunch })).ok, false);
+  assert.strictEqual(seen.length, 0, "id inválido nunca chega a um shell");
+  const r = await launchCodexResume(CWD, CX, { tryLaunch, platform: () => "win32" });
+  assert.strictEqual(r.ok, true);
+  assert.match(seen[0][1], new RegExp(`codex.*resume.*${CX}`));
 });

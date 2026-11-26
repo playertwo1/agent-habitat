@@ -76,6 +76,29 @@ function createHabitatRenderer({ container, manifest, manifestDirUrl, atomMetaMa
   };
   doorEl.src = doorFrames.closed;
 
+  // P1.4: objetos do jardim (só os ligados) e luz noturna nos fundos; moradores nunca são filtrados.
+  const gardenCfg = manifest.garden || null;
+  const gardenEls = {};
+  if (gardenCfg) {
+    const sheetUrl = new URL(gardenCfg.file, manifestDirUrl).href;
+    for (const [name, it] of Object.entries(gardenCfg.items)) {
+      const el = document.createElement('div');
+      el.style.position = 'absolute';
+      el.style.display = 'none';
+      el.style.width = `${gardenCfg.frame.width}px`;
+      el.style.height = `${gardenCfg.frame.height}px`;
+      el.style.left = `${it.x - gardenCfg.frame.width / 2}px`;
+      el.style.top = `${it.y - gardenCfg.frame.height}px`;
+      el.style.backgroundImage = `url("${sheetUrl}")`;
+      el.style.backgroundPosition = `-${it.col * gardenCfg.frame.width}px 0`;
+      el.style.imageRendering = 'pixelated';
+      el.dataset.garden = name;
+      stage.appendChild(el);
+      gardenEls[name] = el;
+    }
+  }
+  const nightLayers = [backdropEl, nightEl, doorEl, ...Object.values(gardenEls)];
+
   // Station Props & Actors container
   const entitiesContainer = document.createElement('div');
   entitiesContainer.style.position = 'absolute';
@@ -210,6 +233,14 @@ function createHabitatRenderer({ container, manifest, manifestDirUrl, atomMetaMa
       smokeEl.src = smokeFrameUrls[idx];
     } else {
       smokeEl.style.display = 'none';
+    }
+
+    if (gardenCfg) {
+      const g = snapshot.garden || { items: [], night: false };
+      for (const [name, el] of Object.entries(gardenEls)) el.style.display = g.items.includes(name) ? 'block' : 'none';
+      const f = g.night ? gardenCfg.nightFilter : '';
+      for (const el of nightLayers) el.style.filter = f;
+      fgEl.style.filter = f;
     }
 
     if (helperCfg) {

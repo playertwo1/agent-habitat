@@ -1,6 +1,6 @@
 # STATE — Ponto de Retomada do Agent Habitat
 
-**Atualizado:** 2026-11-25 · **Versão atual:** `0.1.0` (Gates G0 a G5 concluídos; release `v0.1.0` publicada) · **Etapa da vez:** [P1 — Refinamentos de uso diário](roadmap/p1-pos-mvp.md) (P1.1 concluída; próxima: P1.2 histórico)
+**Atualizado:** 2026-11-25 · **Versão atual:** `0.1.0` (Gates G0 a G5 concluídos; release `v0.1.0` publicada) · **Etapa da vez:** [P1 — Refinamentos de uso diário](roadmap/p1-pos-mvp.md) (P1.1 a P1.4 implementadas; falta build único, conferência instalada e release `v0.2.0`)
 
 Este arquivo registra **apenas** onde estamos, o que aguarda validação do dono e qual é a próxima ação imediata. Para detalhes das etapas, consulte o [ROADMAP](ROADMAP.md).
 
@@ -20,7 +20,7 @@ Este arquivo registra **apenas** onde estamos, o que aguarda validação do dono
 
 ## Próxima Ação Imediata
 
-1. **P1.2:** histórico de sessões recentes no painel (ver [P1.2](roadmap/p1/P1.2-historico.md)); antes, decidir quantas sessões listar.
+1. **Fim do P1:** um só `release-local.ps1`, instalar, conferir pelo CDP (cotas, histórico e retomada de Claude e Codex, ajudantes, jardim de dia e de noite) e, com sua confirmação, tag `v0.2.0` + `gh release`.
 
 ## Pendências do Proprietário
 

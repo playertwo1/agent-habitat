@@ -5,6 +5,7 @@
 const fs = require("fs");
 const path = require("path");
 const { writeJsonAtomic } = require("../../hooks/json-utils");
+const { UUID } = require("./habitat-codex-launch");
 
 const HISTORY_PROVIDERS = new Set(["claude", "codex"]);
 const MAX_ROWS = 50;
@@ -55,12 +56,12 @@ function createHistoryStore({ filePath } = {}) {
 const ACTIVE_WINDOW_MS = 60_000;
 const DEFAULT_PROFILE = { kind: "default", configDir: null };
 
-// Por que uma linha não pode ser retomada (null = pode). Só o Claude retoma (D3); o Codex fica somente leitura.
+// Por que uma linha não pode ser retomada (null = pode). O Codex não tem sonda de transcrição: o próprio `codex resume` avisa se faltar.
 function resumeBlockReason(row, { now, probe, dirExists }) {
-  if (row.provider !== "claude") return "codex-somente-leitura";
+  if (row.provider === "codex" && !UUID.test(row.sessionId)) return "sessao-invalida";
   if (!row.cwd) return "pasta-desconhecida";
   if (!dirExists(row.cwd)) return "pasta-ausente";
-  if (probe("claude-code", row.sessionId, row.cwd, DEFAULT_PROFILE) === false) return "transcricao-ausente";
+  if (row.provider === "claude" && probe("claude-code", row.sessionId, row.cwd, DEFAULT_PROFILE) === false) return "transcricao-ausente";
   if (now - row.lastEventAt < ACTIVE_WINDOW_MS) return "em-andamento";
   return null;
 }
@@ -86,7 +87,7 @@ async function resumeHistorySession(store, { provider, sessionId }, deps) {
   if (!row) return { ok: false, reason: "desconhecida" };
   const reason = resumeBlockReason(row, deps);
   if (reason) return { ok: false, reason };
-  const res = await deps.launch("resume", row.cwd, row.sessionId);
+  const res = await deps.launch(row.provider === "codex" ? "codex-resume" : "resume", row.cwd, row.sessionId);
   return res && res.ok === true ? { ok: true } : { ok: false, reason: "falha-ao-abrir" };
 }
 
