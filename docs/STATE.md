@@ -20,13 +20,13 @@ Este arquivo registra **apenas** onde estamos, o que aguarda validação do dono
 
 ## Próxima Ação Imediata
 
-1. **Retomada real conferida em 26/11** (Claude e Codex; o id do hook do Codex é o UUID do `codex resume`); a correção do `wt.exe` entra na próxima release (0.3.1).
-2. Aprovar visualmente o jardim (`docs/prototipos/p1.4/`).
-3. **P2:** P2.1 a P2.4 concluídas e conferidas no app instalado `0.3.0` em 26/11 (temas de dia e de noite, moradores, luz, consumo em `000`). Release `v0.3.0` publicada em 26/11. Opcional: refazer a Cozy Cottage com os [prompts v2](arte-p2/prompts-gemini-cozy-v2.md). Space Habitat, 4º morador e Lumen seguem parqueados.
+1. **Retomada real conferida em 26/11** (Claude e Codex; o id do hook do Codex é o UUID do `codex resume`); a correção do `wt.exe` saiu na release `v0.3.1`.
+2. **Jardim aprovado pelo dono em 26/11** (`docs/prototipos/p1.4/`); P1 e P2 sem pendências do dono.
+3. **P2:** P2.1 a P2.4 concluídas e conferidas no app instalado `0.3.0` em 26/11 (temas de dia e de noite, moradores, luz, consumo em `000`). Release `v0.3.0` publicada em 26/11. A Cozy Cottage v2 (arte refeita) já é o tema padrão desde a `v0.3.0`.
 
 ## Pendências do Proprietário
 
-- Aprovação do jardim (acima).
+- Nenhuma pendência aberta (jardim aprovado em 26/11).
 
 
 ## Notas Técnicas Atuais
