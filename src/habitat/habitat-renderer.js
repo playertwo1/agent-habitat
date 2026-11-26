@@ -245,7 +245,7 @@ function createHabitatRenderer({ container, manifest, manifestDirUrl, atomMetaMa
 
     if (helperCfg) {
       const t = snapshot.nowMs || Date.now();
-      const col = snapshot.reducedMotion ? 0 : Math.floor(t / helperCfg.frameMs) % 2;
+      const col = snapshot.reducedMotion ? 0 : Math.floor(t / helperCfg.frameMs) % (helperCfg.frames || 2);
       for (const provider of Object.keys(helperEls)) {
         const res = snapshot.residents[provider];
         const n = res && res.presence === 'outside' && snapshot.helpers ? (snapshot.helpers[provider] || 0) : 0;

@@ -8,6 +8,7 @@ const { createHabitatSceneMachine } = require("./scene-machine");
 const { loadHabitatPrefs, saveHabitatPrefs } = require("./habitat-prefs");
 const { resolveGardenState } = require("./habitat-garden");
 const { launchCodexResume } = require("./habitat-codex-launch");
+const { loadTheme, listThemes } = require("./habitat-themes");
 const { computeHabitatHitRects, classifyHabitatHitPoint } = require("./habitat-hit-geometry");
 const { createHitWindowActivationRuntime } = require("../win-hit-window-activation");
 const { resolveTargetDisplayWorkArea, computeSafeStageBounds, computeSafePanelBounds } = require("./habitat-display-layout");
@@ -264,7 +265,7 @@ function resolveAggregatorSession(runtime, fullSnap, providerId) {
   return null;
 }
 
-function buildHabitatPanelState({ prefs, demoMode, runtime, demoSceneMachine, diagnostics, quota, usage, history } = {}) {
+function buildHabitatPanelState({ prefs, demoMode, runtime, demoSceneMachine, diagnostics, quota, usage, history, themes } = {}) {
   const now = Date.now();
   const fullSnap = runtime && typeof runtime.getSnapshot === "function" ? runtime.getSnapshot(now) : null;
   const demoSnap = demoMode && demoSceneMachine && typeof demoSceneMachine.getSnapshot === "function"
@@ -298,6 +299,7 @@ function buildHabitatPanelState({ prefs, demoMode, runtime, demoSceneMachine, di
     residents: residentList,
     metrics: { quota: quota || null, usage: usage || null },
     history: history || [],
+    themes: themes || [],
     diagnostics: diagnostics || computeHabitatDiagnostics(runtime, { inspectLiveProcesses: false })
   };
 }
@@ -321,6 +323,9 @@ function runHabitatAppMode(electron) {
   const manifestData = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   const manifestDir = path.dirname(manifestPath);
   const manifestDirUrl = `file://${path.resolve(manifestDir).replace(/\\/g, "/")}/`;
+
+  // P2.1: a geometria vem da Cozy Cottage; o tema escolhido troca só a arte enviada ao Stage.
+  const currentTheme = () => loadTheme({ repoRoot, theme: prefs.theme });
 
   const atomMetaMap = {};
   const atomDir = path.join(manifestDir, "../actors/atom");
@@ -462,7 +467,8 @@ function runHabitatAppMode(electron) {
       diagnostics: lastDiagnostics,
       quota: readHabitatQuota(),
       usage: { today: usageCounter.getUsage("today"), week: usageCounter.getUsage("7d") },
-      history: buildHistoryView(historyStore, historyDeps())
+      history: buildHistoryView(historyStore, historyDeps()),
+      themes: listThemes({ repoRoot })
     });
   }
 
@@ -495,9 +501,11 @@ function runHabitatAppMode(electron) {
     const scaleVal = prefs.scale || 1.5;
     const idle000 = isSceneIdle000(sceneSnap, demoMode);
     const garden = resolveGardenState(prefs, new Date(now));
+    const theme = currentTheme();
     const sceneKey = JSON.stringify({
       ...sceneSnap,
       garden,
+      theme: theme.id,
       nowMs: 0,
       scale: scaleVal,
       reducedMotion: !!prefs.reducedMotion
@@ -506,8 +514,8 @@ function runHabitatAppMode(electron) {
     if (force || !idle000 || sceneKey !== lastRenderSceneKey) {
       lastRenderSceneKey = sceneKey;
       renderWin.webContents.send("habitat-stage:render", {
-        manifest: manifestData,
-        manifestDirUrl,
+        manifest: theme.manifest,
+        manifestDirUrl: theme.dirUrl,
         atomMetaMap,
         scale: scaleVal,
         reducedMotion: !!prefs.reducedMotion,

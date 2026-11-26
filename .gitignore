@@ -130,3 +130,6 @@ Microsoft/
 
 # Emoji export scratch
 clawd-emoji-final/
+
+# Peças brutas do Gemini (P2); só a saída processada entra no repositório
+/assets-novos/

@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const { defaultHabitatRuntimeConfigPath } = require("../habitat-identity");
 const { normalizeGarden, normalizeLightMode } = require("./habitat-garden");
+const { normalizeTheme } = require("./habitat-themes");
 
 const HABITAT_ALLOWED_SCALES = Object.freeze([1, 1.5, 2]);
 
@@ -18,6 +19,7 @@ const DEFAULT_HABITAT_PREFS = Object.freeze({
   windowPosition: null,
   garden: normalizeGarden(null),
   lightMode: "auto",
+  theme: "cozy-cottage",
 });
 
 function normalizeHabitatPrefs(input) {
@@ -59,6 +61,7 @@ function normalizeHabitatPrefs(input) {
 
   prefs.garden = normalizeGarden(input.garden);
   prefs.lightMode = normalizeLightMode(input.lightMode);
+  prefs.theme = normalizeTheme(input.theme);
 
   // windowPosition
   if (input.windowPosition && typeof input.windowPosition === "object") {

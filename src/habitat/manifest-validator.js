@@ -214,7 +214,7 @@ function validateHabitatManifest({ manifest, manifestDir, repoRoot, checkFiles =
     const ok = helpers && typeof helpers.file === 'string' && f && f.width > 0 && f.height > 0
       && helpers.frameMs > 0 && Number.isInteger(helpers.max) && helpers.max > 0 && helpers.rows
       && expectedProviders.every((p) => Number.isInteger(helpers.rows[p]) && helpers.rows[p] >= 0);
-    if (!ok) errors.push('helpers must have file, frame, frameMs, max and rows for every provider');
+    if (!ok || (helpers.frames !== undefined && !(Number.isInteger(helpers.frames) && helpers.frames >= 2))) errors.push('helpers must have file, frame, frameMs, max, rows for every provider and frames >= 2 when set');
     else if (resolvedManifestDir && resolvedRepoRoot) validateClipPathOrObject(helpers.file);
   }
 

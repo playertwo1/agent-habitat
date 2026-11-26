@@ -196,6 +196,18 @@
     if (prefCardsEnabled) prefCardsEnabled.checked = prefs.cardsEnabled !== false;
     if (prefOpenAtLogin) prefOpenAtLogin.checked = Boolean(prefs.openAtLogin);
 
+    // Tema (P2.1): o cartão só aparece quando há mais de um tema instalado
+    const themeCard = document.getElementById("theme-card");
+    const themeBox = document.getElementById("theme-options");
+    const themes = Array.isArray(state.themes) ? state.themes : [];
+    if (themeCard && themeBox) {
+      themeCard.hidden = themes.length < 2;
+      themeBox.innerHTML = themes.map((t) => `<label><input type="radio" name="theme" value="${escapeHtml(t.id)}"${t.id === (prefs.theme || "cozy-cottage") ? " checked" : ""}> ${escapeHtml(t.name)}</label>`).join("");
+      themeBox.querySelectorAll('input[name="theme"]').forEach((el) => {
+        el.addEventListener("change", () => bridge.updatePref("theme", el.value).then((s) => { if (s) render(s); }));
+      });
+    }
+
     // Jardim e luz (P1.4)
     const garden = prefs.garden || {};
     document.querySelectorAll("[data-garden]").forEach((el) => { el.checked = garden[el.dataset.garden] === true; });

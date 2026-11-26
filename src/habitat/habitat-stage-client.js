@@ -4,12 +4,15 @@
 window.addEventListener('DOMContentLoaded', () => {
   const container = document.getElementById('stage-root');
   let renderer = null;
+  let rendererThemeId = null;
 
   window.habitatStage.onRenderData((payload) => {
     if (!payload || !payload.manifest) return;
     const { manifest, manifestDirUrl, atomMetaMap, scale, reducedMotion, snapshot } = payload;
 
+    if (renderer && rendererThemeId !== manifest.id) renderer = null; // tema trocado: recria o cenário
     if (!renderer) {
+      rendererThemeId = manifest.id;
       renderer = window.createHabitatRenderer({
         container,
         manifest,
