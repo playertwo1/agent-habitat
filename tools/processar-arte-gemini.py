@@ -201,6 +201,7 @@ def main():
     saida = Path(a.saida) if a.saida else RAIZ / "assets" / "habitat" / a.tema
     saida.mkdir(parents=True, exist_ok=True)
     man = json.loads((BASE / "habitat-manifest.json").read_text(encoding="utf-8"))
+    man.pop("trees", None)  # P3.7: no Gemini as árvores vêm desenhadas no próprio cenário (A1)
     L = man["layers"]
     cw, ch = man["canvas"]["width"], man["canvas"]["height"]
     cores = a.cores

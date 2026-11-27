@@ -25,9 +25,9 @@ test("T33: automático segue o relógio e forçar dia/noite vence o relógio", (
 });
 
 test("T33: nada ligado por padrão e só objetos conhecidos e ligados chegam ao Stage", () => {
-  assert.deepStrictEqual(resolveGardenState({}, at(12)), { items: [], night: false });
+  assert.deepStrictEqual({ ...resolveGardenState({}, at(12)), trees: undefined }, { items: [], night: false, trees: undefined });
   assert.deepStrictEqual(normalizeGarden({ bench: true, kitten: "sim", lixo: true }), { bench: true, campfire: false, kitten: false, mailbox: false });
-  assert.deepStrictEqual(resolveGardenState({ garden: { campfire: true, mailbox: true }, lightMode: "night" }, at(12)), { items: ["campfire", "mailbox"], night: true });
+  assert.deepStrictEqual({ ...resolveGardenState({ garden: { campfire: true, mailbox: true }, lightMode: "night" }, at(12)), trees: undefined }, { items: ["campfire", "mailbox"], night: true, trees: undefined });
 });
 
 test("T33: objetos e luz persistem entre reinícios e valores inválidos voltam ao padrão", () => {

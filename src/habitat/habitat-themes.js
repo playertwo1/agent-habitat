@@ -39,6 +39,7 @@ function expectedImages(m) {
   for (const s of Object.values(m.stations)) out.push([s.props.file, s.props.width, s.props.height, true]);
   if (m.helpers) out.push([m.helpers.file, m.helpers.frame.width * (m.helpers.frames || 2), m.helpers.frame.height * Object.keys(m.helpers.rows).length, true]);
   if (m.garden) out.push([m.garden.file, m.garden.frame.width * Object.keys(m.garden.items).length, m.garden.frame.height, true]);
+  if (m.trees) out.push([m.trees.file, m.trees.frame.width * m.trees.count, m.trees.frame.height, true]);
   return out;
 }
 

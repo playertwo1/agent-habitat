@@ -234,6 +234,17 @@ function validateHabitatManifest({ manifest, manifestDir, repoRoot, checkFiles =
     else if (resolvedManifestDir && resolvedRepoRoot) validateClipPathOrObject(garden.file);
   }
 
+  // P3.7: árvores por tema (opcional); se existir, folha com count quadros e base de cada lado.
+  const trees = manifest.trees;
+  if (trees !== undefined) {
+    const f = trees && trees.frame;
+    const side = (s) => trees[s] && Number.isFinite(trees[s].x) && Number.isFinite(trees[s].y);
+    const ok = trees && typeof trees.file === 'string' && f && f.width > 0 && f.height > 0
+      && Number.isInteger(trees.count) && trees.count >= 2 && side('left') && side('right');
+    if (!ok) errors.push('trees must have file, frame, count >= 2 and left/right with x, y');
+    else if (resolvedManifestDir && resolvedRepoRoot) validateClipPathOrObject(trees.file);
+  }
+
   if (stations && resolvedManifestDir && resolvedRepoRoot) {
     for (const p of expectedProviders) {
       if (stations[p] && stations[p].props) {

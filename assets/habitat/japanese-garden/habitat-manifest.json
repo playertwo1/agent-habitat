@@ -265,5 +265,21 @@
         }
       }
     }
+  },
+  "trees": {
+    "file": "trees.png",
+    "frame": {
+      "width": 100,
+      "height": 112
+    },
+    "count": 6,
+    "left": {
+      "x": 49,
+      "y": 101
+    },
+    "right": {
+      "x": 263,
+      "y": 102
+    }
   }
 }

@@ -44,6 +44,28 @@ function createHabitatRenderer({ container, manifest, manifestDirUrl, atomMetaMa
   smokeEl.style.display = 'none';
   stage.appendChild(smokeEl);
 
+  // P3.7: árvores (sprites por tema) logo depois do fundo, um par por dia; escurecem à noite com o cenário.
+  const treesCfg = manifest.trees || null;
+  const treeEls = {};
+  if (treesCfg) {
+    const treesUrl = new URL(treesCfg.file, manifestDirUrl).href;
+    for (const side of ['left', 'right']) {
+      const el = document.createElement('div');
+      el.style.position = 'absolute';
+      el.style.width = `${treesCfg.frame.width}px`;
+      el.style.height = `${treesCfg.frame.height}px`;
+      el.style.left = `${treesCfg[side].x - treesCfg.frame.width / 2}px`;
+      el.style.top = `${treesCfg[side].y - treesCfg.frame.height}px`;
+      el.style.backgroundImage = `url("${treesUrl}")`;
+      el.style.backgroundPosition = `-${(side === 'left' ? 0 : 1) * treesCfg.frame.width}px 0`;
+      el.style.imageRendering = 'pixelated';
+      el.style.pointerEvents = 'none';
+      el.dataset.tree = side;
+      stage.appendChild(el);
+      treeEls[side] = el;
+    }
+  }
+
   // Layer 2: Cottage Night
   const nightEl = document.createElement('img');
   nightEl.src = new URL(manifest.layers.cottageNight, manifestDirUrl).href;
@@ -97,7 +119,7 @@ function createHabitatRenderer({ container, manifest, manifestDirUrl, atomMetaMa
       gardenEls[name] = el;
     }
   }
-  const nightLayers = [backdropEl, nightEl, doorEl, ...Object.values(gardenEls)];
+  const nightLayers = [backdropEl, ...Object.values(treeEls), nightEl, doorEl, ...Object.values(gardenEls)];
 
   // Station Props & Actors container
   const entitiesContainer = document.createElement('div');
@@ -259,6 +281,14 @@ function createHabitatRenderer({ container, manifest, manifestDirUrl, atomMetaMa
       smokeEl.src = smokeFrameUrls[idx];
     } else {
       smokeEl.style.display = 'none';
+    }
+
+    if (treesCfg) {
+      const t = (snapshot.garden && snapshot.garden.trees) || { left: 0, right: 1 };
+      for (const side of ['left', 'right']) {
+        const i = ((Number(t[side]) || 0) % treesCfg.count + treesCfg.count) % treesCfg.count;
+        treeEls[side].style.backgroundPosition = `-${i * treesCfg.frame.width}px 0`;
+      }
     }
 
     if (gardenCfg) {

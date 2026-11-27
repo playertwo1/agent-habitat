@@ -80,9 +80,53 @@ test("T40c: Fantasy Village tem castelo com portão na área de clique, alinhado
   assert.strictEqual(fora, 0, "luz âmbar fora do castelo");
 });
 
+test("T40d: par de árvores muda a cada dia, nunca repete os lados e cobre os 30 pares em 30 dias", () => {
+  const { treesForDate, resolveGardenState } = require("../src/habitat/habitat-garden");
+  const vistos = new Set();
+  let anterior = null;
+  for (let d = 0; d < 30; d += 1) {
+    const t = treesForDate(new Date(2026, 10, 27 + d, 12));
+    assert.notStrictEqual(t.left, t.right, "esquerda igual à direita");
+    assert.ok(t.left >= 0 && t.left < 6 && t.right >= 0 && t.right < 6);
+    const k = `${t.left}-${t.right}`;
+    assert.notStrictEqual(k, anterior, "repetiu o par do dia anterior");
+    vistos.add(k);
+    anterior = k;
+  }
+  assert.strictEqual(vistos.size, 30);
+  // Mesmo dia, horas diferentes: mesmo par (não muda ao longo do dia).
+  assert.deepStrictEqual(treesForDate(new Date(2026, 10, 27, 0, 1)), treesForDate(new Date(2026, 10, 27, 23, 59)));
+  assert.deepStrictEqual(resolveGardenState({}, new Date(2026, 10, 27, 12)).trees, treesForDate(new Date(2026, 10, 27, 12)));
+});
+
+test("T40e: os 4 temas têm 6 árvores em sprite, o fundo não tem mais as árvores antigas e o renderizador escurece as árvores à noite", () => {
+  for (const id of TEMAS) {
+    const { manifest, png } = tema(id);
+    const t = manifest.trees;
+    assert.ok(t, `${id}: sem árvores`);
+    assert.strictEqual(t.count, 6);
+    const folha = png(t.file);
+    assert.deepStrictEqual([folha.width, folha.height], [t.frame.width * t.count, t.frame.height], `${id}: folha com tamanho errado`);
+    for (let i = 0; i < t.count; i += 1) {
+      let px = 0;
+      for (let y = 0; y < t.frame.height; y += 1) for (let x = 0; x < t.frame.width; x += 1) if (alfa(folha, i * t.frame.width + x, y) > 0) px += 1;
+      assert.ok(px > 2000, `${id}: árvore ${i} quase vazia (${px} px)`);
+    }
+    // No céu acima de cada árvore o fundo ficou transparente (a copa antiga saiu).
+    const fundo = png(manifest.layers.backdrop);
+    for (const lado of ["left", "right"]) {
+      let opacos = 0;
+      for (let y = 8; y < 40; y += 1) for (let x = t[lado].x - 20; x < t[lado].x + 20; x += 1) if (alfa(fundo, x, y) > 0) opacos += 1;
+      assert.ok(opacos < 40, `${id}/${lado}: sobrou copa antiga no fundo (${opacos} px)`);
+    }
+  }
+  const src = fs.readFileSync(path.join(RAIZ, "src", "habitat", "habitat-renderer.js"), "utf8");
+  assert.match(src, /const nightLayers = \[backdropEl, \.\.\.Object\.values\(treeEls\)/);
+});
+
 test("T40b: o jardim é desenhado depois do fundo e da casa, e os moradores nunca recebem o filtro noturno", () => {
   const src = fs.readFileSync(path.join(RAIZ, "src", "habitat", "habitat-renderer.js"), "utf8");
   const iJardim = src.indexOf("el.dataset.garden = name");
   assert.ok(iJardim > src.indexOf("doorEl.src = doorFrames.closed"), "jardim antes da porta");
-  assert.match(src, /const nightLayers = \[backdropEl, nightEl, doorEl, \.\.\.Object\.values\(gardenEls\)\]/);
+  assert.match(src, /nightEl, doorEl, \.\.\.Object\.values\(gardenEls\)\]/);
 });
