@@ -1,6 +1,6 @@
 # Etapa: P3 — Space Habitat, confiabilidade, ponte com o Lumen e aviso de versão
 
-**Estado:** P3.3, P3.4 e P3.6 no `main`; P3.2 falta fechar o aceite; P3.7 integrada no branch `p3.7-refino`, espera a aprovação visual do dono; P3.1/P3.5 esperam a arte do Space Habitat. Atualizado em 27/11/2026.
+**Estado:** P3.3, P3.4 e P3.6 no `main`; P3.2 falta fechar o aceite; P3.7 concluída e no `main`; P3.1/P3.5 esperam a arte do Space Habitat. Atualizado em 27/11/2026.
 
 **Objetivo:** o dono ganha um terceiro tema (**Space Habitat**, domo em asteroide flutuante), um app mais confiável (testes estáveis, desinstalador e NSIS corretos), uma **leitura local opcional** do estado para o **Lumen** e um **aviso opcional de nova versão**. Publicados juntos em **uma release `v0.4.0`** no fim.
 
@@ -16,7 +16,7 @@ Este arquivo é só um índice. Para trabalhar numa fase, leia apenas o document
 | P3.4 | Aviso opcional de nova versão | CP-P3.4 | Concluída 27/11 | [P3.4 — Aviso de versão](p3/P3.4-aviso-de-versao.md) |
 | P3.5 | Tema Space Habitat completo, de dia e de noite | CP-P3.5 | Condicional a CP-P3.1 | [P3.5 — Space Habitat](p3/P3.5-space-habitat.md) |
 | P3.6 | Modo de visualização em escala 0,5x (pedido do dono em 27/11) | CP-P3.6 | Implementada e no `main`; falta conferir DPI 100/125/200% e 2 monitores | [P3.6 — Escala 0,5x](p3/P3.6-escala-meio.md) |
-| P3.7 | Árvores variadas, castelo no Fantasy Village, aviso de conclusão na ilha e bug do jardim (pedido do dono em 27/11) | CP-P3.7 | Arte do Codex integrada no branch `p3.7-refino`; espera a aprovação visual do dono | [P3.7 — Refino visual](p3/P3.7-refino-visual.md) |
+| P3.7 | Árvores variadas, castelo no Fantasy Village, aviso de conclusão na ilha e bug do jardim (pedido do dono em 27/11) | CP-P3.7 | Concluída 27/11 (aprovada pelo dono) | [P3.7 — Refino visual](p3/P3.7-refino-visual.md) |
 | Release | `v0.4.0` publicada com tudo | CP-P3 | Condicional a todos os CPs | (regra abaixo) |
 
 ## Regras da etapa
