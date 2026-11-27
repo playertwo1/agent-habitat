@@ -6,7 +6,7 @@ const { defaultHabitatRuntimeConfigPath } = require("../habitat-identity");
 const { normalizeGarden, normalizeLightMode } = require("./habitat-garden");
 const { normalizeTheme } = require("./habitat-themes");
 
-const HABITAT_ALLOWED_SCALES = Object.freeze([1, 1.5, 2]);
+const HABITAT_ALLOWED_SCALES = Object.freeze([0.5, 1, 1.5, 2]);
 
 const DEFAULT_HABITAT_PREFS = Object.freeze({
   scale: 1.5,

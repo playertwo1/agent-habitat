@@ -39,6 +39,7 @@ const HABITAT_PTBR = Object.freeze({
   settings: {
     scaleTitle: "Escala da Interface",
     scale1x: "Padrão (1x)",
+    scale0_5x: "Compacto (0,5x)",
     scale1_5x: "Ampliado (1.5x)",
     scale2x: "Grande (2x)",
     togglesTitle: "Preferências do Painel",

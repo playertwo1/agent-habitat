@@ -194,7 +194,7 @@ function buildTrayTemplateModel({ prefs, demoMode }) {
     { label: prefs.alwaysOnTop ? "Desativar sempre no topo" : "Manter sempre no topo", id: "toggle-always-on-top" },
     { label: prefs.fullscreenAutoHide ? "Desativar ocultar em tela cheia" : "Ocultar em tela cheia", id: "toggle-fullscreen-auto-hide" },
     { label: prefs.reducedMotion ? "Movimento Normal" : "Reduzir movimento", id: "toggle-reduced-motion" },
-    { label: `Escala Atual (${prefs.scale || 1.5}x)`, id: "select-scale" },
+    { label: `Escala Atual (${String(prefs.scale || 1.5).replace(".", ",")}x)`, id: "select-scale" },
     { label: "Trazer para tela principal", id: "bring-to-primary" },
     { label: prefs.openAtLogin ? "Desativar iniciar com o Windows" : "Iniciar com o Windows", id: "toggle-open-at-login" },
     { type: "separator" },
@@ -1002,7 +1002,9 @@ function runHabitatAppMode(electron) {
             updateTrayMenu();
             pushPanelState();
           } else if (item.id === "select-scale") {
-            const nextScale = prefs.scale === 2 ? 1 : (prefs.scale === 1 ? 1.5 : 2);
+            // Ciclo 0,5x -> 1x -> 1,5x -> 2x -> 0,5x (P3.6).
+            const ciclo = [0.5, 1, 1.5, 2];
+            const nextScale = ciclo[(ciclo.indexOf(prefs.scale) + 1) % ciclo.length];
             prefs = saveHabitatPrefs({ filePath: prefsPath, patch: { scale: nextScale } });
             applyPrefsChanges();
             updateTrayMenu();

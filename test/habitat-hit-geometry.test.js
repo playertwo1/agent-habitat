@@ -108,7 +108,7 @@ test("HitGeometry - Cenários 100 / 010 / 001 / 111 residents visibility", () =>
 
 test("HabitatPrefs - defaults, normalization and persistence", () => {
   assert.equal(DEFAULT_HABITAT_PREFS.openAtLogin, false);
-  assert.deepEqual(HABITAT_ALLOWED_SCALES, [1, 1.5, 2]);
+  assert.deepEqual(HABITAT_ALLOWED_SCALES, [0.5, 1, 1.5, 2]);
 
   // normalization test
   const normalizedInvalid = normalizeHabitatPrefs({

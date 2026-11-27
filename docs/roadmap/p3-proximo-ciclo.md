@@ -15,7 +15,7 @@ Este arquivo é só um índice. Para trabalhar numa fase, leia apenas o document
 | P3.3 | Leitura local opcional do estado para o Lumen | CP-P3.3 | Não iniciada | [P3.3 — Ponte com o Lumen](p3/P3.3-ponte-lumen.md) |
 | P3.4 | Aviso opcional de nova versão | CP-P3.4 | Não iniciada | [P3.4 — Aviso de versão](p3/P3.4-aviso-de-versao.md) |
 | P3.5 | Tema Space Habitat completo, de dia e de noite | CP-P3.5 | Condicional a CP-P3.1 | [P3.5 — Space Habitat](p3/P3.5-space-habitat.md) |
-| P3.6 | Modo de visualização em escala 0,5x (pedido do dono em 27/11) | CP-P3.6 | Não iniciada | [P3.6 — Escala 0,5x](p3/P3.6-escala-meio.md) |
+| P3.6 | Modo de visualização em escala 0,5x (pedido do dono em 27/11) | CP-P3.6 | Implementada no branch `p3.6-escala` | [P3.6 — Escala 0,5x](p3/P3.6-escala-meio.md) |
 | P3.7 | Árvores variadas, castelo no Fantasy Village, aviso de conclusão na ilha e bug do jardim (pedido do dono em 27/11) | CP-P3.7 | Não iniciada; arte pelo Codex | [P3.7 — Refino visual](p3/P3.7-refino-visual.md) |
 | Release | `v0.4.0` publicada com tudo | CP-P3 | Condicional a todos os CPs | (regra abaixo) |
 
