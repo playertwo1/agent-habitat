@@ -12,10 +12,13 @@ const { readStats, fileIdentity } = require("../hooks/file-identity");
 const SID = "019d23d4-f1a9-7633-b9c7-758327137228";
 const NAME = `rollout-2026-03-25T15-10-51-${SID}.jsonl`;
 const record = (type, payload) => JSON.stringify({ timestamp: new Date().toISOString(), type, payload }) + "\n";
-const meta = record("session_meta", { id: SID, cwd: "/identity" });
-const start = record("event_msg", { type: "task_started", turn_id: "turn" });
+// Gerados no uso: o monitor descarta como histórico eventos com timestamp anterior
+// ao próprio início (menos 1,5 s), então timestamps do carregamento do módulo
+// fariam o teste falhar sob carga.
+const meta = () => record("session_meta", { id: SID, cwd: "/identity" });
+const start = () => record("event_msg", { type: "task_started", turn_id: "turn" });
 
-function fixture(t, text = meta) {
+function fixture(t, text = meta()) {
   const base = fs.mkdtempSync(path.join(os.tmpdir(), "codex-identity-"));
   const now = new Date();
   const dir = path.join(base, String(now.getFullYear()), String(now.getMonth() + 1).padStart(2, "0"),
@@ -44,14 +47,14 @@ for (const replaced of [true, false]) {
     const f = fixture(t);
     f.monitor._poll(); f.events.length = 0;
     if (replaced) {
-      fs.writeFileSync(f.replacement, " ".repeat(Buffer.byteLength(meta)) + start);
+      fs.writeFileSync(f.replacement, " ".repeat(Buffer.byteLength(meta())) + start());
       f.replace();
-    } else fs.appendFileSync(f.file, start);
+    } else fs.appendFileSync(f.file, start());
     f.monitor._poll();
     assert.deepEqual(f.events.map(e => e[2]), replaced ? [] : ["event_msg:task_started"]);
     assert.equal(f.monitor._tracked.get(f.file).offset, fs.statSync(f.file).size);
     if (replaced) {
-      fs.appendFileSync(f.file, start); f.monitor._poll();
+      fs.appendFileSync(f.file, start()); f.monitor._poll();
       assert.deepEqual(f.events.map(e => e[2]), ["event_msg:task_started"]);
     }
   });
@@ -59,8 +62,8 @@ for (const replaced of [true, false]) {
   test(`S1b: stat/open race ${replaced ? "rebaselines collision" : "retains exact identity"}`, t => {
     const f = fixture(t);
     f.monitor._poll(); f.events.length = 0;
-    fs.appendFileSync(f.file, start);
-    fs.writeFileSync(f.replacement, " ".repeat(Buffer.byteLength(meta)) + start);
+    fs.appendFileSync(f.file, start());
+    fs.writeFileSync(f.replacement, " ".repeat(Buffer.byteLength(meta())) + start());
     const open = fs.openSync;
     let opened = false;
     t.mock.method(fs, "openSync", (target, ...args) => {
@@ -71,13 +74,13 @@ for (const replaced of [true, false]) {
     assert.equal(opened, true);
     assert.deepEqual(f.events.map(e => e[2]), replaced ? [] : ["event_msg:task_started"]);
     if (replaced) {
-      fs.appendFileSync(f.file, start); f.monitor._poll();
+      fs.appendFileSync(f.file, start()); f.monitor._poll();
       assert.deepEqual(f.events.map(e => e[2]), ["event_msg:task_started"]);
     }
   });
 
   test(`S1c: startup preStat ${replaced ? "detects replacement before open" : "reads first snapshot"}`, t => {
-    const f = fixture(t, meta + start);
+    const f = fixture(t, meta() + start());
     const open = fs.openSync;
     let opened = false;
     t.mock.method(fs, "openSync", (target, ...args) => {
@@ -97,8 +100,8 @@ for (const replaced of [true, false]) {
     f.monitor._retireTrackedFile(f.file, f.monitor._tracked.get(f.file));
     for (let i = 0; i <= 100; i++) f.monitor._retireTrackedFile(`dummy-${i}`, { offset: 0, lastEventTime: i });
     assert.equal(f.monitor._retiredTracked.has(f.file), false);
-    if (replaced) { fs.writeFileSync(f.replacement, meta + start); f.replace(); }
-    else fs.appendFileSync(f.file, start);
+    if (replaced) { fs.writeFileSync(f.replacement, meta() + start()); f.replace(); }
+    else fs.appendFileSync(f.file, start());
     f.monitor._pollFile(f.file, NAME);
     assert.deepEqual(f.events.map(e => e[2]), replaced ? [] : ["event_msg:task_started"]);
     assert.equal(f.monitor._tracked.get(f.file).offset, fs.statSync(f.file).size);
@@ -108,7 +111,7 @@ for (const replaced of [true, false]) {
     test(`S1d: ${route} recovery ${replaced ? "rejects collision during read" : "accepts unchanged snapshot"}`, t => {
       const source = route === "delegated" ? { subagent: { thread_spawn: {
         parent_thread_id: "00000000-0000-4000-8000-000000000099" } } } : "cli";
-      const text = record("session_meta", { id: SID, cwd: "/identity", source }) + start
+      const text = record("session_meta", { id: SID, cwd: "/identity", source }) + start()
         + record("response_item", { type: "function_call", name: "request_user_input", call_id: "call",
           arguments: JSON.stringify({ questions: [{ id: "q", header: "Pick", question: "Choose", options: [] }] }) });
       const f = fixture(t, text);

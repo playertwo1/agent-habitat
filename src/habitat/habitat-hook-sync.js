@@ -86,6 +86,21 @@ function hasAgentHabitatMarker(entry) {
   return false;
 }
 
+
+// Remove só as entradas do Habitat. Um grupo misto (com hooks do Habitat e de
+// terceiros na mesma lista `hooks`) mantém os de terceiros; só some o grupo
+// que ficar sem nenhum hook.
+function stripHabitatEntries(list) {
+  const out = [];
+  for (const item of list) {
+    if (!hasAgentHabitatMarker(item)) { out.push(item); continue; }
+    if (item && typeof item === "object" && !Array.isArray(item) && Array.isArray(item.hooks)) {
+      const inner = item.hooks.filter((h) => !hasAgentHabitatMarker(h));
+      if (inner.length > 0) out.push({ ...item, hooks: inner });
+    }
+  }
+  return out;
+}
 function planHabitatHookSync(options = {}) {
   const nodeBin = options.nodeBin || "node";
   const hookScriptPath = options.hookScriptPath || DEFAULT_HOOK_SCRIPT_PATH;
@@ -204,11 +219,11 @@ function mutateHooksData(existingData, events, provider, options) {
       const hookEntry = { type: "command", command, timeout: 10 };
       if (ev === "PostToolUse") {
         // preserve foreign hooks inside PostToolUse array if any
-        const currentList = Array.isArray(group[ev]) ? group[ev].filter(item => !hasAgentHabitatMarker(item)) : [];
+        const currentList = Array.isArray(group[ev]) ? stripHabitatEntries(group[ev]) : [];
         currentList.push({ matcher: "*", hooks: [hookEntry] });
         group[ev] = currentList;
       } else {
-        const currentList = Array.isArray(group[ev]) ? group[ev].filter(item => !hasAgentHabitatMarker(item)) : (group[ev] && !hasAgentHabitatMarker(group[ev]) ? [group[ev]] : []);
+        const currentList = Array.isArray(group[ev]) ? stripHabitatEntries(group[ev]) : (group[ev] && !hasAgentHabitatMarker(group[ev]) ? [group[ev]] : []);
         currentList.push(hookEntry);
         group[ev] = currentList;
       }
@@ -236,7 +251,7 @@ function mutateHooksData(existingData, events, provider, options) {
     if (!current) {
       existingData.hooks[ev] = [ourGroup];
     } else if (Array.isArray(current)) {
-      const filtered = current.filter((item) => !hasAgentHabitatMarker(item));
+      const filtered = stripHabitatEntries(current);
       filtered.push(ourGroup);
       existingData.hooks[ev] = filtered;
     } else {
@@ -366,7 +381,7 @@ function uninstallHabitatHooks(options = {}) {
           if (hasAgentHabitatMarker(entry)) {
             createBackupOnce();
             if (Array.isArray(entry)) {
-              const filtered = entry.filter(item => !hasAgentHabitatMarker(item));
+              const filtered = stripHabitatEntries(entry);
               if (filtered.length > 0) {
                 agyObj[ev] = filtered;
               } else {
@@ -389,7 +404,7 @@ function uninstallHabitatHooks(options = {}) {
           if (hasAgentHabitatMarker(current)) {
             createBackupOnce();
             if (Array.isArray(current)) {
-              const filtered = current.filter((item) => !hasAgentHabitatMarker(item));
+              const filtered = stripHabitatEntries(current);
               if (filtered.length > 0) {
                 data.hooks[ev] = filtered;
               } else {

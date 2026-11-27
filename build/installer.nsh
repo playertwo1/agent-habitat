@@ -7,7 +7,7 @@ Var pid
 ; Resync with the template when upgrading electron-builder; remove this override once upstream fixes the count.
 !macro CLAWD_FIND_PROCESS _FILE _RETURN
   ${if} $IsPowerShellAvailable == 0
-    nsExec::Exec `"$PowerShellPath" -C "if (@(Get-CimInstance -ClassName Win32_Process | ? {$$_.Path -and $$_.Path.StartsWith('$INSTDIR', 'CurrentCultureIgnoreCase')}).Count -gt 0) { exit 0 } else { exit 1 }"`
+    nsExec::Exec `"$PowerShellPath" -C "if (@(Get-CimInstance -ClassName Win32_Process | ? {$$_.Path -and $$_.Path.StartsWith('$INSTDIR\', 'CurrentCultureIgnoreCase')}).Count -gt 0) { exit 0 } else { exit 1 }"`
     Pop ${_RETURN}
   ${else}
     !ifdef INSTALL_MODE_PER_ALL_USERS
@@ -20,6 +20,33 @@ Var pid
       Pop ${_RETURN}
     !endif
   ${endIf}
+!macroend
+
+; O KILL_PROCESS do template casa o caminho por prefixo (StartsWith('$INSTDIR')): uma pasta irma como
+; "<INSTDIR> Beta" tambem seria encerrada. Aqui o caminho termina com "\", entao so processos de dentro
+; da pasta de instalacao sao alvo. Mesmo corpo do template nos demais ramos.
+!macro CLAWD_KILL_PROCESS _FILE _FORCE
+  Push $0
+  ${if} ${_FORCE} == 1
+    ${if} $IsPowerShellAvailable == 0
+      StrCpy $0 "-Force"
+    ${else}
+      StrCpy $0 "/F"
+    ${endIf}
+  ${else}
+    StrCpy $0 ""
+  ${endIf}
+
+  ${if} $IsPowerShellAvailable == 0
+    nsExec::Exec `"$PowerShellPath" -C "Get-CimInstance -ClassName Win32_Process | ? {$$_.Path -and $$_.Path.StartsWith('$INSTDIR\', 'CurrentCultureIgnoreCase')} | % { Stop-Process -Id $$_.ProcessId $0 }"`
+  ${else}
+    !ifdef INSTALL_MODE_PER_ALL_USERS
+      nsExec::Exec `taskkill /IM "${_FILE}" /FI "PID ne $pid"`
+    !else
+      nsExec::Exec `"$CmdPath" /C taskkill $0 /IM "${_FILE}" /FI "PID ne $pid" /FI "USERNAME eq %USERNAME%"`
+    !endif
+  ${endIf}
+  Pop $0
 !macroend
 
 !macro CLAWD_CHECK_APP_RUNNING
@@ -44,7 +71,7 @@ Var pid
 
       DetailPrint "$(appClosing)"
 
-      !insertmacro KILL_PROCESS "${APP_EXECUTABLE_FILENAME}" 0
+      !insertmacro CLAWD_KILL_PROCESS "${APP_EXECUTABLE_FILENAME}" 0
       # to ensure that files are not "in-use"
       Sleep 300
 
@@ -58,7 +85,7 @@ Var pid
         ${if} $R0 == 0
           # wait to give a chance to exit gracefully
           Sleep 1000
-          !insertmacro KILL_PROCESS "${APP_EXECUTABLE_FILENAME}" 1 # 1 = force kill
+          !insertmacro CLAWD_KILL_PROCESS "${APP_EXECUTABLE_FILENAME}" 1 # 1 = force kill
           !insertmacro CLAWD_FIND_PROCESS "${APP_EXECUTABLE_FILENAME}" $R0
           ${if} $R0 == 0
             DetailPrint `Waiting for "${PRODUCT_NAME}" to close.`
