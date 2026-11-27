@@ -11,10 +11,10 @@
     "y": 132
   },
   "cottageHitBox": {
-    "x": 114,
-    "y": 41,
-    "width": 92,
-    "height": 83
+    "x": 120,
+    "y": 36,
+    "width": 80,
+    "height": 88
   },
   "layers": {
     "shadow": "layer-0-shadow.png",
@@ -23,10 +23,10 @@
     "cottageAmber": "cottage-amber-lights.png",
     "foreground": "layer-6-foreground.png",
     "door": {
-      "x": 149,
-      "y": 83,
-      "width": 26,
-      "height": 33,
+      "x": 144,
+      "y": 92,
+      "width": 31,
+      "height": 30,
       "frames": {
         "closed": "door-closed.png",
         "opening": "door-opening.png",
@@ -40,12 +40,7 @@
       "width": 32,
       "height": 32,
       "frameMs": 450,
-      "frames": [
-        "smoke-0.png",
-        "smoke-1.png",
-        "smoke-2.png",
-        "smoke-3.png"
-      ]
+      "frames": []
     }
   },
   "helpers": {

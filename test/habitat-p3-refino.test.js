@@ -52,6 +52,34 @@ test("T40a: objetos do jardim ficam no gramado, visíveis e fora do primeiro pla
   }
 });
 
+test("T40c: Fantasy Village tem castelo com portão na área de clique, alinhado à saída dos moradores e sem fumaça", () => {
+  const { manifest, png } = tema("fantasy-village");
+  const hit = manifest.cottageHitBox;
+  const porta = manifest.layers.door;
+  assert.ok(hit.width >= 70 && hit.height >= 80, "castelo pequeno demais");
+  assert.ok(porta.x >= hit.x && porta.x + porta.width <= hit.x + hit.width, "portão fora da largura do castelo");
+  assert.ok(porta.y >= hit.y && porta.y + porta.height <= hit.y + hit.height + 2, "portão fora da altura do castelo");
+  assert.ok(Math.abs(porta.x + porta.width / 2 - manifest.doorAnchor.x) <= 3, "portão longe da saída dos moradores");
+  assert.deepStrictEqual(manifest.layers.smoke.frames, [], "castelo não tem chaminé");
+  for (const f of Object.values(porta.frames)) {
+    const q = png(f);
+    assert.deepStrictEqual([q.width, q.height], [porta.width, porta.height], `${f} com tamanho diferente`);
+  }
+  // Janelas acesas: a camada âmbar existe e fica só sobre o castelo.
+  const luz = png(manifest.layers.cottageAmber);
+  let acesos = 0;
+  let fora = 0;
+  for (let y = 0; y < luz.height; y += 1) {
+    for (let x = 0; x < luz.width; x += 1) {
+      if (alfa(luz, x, y) === 0) continue;
+      acesos += 1;
+      if (x < hit.x || x >= hit.x + hit.width || y < hit.y || y >= hit.y + hit.height) fora += 1;
+    }
+  }
+  assert.ok(acesos >= 20, "sem janelas acesas");
+  assert.strictEqual(fora, 0, "luz âmbar fora do castelo");
+});
+
 test("T40b: o jardim é desenhado depois do fundo e da casa, e os moradores nunca recebem o filtro noturno", () => {
   const src = fs.readFileSync(path.join(RAIZ, "src", "habitat", "habitat-renderer.js"), "utf8");
   const iJardim = src.indexOf("el.dataset.garden = name");
