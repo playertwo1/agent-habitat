@@ -22,6 +22,7 @@ const {
 } = require("../hooks/server-config");
 const { processAlive } = require("../hooks/shared-process");
 const { handleDshFocusStream } = require("./dsh-focus-stream");
+const { handleLumenRequest } = require("./habitat/habitat-lumen-bridge");
 const {
   B1A_AGENT_IDS,
   createServerWindowsProcessMetadataResolver,
@@ -1288,6 +1289,10 @@ function routeHttpRequest(req, res, remoteProfile = null) {
       && Object.prototype.hasOwnProperty.call(req.headers, ROUTING_NONCE_HEADER)) {
       res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
       res.end("not found");
+      return;
+    }
+    if (!remoteProfile && typeof req.url === "string" && req.url.startsWith("/lumen/")
+      && ctx.habitatLumen && handleLumenRequest(req, res, ctx.habitatLumen)) {
       return;
     }
     if (req.method === "GET" && req.url === "/habitat/snapshot") {

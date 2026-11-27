@@ -595,6 +595,11 @@ function runHabitatAppMode(electron) {
       habitatRuntime: runtime,
       syncIntegrationsOnStartup: shouldSyncHooksOnStartup()
     });
+    // P3.3: leitura local opcional para o Lumen; só responde com a preferência ligada.
+    serverCtx.habitatLumen = {
+      enabled: () => prefs.lumenBridge === true,
+      getSnapshot: () => runtime.getSnapshot(Date.now())
+    };
 
     serverCtl = initServer(serverCtx);
     if (serverCtl && typeof serverCtl.startHttpServer === "function") {

@@ -16,6 +16,7 @@
       reducedMotion: false,
       clickThrough: false,
       cardsEnabled: true,
+      lumenBridge: false,
       openAtLogin: false
     },
     residents: [
@@ -80,6 +81,7 @@
   const prefClickThrough = document.getElementById("pref-clickThrough");
   const prefCardsEnabled = document.getElementById("pref-cardsEnabled");
   const prefOpenAtLogin = document.getElementById("pref-openAtLogin");
+  const prefLumenBridge = document.getElementById("pref-lumenBridge");
 
   // Keyboard navigation for tabs
   const tabHistoryBtn = document.getElementById("tab-history");
@@ -195,6 +197,7 @@
     if (prefClickThrough) prefClickThrough.checked = Boolean(prefs.clickThrough);
     if (prefCardsEnabled) prefCardsEnabled.checked = prefs.cardsEnabled !== false;
     if (prefOpenAtLogin) prefOpenAtLogin.checked = Boolean(prefs.openAtLogin);
+    if (prefLumenBridge) prefLumenBridge.checked = prefs.lumenBridge === true;
 
     // Tema (P2.1): o cartão só aparece quando há mais de um tema instalado
     const themeCard = document.getElementById("theme-card");
@@ -367,7 +370,8 @@ const HISTORY_PROVIDER_NAMES = { claude: "Claude Code", codex: "Codex" };
     [prefReducedMotion, "reducedMotion"],
     [prefClickThrough, "clickThrough"],
     [prefCardsEnabled, "cardsEnabled"],
-    [prefOpenAtLogin, "openAtLogin"]
+    [prefOpenAtLogin, "openAtLogin"],
+    [prefLumenBridge, "lumenBridge"]
   ];
 
   prefMap.forEach(([el, key]) => {

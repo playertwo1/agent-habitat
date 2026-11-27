@@ -48,6 +48,7 @@ const HABITAT_PTBR = Object.freeze({
     clickThrough: "Permitir clique através da cabana",
     cardsEnabled: "Exibir mini-cards de atividade detalhada",
     openAtLogin: "Iniciar com o Windows",
+    lumenBridge: "Permitir que o Lumen leia o estado (somente leitura, só neste computador)",
     diagnosticsTitle: "Diagnóstico das 6 Superfícies Windows",
     verifySurfacesBtn: "Verificar superfícies",
     surfaceStatusDetected: "Detectado",

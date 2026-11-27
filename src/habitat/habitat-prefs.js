@@ -16,6 +16,7 @@ const DEFAULT_HABITAT_PREFS = Object.freeze({
   openAtLogin: false,
   clickThrough: false,
   cardsEnabled: true,
+  lumenBridge: false,
   windowPosition: null,
   garden: normalizeGarden(null),
   lightMode: "auto",
@@ -58,6 +59,8 @@ function normalizeHabitatPrefs(input) {
   if (typeof input.cardsEnabled === "boolean") {
     prefs.cardsEnabled = input.cardsEnabled;
   }
+  // P3.3: leitura local para o Lumen. Estritamente false por padrão (opt-in explícito).
+  prefs.lumenBridge = input.lumenBridge === true;
 
   prefs.garden = normalizeGarden(input.garden);
   prefs.lightMode = normalizeLightMode(input.lightMode);
