@@ -6,6 +6,7 @@ const { loadAndValidateHabitatManifest } = require("./manifest-validator");
 const { createHabitatRuntime } = require("./habitat-runtime");
 const { createHabitatSceneMachine } = require("./scene-machine");
 const { loadHabitatPrefs, saveHabitatPrefs } = require("./habitat-prefs");
+const { checkForUpdate, compareSemver, releaseUrl } = require("./habitat-update-notice");
 const { resolveGardenState } = require("./habitat-garden");
 const { launchCodexResume, tryLaunchSemWt } = require("./habitat-codex-launch");
 const { loadTheme, listThemes } = require("./habitat-themes");
@@ -265,7 +266,7 @@ function resolveAggregatorSession(runtime, fullSnap, providerId) {
   return null;
 }
 
-function buildHabitatPanelState({ prefs, demoMode, runtime, demoSceneMachine, diagnostics, quota, usage, history, themes } = {}) {
+function buildHabitatPanelState({ prefs, demoMode, runtime, demoSceneMachine, diagnostics, quota, usage, history, themes, updateNotice } = {}) {
   const now = Date.now();
   const fullSnap = runtime && typeof runtime.getSnapshot === "function" ? runtime.getSnapshot(now) : null;
   const demoSnap = demoMode && demoSceneMachine && typeof demoSceneMachine.getSnapshot === "function"
@@ -300,12 +301,13 @@ function buildHabitatPanelState({ prefs, demoMode, runtime, demoSceneMachine, di
     metrics: { quota: quota || null, usage: usage || null },
     history: history || [],
     themes: themes || [],
+    updateNotice: updateNotice || null,
     diagnostics: diagnostics || computeHabitatDiagnostics(runtime, { inspectLiveProcesses: false })
   };
 }
 
 function runHabitatAppMode(electron) {
-  const { app, BrowserWindow, Tray, Menu, screen, ipcMain, nativeImage } = electron;
+  const { app, BrowserWindow, Tray, Menu, screen, ipcMain, nativeImage, shell } = electron;
 
   const gotSingleInstanceLock = app.requestSingleInstanceLock();
   if (!gotSingleInstanceLock) {
@@ -468,8 +470,33 @@ function runHabitatAppMode(electron) {
       quota: readHabitatQuota(),
       usage: { today: usageCounter.getUsage("today"), week: usageCounter.getUsage("7d") },
       history: buildHistoryView(historyStore, historyDeps()),
-      themes: listThemes({ repoRoot })
+      themes: listThemes({ repoRoot }),
+      updateNotice: currentUpdateNotice()
     });
+  }
+
+  // P3.4: aviso opcional de nova versão. Só mostra algo com a preferência ligada e uma versão maior que a instalada.
+  function currentUpdateNotice() {
+    const seen = prefs.updateSeenVersion;
+    if (prefs.updateNotice !== true || !seen || compareSemver(seen, app.getVersion()) <= 0) return null;
+    return { version: seen, url: releaseUrl(seen) };
+  }
+
+  async function runUpdateCheck() {
+    try {
+      const r = await checkForUpdate({
+        enabled: prefs.updateNotice === true,
+        nowMs: Date.now(),
+        lastCheckMs: prefs.lastUpdateCheckMs,
+        currentVersion: app.getVersion(),
+        fetchFn: (url, opts) => fetch(url, opts)
+      });
+      if (!r.checked) return;
+      const patch = { lastUpdateCheckMs: r.lastCheckMs };
+      if (r.ok) patch.updateSeenVersion = r.available || null;
+      prefs = saveHabitatPrefs({ filePath: prefsPath, patch });
+      pushPanelState();
+    } catch {}
   }
 
   function pushPanelState(stateOverride) {
@@ -602,6 +629,10 @@ function runHabitatAppMode(electron) {
     };
 
     serverCtl = initServer(serverCtx);
+    // P3.4: checagem opcional no início e a cada 6 h (a própria função limita a 1 consulta por 24 h).
+    runUpdateCheck();
+    const updateTimer = setInterval(runUpdateCheck, 6 * 60 * 60 * 1000);
+    if (updateTimer && typeof updateTimer.unref === "function") updateTimer.unref();
     if (serverCtl && typeof serverCtl.startHttpServer === "function") {
       try {
         await serverCtl.startHttpServer();
@@ -771,9 +802,18 @@ function runHabitatAppMode(electron) {
       }
       applyPrefsChanges();
       updateTrayMenu();
+      if (key === "updateNotice" && val === true) runUpdateCheck();
       const state = getPanelState();
       pushPanelState(state);
       return state;
+    });
+
+    // Abre só o link da release calculado aqui no processo principal; nunca uma URL vinda da janela.
+    ipcMain.handle("habitat:open-release", async () => {
+      const notice = currentUpdateNotice();
+      if (!notice || !notice.url || typeof shell.openExternal !== "function") return { ok: false };
+      await shell.openExternal(notice.url);
+      return { ok: true };
     });
 
     ipcMain.handle("habitat:set-demo-state", (event, stateObj) => {

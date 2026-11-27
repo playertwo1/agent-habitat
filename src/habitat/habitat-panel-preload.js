@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld("habitatPanel", {
     };
   },
   updatePref: (key, value) => ipcRenderer.invoke("habitat:update-pref", key, value),
+  openRelease: () => ipcRenderer.invoke("habitat:open-release"),
   setDemoState: (demoState) => ipcRenderer.invoke("habitat:set-demo-state", demoState),
   triggerDemoPreset: (presetId) => ipcRenderer.invoke("habitat:trigger-demo-preset", presetId),
   stopDemo: () => ipcRenderer.invoke("habitat:stop-demo"),

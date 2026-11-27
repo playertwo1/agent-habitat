@@ -75,6 +75,9 @@
             <label class="toggle-row"><input type="checkbox" id="pref-cardsEnabled" checked> Exibir mini-cards de atividade detalhada</label>
             <label class="toggle-row"><input type="checkbox" id="pref-openAtLogin"> Iniciar com o Windows</label>
             <label class="toggle-row"><input type="checkbox" id="pref-lumenBridge"> Permitir que o Lumen leia o estado (somente leitura, só neste computador)</label>
+            <label class="toggle-row"><input type="checkbox" id="pref-updateNotice"> Avisar quando houver uma nova versão (consulta pública ao GitHub, no máximo 1 vez por dia)</label>
+            <p class="hint" id="update-notice-hint">Desligado por padrão. Ligado, o Habitat lê o arquivo público de versão da última release no GitHub, sem enviar nada seu, e só mostra o aviso com um link. Nunca baixa nem instala nada.</p>
+            <p class="hint" id="update-notice-banner" hidden><strong id="update-notice-text"></strong> <a href="#" id="update-notice-link">Ver release</a></p>
             <p class="hint" id="lumen-bridge-hint">Desligado por padrão. Ligado, o Habitat responde em 127.0.0.1 apenas se cada provedor está fora da cabana, o estado, se há algo pendente e quantas sessões. Sem pastas, prompts, ids nem comandos.</p>
           </div>
         </div>

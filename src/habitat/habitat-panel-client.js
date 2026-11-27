@@ -82,6 +82,10 @@
   const prefCardsEnabled = document.getElementById("pref-cardsEnabled");
   const prefOpenAtLogin = document.getElementById("pref-openAtLogin");
   const prefLumenBridge = document.getElementById("pref-lumenBridge");
+  const prefUpdateNotice = document.getElementById("pref-updateNotice");
+  const updateBanner = document.getElementById("update-notice-banner");
+  const updateText = document.getElementById("update-notice-text");
+  const updateLink = document.getElementById("update-notice-link");
 
   // Keyboard navigation for tabs
   const tabHistoryBtn = document.getElementById("tab-history");
@@ -198,6 +202,12 @@
     if (prefCardsEnabled) prefCardsEnabled.checked = prefs.cardsEnabled !== false;
     if (prefOpenAtLogin) prefOpenAtLogin.checked = Boolean(prefs.openAtLogin);
     if (prefLumenBridge) prefLumenBridge.checked = prefs.lumenBridge === true;
+    if (prefUpdateNotice) prefUpdateNotice.checked = prefs.updateNotice === true;
+    if (updateBanner) {
+      const notice = state && state.updateNotice;
+      updateBanner.hidden = !notice;
+      if (notice && updateText) updateText.textContent = "Versão " + notice.version + " disponível.";
+    }
 
     // Tema (P2.1): o cartão só aparece quando há mais de um tema instalado
     const themeCard = document.getElementById("theme-card");
@@ -371,8 +381,16 @@ const HISTORY_PROVIDER_NAMES = { claude: "Claude Code", codex: "Codex" };
     [prefClickThrough, "clickThrough"],
     [prefCardsEnabled, "cardsEnabled"],
     [prefOpenAtLogin, "openAtLogin"],
-    [prefLumenBridge, "lumenBridge"]
+    [prefLumenBridge, "lumenBridge"],
+    [prefUpdateNotice, "updateNotice"]
   ];
+
+  if (updateLink) {
+    updateLink.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      if (bridge.openRelease) bridge.openRelease();
+    });
+  }
 
   prefMap.forEach(([el, key]) => {
     if (el) {

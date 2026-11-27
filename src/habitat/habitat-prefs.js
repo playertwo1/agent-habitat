@@ -17,6 +17,9 @@ const DEFAULT_HABITAT_PREFS = Object.freeze({
   clickThrough: false,
   cardsEnabled: true,
   lumenBridge: false,
+  updateNotice: false,
+  lastUpdateCheckMs: 0,
+  updateSeenVersion: null,
   windowPosition: null,
   garden: normalizeGarden(null),
   lightMode: "auto",
@@ -61,6 +64,12 @@ function normalizeHabitatPrefs(input) {
   }
   // P3.3: leitura local para o Lumen. Estritamente false por padrão (opt-in explícito).
   prefs.lumenBridge = input.lumenBridge === true;
+  // P3.4: aviso de nova versão. Estritamente false por padrão (opt-in explícito).
+  prefs.updateNotice = input.updateNotice === true;
+  prefs.lastUpdateCheckMs = Number.isFinite(input.lastUpdateCheckMs) && input.lastUpdateCheckMs > 0
+    ? Math.trunc(input.lastUpdateCheckMs) : 0;
+  prefs.updateSeenVersion = typeof input.updateSeenVersion === "string" && /^\d{1,4}\.\d{1,4}\.\d{1,4}$/.test(input.updateSeenVersion)
+    ? input.updateSeenVersion : null;
 
   prefs.garden = normalizeGarden(input.garden);
   prefs.lightMode = normalizeLightMode(input.lightMode);
