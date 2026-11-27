@@ -26,6 +26,8 @@ const {
 } = require("./habitat-hook-sync");
 const { createHabitatFocusController } = require("./habitat-focus");
 const { createHabitatCardManager } = require("./habitat-cards");
+const { DONE_SIGN_ART, createDoneSignTracker, doneSignFrame, doneSignHitRects, hitDoneSign } = require("./habitat-done-signs");
+const { pathToFileURL } = require("url");
 const { createForegroundFullscreenProbe } = require("../win-fullscreen-detect");
 
 const { readHabitatQuota } = require("./habitat-quota-reader");
@@ -410,6 +412,20 @@ function runHabitatAppMode(electron) {
 
   cardManager.attachIpc(ipcMain);
 
+  // P3.7.5: aviso de conclusão dentro da ilha (no lugar do card de conclusão em janela própria).
+  const doneSigns = createDoneSignTracker();
+  const doneSignArt = {
+    sheetUrl: pathToFileURL(path.join(repoRoot, "assets", "habitat", DONE_SIGN_ART.sheet)).href,
+    iconsUrl: pathToFileURL(path.join(repoRoot, "assets", "habitat", DONE_SIGN_ART.icons)).href,
+    frame: DONE_SIGN_ART.frame,
+    plaque: DONE_SIGN_ART.plaque,
+    iconSize: DONE_SIGN_ART.iconSize,
+    iconOrder: DONE_SIGN_ART.iconOrder,
+  };
+  function activeDoneSigns(now = Date.now()) {
+    return doneSigns.list(currentTheme().manifest, now).map(({ startMs, ...g }) => ({ ...g, frame: doneSignFrame(now - startMs, !!prefs.reducedMotion) }));
+  }
+
   runtime = createHabitatRuntime({
     repoRoot,
     manifestPath,
@@ -444,7 +460,7 @@ function runHabitatAppMode(electron) {
         workArea
       };
       if (state === "done") {
-        cardManager.showCompletionCard(cardOpts);
+        if (doneSigns.show(provider, Date.now()) && stageLoop) stageLoop.wake();
       } else if (state === "waiting_input" || state === "needs_approval") {
         cardManager.showQuestionCard(cardOpts);
       }
@@ -505,12 +521,12 @@ function runHabitatAppMode(electron) {
     }
   }
 
-  function updateHitShapes(currentSceneSnap, scaleVal) {
+  function updateHitShapes(currentSceneSnap, scaleVal, signs = []) {
     if (!hitWin || hitWin.isDestroyed()) return;
     try {
       const hit = computeHabitatHitRects({ manifest: { ...manifestData, cottageHitBox: currentTheme().manifest.cottageHitBox }, snapshot: currentSceneSnap, scale: scaleVal });
       if (hit && Array.isArray(hit.rects)) {
-        const mappedRects = hit.rects.map(r => ({ x: r.x, y: r.y, width: r.width, height: r.height }));
+        const mappedRects = [...hit.rects, ...doneSignHitRects(signs, scaleVal)].map(r => ({ x: r.x, y: r.y, width: r.width, height: r.height }));
         const hash = JSON.stringify(mappedRects);
         if (hash !== lastHitRectsHash) {
           lastHitRectsHash = hash;
@@ -526,12 +542,14 @@ function runHabitatAppMode(electron) {
     if (!renderWin || renderWin.isDestroyed()) return;
     const sceneSnap = getActiveSceneSnapshot(now);
     const scaleVal = prefs.scale || 1.5;
-    const idle000 = isSceneIdle000(sceneSnap, demoMode);
+    const signs = demoMode ? [] : activeDoneSigns(now);
+    const idle000 = isSceneIdle000(sceneSnap, demoMode) && signs.length === 0;
     const garden = resolveGardenState(prefs, new Date(now));
     const theme = currentTheme();
     const sceneKey = JSON.stringify({
       ...sceneSnap,
       garden,
+      doneSigns: signs,
       theme: theme.id,
       nowMs: 0,
       scale: scaleVal,
@@ -546,9 +564,9 @@ function runHabitatAppMode(electron) {
         atomMetaMap,
         scale: scaleVal,
         reducedMotion: !!prefs.reducedMotion,
-        snapshot: { ...sceneSnap, garden }
+        snapshot: { ...sceneSnap, garden, doneSigns: signs, doneSignArt }
       });
-      updateHitShapes(sceneSnap, scaleVal);
+      updateHitShapes(sceneSnap, scaleVal, signs);
     }
   }
 
@@ -740,7 +758,7 @@ function runHabitatAppMode(electron) {
     });
 
     stageLoop = createAdaptiveStageLoop({
-      isIdle000: () => isSceneIdle000(getActiveSceneSnapshot(Date.now()), demoMode),
+      isIdle000: () => isSceneIdle000(getActiveSceneSnapshot(Date.now()), demoMode) && !doneSigns.hasActive(Date.now()),
       onTick: () => pushStageFrame(),
       intervalMs: 33,
       reconcileMs: 5000,
@@ -756,11 +774,19 @@ function runHabitatAppMode(electron) {
     ipcMain.on("habitat-hit:click", async (event, pt) => {
       if (!pt || typeof pt.x !== "number" || typeof pt.y !== "number") return;
       const now = Date.now();
+      // Plaquinha de conclusão: clique explícito foca a sessão daquele morador (D3) e a placa some.
+      const signProvider = demoMode ? null : hitDoneSign(activeDoneSigns(now), pt.x, pt.y, prefs.scale || 1.5);
+      if (signProvider) {
+        doneSigns.dismiss(signProvider);
+        pushStageFrame({ force: true });
+        await focusProviderSession(signProvider);
+        return;
+      }
       const currentSceneSnap = getActiveSceneSnapshot(now);
       const hitResult = classifyHabitatHitPoint({
         x: pt.x,
         y: pt.y,
-        manifest: manifestData,
+        manifest: { ...manifestData, cottageHitBox: currentTheme().manifest.cottageHitBox },
         snapshot: currentSceneSnap,
         scale: prefs.scale || 1.5
       });

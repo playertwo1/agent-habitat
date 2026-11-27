@@ -231,13 +231,86 @@ def previa_arvores(pasta, man, destino):
     out.resize((960 * 2, 192 * 2), Image.NEAREST).save(destino)
 
 
+# Aviso de conclusão na ilha (P3.7.5): arte comum a todos os temas, em assets/habitat/comum/.
+AVISO_QUADRO = (64, 58)
+AVISO_ICONE = 10
+
+
+def pecas_por_vaos(rgba, n, vao=3):
+    """Separa n peças pelos vãos de colunas vazias (a folha não respeita células iguais); pedaços pequenos
+    (brilhos soltos) juntam-se à peça grande mais próxima."""
+    cols = rgba[..., 3].any(axis=0)
+    runs, x = [], 0
+    while x < len(cols):
+        if not cols[x]:
+            x += 1
+            continue
+        x0 = x
+        while x < len(cols) and (cols[x] or cols[x:x + vao].any()):
+            x += 1
+        runs.append([x0, x])
+    grandes = sorted(sorted(runs, key=lambda r: r[1] - r[0])[-n:])
+    for r in runs:
+        if r in grandes:
+            continue
+        alvo = min(grandes, key=lambda g: min(abs(r[0] - g[1]), abs(g[0] - r[1])))
+        alvo[0], alvo[1] = min(alvo[0], r[0]), max(alvo[1], r[1])
+    return [rgba[:, a:b] for a, b in grandes]
+
+
+def aviso(entrada_dir, cores=64):
+    pasta = RAIZ / "assets" / "habitat" / "comum"
+    pasta.mkdir(parents=True, exist_ok=True)
+    pecas = pecas_por_vaos(P.tirar_magenta(entrada_dir / "done-sign.png"), 4)
+    # Âncora de cada peça = centro da estaca (linhas de baixo); todas alinhadas pela estaca e pelo chão.
+    info = []
+    for pc in pecas:
+        x0, y0, x1, y1 = P.caixa_do_conteudo(pc)
+        base = pc[y1 - max(4, (y1 - y0) // 12):y1, :, 3].any(axis=0)
+        xs = np.nonzero(base)[0]
+        info.append((pc, (x0, y0, x1, y1), (xs.min() + xs.max()) / 2))
+    esq = max(a - c[0] for _, c, a in info)
+    dir_ = max(c[2] - a for _, c, a in info)
+    alto = max(c[3] - c[1] for _, c, _ in info)
+    w, h = AVISO_QUADRO
+    esc = min(w / (esq + dir_), h / alto)
+    ax = round(esq * esc)  # x da estaca no quadro
+    sheet = np.zeros((h, 4 * w, 4), dtype=np.uint8)
+    for i, (pc, (x0, y0, x1, y1), a) in enumerate(info):
+        sub = pc[y0:y1, x0:x1]
+        nw, nh = max(1, round(sub.shape[1] * esc)), max(1, round(sub.shape[0] * esc))
+        red = P.reduzir(sub, nw, nh)
+        quadro = np.zeros((h, w, 4), dtype=np.uint8)
+        P.colar(quadro, red, ax - round((a - x0) * esc), h - nh)
+        sheet[:, i * w:(i + 1) * w] = quadro
+    P.salvar(sheet, pasta / "done-sign.png", cores)
+    print("estaca em x =", ax)
+    # Área lisa do pergaminho no quadro 3 (placa inteira): onde o app escreve o nome e põe o ícone.
+    f = sheet[:, 2 * w:3 * w].astype(int)
+    lisa = (f[..., 3] > 0) & (f[..., 0] > 225) & (f[..., 1] > 195) & (f[..., 2] > 130)
+    ys, xs = np.nonzero(lisa)
+    print("pergaminho:", int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1, int(lisa.sum()))
+    icones = P.celulas_de(P.tirar_magenta(entrada_dir / "done-icons.png"), 3)[0]
+    caixas = [P.caixa_do_conteudo(c) for c in icones]
+    t = AVISO_ICONE
+    esc_i = P.escala_caber(caixas, t, t)
+    folha = np.zeros((t, 3 * t, 4), dtype=np.uint8)
+    for i, (c, cx) in enumerate(zip(icones, caixas)):
+        P.colar(folha, P.encaixar(c, cx, esc_i, t, t, centro=True), i * t, 0)
+    P.salvar(folha, pasta / "done-icons.png", 0)
+    print("aviso salvo em", pasta)
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("acao", choices=["jardim", "castelo", "arvores"])
+    ap.add_argument("acao", choices=["jardim", "castelo", "arvores", "aviso"])
     ap.add_argument("tema", choices=sorted(set(JARDIM_POS) | set(ARVORES)))
     ap.add_argument("--entrada", required=True, help="jardim: o PNG da folha; castelo: a pasta com fv-castle*.png")
     ap.add_argument("--previa", default=None)
     a = ap.parse_args()
+    if a.acao == "aviso":
+        aviso(Path(a.entrada))
+        return
     if a.acao == "castelo":
         assert a.tema == "fantasy-village", "o castelo é só do Fantasy Village"
         castelo(Path(a.entrada), a.previa)

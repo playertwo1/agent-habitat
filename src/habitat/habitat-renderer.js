@@ -148,6 +148,76 @@ function createHabitatRenderer({ container, manifest, manifestDirUrl, atomMetaMa
     propElements[provider] = propImg;
   }
 
+  // P3.7.5: plaquinhas de conclusão (acima dos adereços, atrás dos moradores, sem filtro noturno).
+  const signsLayer = document.createElement('div');
+  signsLayer.style.position = 'absolute';
+  signsLayer.style.left = '0';
+  signsLayer.style.top = '0';
+  signsLayer.style.width = `${canvasWidth}px`;
+  signsLayer.style.height = `${canvasHeight}px`;
+  signsLayer.style.pointerEvents = 'none';
+  stage.insertBefore(signsLayer, entitiesContainer);
+  const signEls = {};
+
+  function renderDoneSigns(signs, art) {
+    const visible = new Set();
+    if (art && Array.isArray(signs)) {
+      for (const g of signs) {
+        if (!g || typeof g.provider !== 'string') continue;
+        visible.add(g.provider);
+        let el = signEls[g.provider];
+        if (!el) {
+          const root = document.createElement('div');
+          root.style.position = 'absolute';
+          root.dataset.doneSign = g.provider;
+          const sprite = document.createElement('div');
+          sprite.style.position = 'absolute';
+          sprite.style.left = '0';
+          sprite.style.top = '0';
+          sprite.style.width = `${art.frame.width}px`;
+          sprite.style.height = `${art.frame.height}px`;
+          sprite.style.backgroundImage = `url("${art.sheetUrl}")`;
+          sprite.style.imageRendering = 'pixelated';
+          const icon = document.createElement('div');
+          icon.style.position = 'absolute';
+          icon.style.width = `${art.iconSize}px`;
+          icon.style.height = `${art.iconSize}px`;
+          icon.style.left = `${art.plaque.x + (art.plaque.width - art.iconSize) / 2}px`;
+          icon.style.top = `${art.plaque.y + 1}px`;
+          icon.style.backgroundImage = `url("${art.iconsUrl}")`;
+          icon.style.backgroundPosition = `-${Math.max(0, art.iconOrder.indexOf(g.provider)) * art.iconSize}px 0`;
+          icon.style.imageRendering = 'pixelated';
+          const label = document.createElement('div');
+          label.style.position = 'absolute';
+          label.style.left = `${art.plaque.x}px`;
+          label.style.top = `${art.plaque.y + art.iconSize + 2}px`;
+          label.style.width = `${art.plaque.width}px`;
+          label.style.textAlign = 'center';
+          label.style.font = "bold 5px 'Segoe UI', sans-serif";
+          label.style.lineHeight = '6px';
+          label.style.color = '#5a3418';
+          label.style.whiteSpace = 'nowrap';
+          label.style.overflow = 'hidden';
+          label.textContent = String(g.label || '');
+          root.append(sprite, icon, label);
+          signsLayer.appendChild(root);
+          el = signEls[g.provider] = { root, sprite, icon, label };
+        }
+        el.root.style.display = 'block';
+        el.root.style.left = `${g.x}px`;
+        el.root.style.top = `${g.y}px`;
+        el.root.style.width = `${g.width}px`;
+        el.root.style.height = `${g.height}px`;
+        const frame = Math.max(0, Math.min(3, Number(g.frame) || 0));
+        el.sprite.style.backgroundPosition = `-${frame * art.frame.width}px 0`;
+        const plaqueReady = frame >= 2; // ícone e nome só com a placa inteira
+        el.icon.style.display = plaqueReady ? 'block' : 'none';
+        el.label.style.display = plaqueReady ? 'block' : 'none';
+      }
+    }
+    for (const [p, el] of Object.entries(signEls)) if (!visible.has(p)) el.root.style.display = 'none';
+  }
+
   // Layer 6: Foreground
   const fgEl = document.createElement('img');
   fgEl.src = new URL(manifest.layers.foreground, manifestDirUrl).href;
@@ -282,6 +352,8 @@ function createHabitatRenderer({ container, manifest, manifestDirUrl, atomMetaMa
     } else {
       smokeEl.style.display = 'none';
     }
+
+    renderDoneSigns(snapshot.doneSigns, snapshot.doneSignArt);
 
     if (treesCfg) {
       const t = (snapshot.garden && snapshot.garden.trees) || { left: 0, right: 1 };

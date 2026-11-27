@@ -124,6 +124,49 @@ test("T40e: os 4 temas têm 6 árvores em sprite, o fundo não tem mais as árvo
   assert.match(src, /const nightLayers = \[backdropEl, \.\.\.Object\.values\(treeEls\)/);
 });
 
+test("T40f: aviso de conclusão na ilha: só provedor e rótulo fixo, some sozinho, clicável e ao lado da estação nos 4 temas", () => {
+  const sign = require("../src/habitat/habitat-done-signs");
+  const t = sign.createDoneSignTracker({ durationMs: 8000 });
+  assert.strictEqual(t.show("desconhecido", 0), false, "provedor fora da lista não gera placa");
+  assert.strictEqual(t.show("claude", 1000), true);
+  for (const id of TEMAS) {
+    const { manifest } = tema(id);
+    const lista = t.list(manifest, 2000);
+    assert.strictEqual(lista.length, 1);
+    const g = lista[0];
+    assert.deepStrictEqual(Object.keys(g).sort(), ["height", "label", "provider", "startMs", "width", "x", "y"], "campo extra chegaria ao palco");
+    assert.strictEqual(g.label, "Clawd");
+    for (const p of ["claude", "codex", "antigravity"]) {
+      const r = sign.layoutDoneSign(manifest, p);
+      assert.ok(r.x >= 0 && r.x + r.width <= manifest.canvas.width && r.y >= 0 && r.y + r.height <= manifest.canvas.height, `${id}/${p}: placa fora do palco`);
+      const st = manifest.stations[p].anchor;
+      assert.ok(Math.abs(r.x + sign.DONE_SIGN_ART.stakeX - st.x) <= 40, `${id}/${p}: placa longe da estação`);
+      assert.strictEqual(r.y + r.height, st.y, `${id}/${p}: placa fora do chão da estação`);
+    }
+    // Clique: dentro da placa devolve o provedor (com escala), fora não.
+    assert.strictEqual(sign.hitDoneSign(lista, (g.x + 10) * 2, (g.y + 30) * 2, 2), "claude");
+    assert.strictEqual(sign.hitDoneSign(lista, 1, 1, 2), null);
+  }
+  assert.strictEqual(t.hasActive(8999), true);
+  assert.strictEqual(t.hasActive(9000), false, "não sumiu sozinho");
+  t.show("codex", 0);
+  assert.strictEqual(t.dismiss("codex"), true);
+  assert.strictEqual(t.hasActive(1), false);
+  // Animação: surge do chão (0, 1, 2) e balança (2/3); movimento reduzido fica parado na placa inteira.
+  assert.deepStrictEqual([0, 130, 250, 700, 1200].map((ms) => sign.doneSignFrame(ms)), [0, 1, 2, 3, 2]);
+  assert.strictEqual(sign.doneSignFrame(50, true), 2);
+});
+
+test("T40g: conclusão não abre mais janela de card e o palco recebe só a plaquinha", () => {
+  const main = fs.readFileSync(path.join(RAIZ, "src", "habitat", "habitat-app-main.js"), "utf8");
+  assert.ok(!main.includes("cardManager.showCompletionCard("), "ainda abre o card de conclusão em janela");
+  assert.match(main, /doneSigns\.show\(provider, Date\.now\(\)\)/);
+  assert.match(main, /snapshot: \{ \.\.\.sceneSnap, garden, doneSigns: signs, doneSignArt \}/);
+  const r = fs.readFileSync(path.join(RAIZ, "src", "habitat", "habitat-renderer.js"), "utf8");
+  assert.ok(!/innerHTML\s*=\s*[^'"]*g\./.test(r), "rótulo não pode ir por innerHTML");
+  assert.match(r, /label\.textContent = String\(g\.label \|\| ''\)/);
+});
+
 test("T40b: o jardim é desenhado depois do fundo e da casa, e os moradores nunca recebem o filtro noturno", () => {
   const src = fs.readFileSync(path.join(RAIZ, "src", "habitat", "habitat-renderer.js"), "utf8");
   const iJardim = src.indexOf("el.dataset.garden = name");
