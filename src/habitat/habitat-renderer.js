@@ -121,7 +121,8 @@ function createHabitatRenderer({ container, manifest, manifestDirUrl, atomMetaMa
     propImg.style.imageRendering = 'pixelated';
     propImg.style.opacity = '0'; // hidden when inside
     if (!disableTransitions) propImg.style.transition = 'opacity 0.2s ease';
-    stage.appendChild(propImg);
+    // Atrás dos moradores: o adereço da estação nunca tampa quem está nela.
+    stage.insertBefore(propImg, entitiesContainer);
     propElements[provider] = propImg;
   }
 

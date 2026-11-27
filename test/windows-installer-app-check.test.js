@@ -32,6 +32,8 @@ function getMacroBody(text, name) {
   return macro[1].trim();
 }
 
+const BS = String.fromCharCode(92);
+
 function getPowerShellCommand(macro, installDir) {
   const command = macro.match(/^\s*nsExec::Exec `"\$PowerShellPath" -C "([^"\n]+)"`\s*$/m);
   assert.ok(command, `${SYNC_MESSAGE} (PowerShell command)`);
@@ -61,7 +63,9 @@ describe("Windows NSIS running app check", {
     const upstream = getMacroBody(template, "_CHECK_APP_RUNNING");
     assert.strictEqual(
       getMacroBody(installer, "CLAWD_CHECK_APP_RUNNING"),
-      upstream.replace(/!insertmacro FIND_PROCESS\b/g, "!insertmacro CLAWD_FIND_PROCESS"),
+      upstream
+        .replace(/!insertmacro FIND_PROCESS\b/g, "!insertmacro CLAWD_FIND_PROCESS")
+        .replace(/!insertmacro KILL_PROCESS\b/g, "!insertmacro CLAWD_KILL_PROCESS"),
       SYNC_MESSAGE
     );
   });
@@ -71,7 +75,18 @@ describe("Windows NSIS running app check", {
     assert.strictEqual((upstream.match(/\(Get-CimInstance/g) || []).length, 1, SYNC_MESSAGE);
     assert.strictEqual(
       getMacroBody(installer, "CLAWD_FIND_PROCESS"),
-      upstream.replace("(Get-CimInstance", "@(Get-CimInstance"),
+      upstream
+        .replace("(Get-CimInstance", "@(Get-CimInstance")
+        .replace("StartsWith('$INSTDIR'", () => "StartsWith('$INSTDIR" + BS + "'"),
+      SYNC_MESSAGE
+    );
+  });
+
+  it("P3.2: KILL_PROCESS differs from the template only by the exact install-dir prefix", () => {
+    const upstream = getMacroBody(template, "KILL_PROCESS");
+    assert.strictEqual(
+      getMacroBody(installer, "CLAWD_KILL_PROCESS"),
+      upstream.replace("StartsWith('$INSTDIR'", () => "StartsWith('$INSTDIR" + BS + "'"),
       SYNC_MESSAGE
     );
   });
